@@ -40,6 +40,25 @@ val DangerColor = Color(0xFF818CF8)
 val TextDim = Color(0xFF94A3B8)
 
 class MainActivity : ComponentActivity() {
+    private fun isEmulator(): Boolean {
+        return (android.os.Build.BRAND.startsWith("generic") && android.os.Build.DEVICE.startsWith("generic"))
+                || android.os.Build.FINGERPRINT.startsWith("generic")
+                || android.os.Build.FINGERPRINT.startsWith("unknown")
+                || android.os.Build.HARDWARE.contains("goldfish")
+                || android.os.Build.HARDWARE.contains("ranchu")
+                || android.os.Build.MODEL.contains("google_sdk")
+                || android.os.Build.MODEL.contains("Emulator")
+                || android.os.Build.MODEL.contains("Android SDK built for x86")
+                || android.os.Build.MANUFACTURER.contains("Genymotion")
+                || android.os.Build.PRODUCT.contains("sdk_google")
+                || android.os.Build.PRODUCT.contains("google_sdk")
+                || android.os.Build.PRODUCT.contains("sdk")
+                || android.os.Build.PRODUCT.contains("sdk_x86")
+                || android.os.Build.PRODUCT.contains("vbox86p")
+                || android.os.Build.PRODUCT.contains("emulator")
+                || android.os.Build.PRODUCT.contains("simulator")
+    }
+
     private val viewModel: MainViewModel by viewModels()
 
     private val permissionLauncher = registerForActivityResult(
@@ -66,7 +85,7 @@ class MainActivity : ComponentActivity() {
                     com.mtpnda.biocue.connect.LoginScreen(onLoginSuccess = { name ->
                         viewModel.setUserName(name)
                     })
-                } else if (watchState == com.mtpnda.biocue.connect.ConnectionState.CONNECTED) {
+                } else if (watchState == com.mtpnda.biocue.connect.ConnectionState.CONNECTED || isEmulator()) {
                     DashboardScreen(viewModel, userName!!)
                 } else {
                     com.mtpnda.biocue.connect.ConnectionGuideScreen(
