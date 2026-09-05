@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +26,7 @@ import kotlinx.coroutines.launch
 import java.security.MessageDigest
 import java.util.UUID
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     val context = LocalContext.current
@@ -37,8 +41,12 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     
     // Profile state
     var fullName by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("Male") }
     var birthdate by remember { mutableStateOf("") }
+    var genderExpanded by remember { mutableStateOf(false) }
+    
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     val auth = FirebaseAuth.getInstance()
 
@@ -67,8 +75,66 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                 OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text("Full Name") }, modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(value = gender, onValueChange = { gender = it }, label = { Text("Gender") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(value = birthdate, onValueChange = { birthdate = it }, label = { Text("Birthdate (YYYY-MM-DD)") }, modifier = Modifier.weight(1f))
+                    ExposedDropdownMenuBox(
+                        expanded = genderExpanded,
+                        onExpandedChange = { genderExpanded = !genderExpanded },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = gender,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Gender") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                            modifier = Modifier.menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = genderExpanded,
+                            onDismissRequest = { genderExpanded = false }
+                        ) {
+                            DropdownMenuItem(text = { Text("Male") }, onClick = { gender = "Male"; genderExpanded = false })
+                            DropdownMenuItem(text = { Text("Female") }, onClick = { gender = "Female"; genderExpanded = false })
+                        }
+                    }
+                    
+                    OutlinedTextField(
+                        value = birthdate,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Birthdate") },
+                        modifier = Modifier.weight(1f),
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                            .also { interactionSource ->
+                                LaunchedEffect(interactionSource) {
+                                    interactionSource.interactions.collect {
+                                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                                            showDatePicker = true
+                                        }
+                                    }
+                                }
+                            }
+                    )
+                }
+                
+                if (showDatePicker) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                    birthdate = formatter.format(Date(millis))
+                                }
+                                showDatePicker = false
+                            }) { Text("OK") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
