@@ -31,6 +31,11 @@ Triggered when the wearer taps the Anchor button.
 ## 2. Mobile Interface (The Caregiver)
 **Core Principle:** The Phone UI must instantly convey the wearer's status without causing caregiver panic, and it must provide a structured journal for ML labeling.
 
+### 2.0 Authentication & Onboarding
+- **Sign In / Sign Up:** The app must provide an authentication gateway before accessing the dashboard.
+- **Registration Data:** When registering a new account, the app must collect: `Email`, `Password`, `Name`, `Gender`, and `Birthdate`.
+- **Identity Display:** Across all screens (both Mobile and Watch), the app MUST display the wearer's **Name** (e.g., "Alex"), NEVER their raw email address.
+
 ### 2.1 The Dashboard Screen (Main View)
 Implemented as a scrolling vertical `Column` in Jetpack Compose.
 

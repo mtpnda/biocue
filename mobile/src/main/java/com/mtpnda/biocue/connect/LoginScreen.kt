@@ -30,9 +30,15 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     var isLoading by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
     
+    var isRegisterMode by remember { mutableStateOf(false) }
     // Email/Password state
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    
+    // Profile state
+    var fullName by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("") }
+    var birthdate by remember { mutableStateOf("") }
 
     val auth = FirebaseAuth.getInstance()
 
@@ -50,6 +56,23 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
         if (isLoading) {
             CircularProgressIndicator()
         } else {
+            // Toggle Register/Login
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                TextButton(onClick = { isRegisterMode = false }, colors = ButtonDefaults.textButtonColors(contentColor = if (!isRegisterMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)) { Text("Sign In") }
+                TextButton(onClick = { isRegisterMode = true }, colors = ButtonDefaults.textButtonColors(contentColor = if (isRegisterMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)) { Text("Register") }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isRegisterMode) {
+                OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text("Full Name") }, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = gender, onValueChange = { gender = it }, label = { Text("Gender") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = birthdate, onValueChange = { birthdate = it }, label = { Text("Birthdate (YYYY-MM-DD)") }, modifier = Modifier.weight(1f))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             // Email/Password Form
             OutlinedTextField(
                 value = email,
@@ -70,22 +93,50 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
+                    if (isRegisterMode && fullName.isBlank()) {
+                        errorMsg = "Please enter your full name."
+                        return@Button
+                    }
                     isLoading = true
                     errorMsg = null
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
+                    
+                    if (isRegisterMode) {
+                        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 val user = auth.currentUser
-                                onLoginSuccess(user?.displayName ?: user?.email ?: "User")
+                                val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                                    .setDisplayName(fullName)
+                                    .build()
+                                user?.updateProfile(profileUpdates)?.addOnCompleteListener {
+                                    // Save Gender/Birthdate to SharedPreferences temporarily
+                                    context.getSharedPreferences("biocue_prefs", android.content.Context.MODE_PRIVATE)
+                                        .edit().putString("gender", gender).putString("birthdate", birthdate).apply()
+                                    onLoginSuccess(fullName)
+                                }
                             } else {
-                                errorMsg = task.exception?.localizedMessage ?: "Sign in failed"
+                                errorMsg = task.exception?.localizedMessage ?: "Registration failed"
                                 isLoading = false
                             }
                         }
+                    } else {
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val user = auth.currentUser
+                                    // Always fallback to "User", never raw email
+                                    var dName = user?.displayName
+                                    if (dName.isNullOrBlank()) dName = "User"
+                                    onLoginSuccess(dName)
+                                } else {
+                                    errorMsg = task.exception?.localizedMessage ?: "Sign in failed"
+                                    isLoading = false
+                                }
+                            }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign In with Email")
+                Text(if (isRegisterMode) "Create Account" else "Sign In with Email")
             }
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -131,7 +182,9 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                                     .addOnCompleteListener { task ->
                                         if (task.isSuccessful) {
                                             val user = auth.currentUser
-                                            onLoginSuccess(user?.displayName ?: user?.email ?: "Google User")
+                                            var dName = user?.displayName
+                                            if (dName.isNullOrBlank()) dName = "Google User"
+                                            onLoginSuccess(dName)
                                         } else {
                                             errorMsg = task.exception?.localizedMessage ?: "Firebase auth failed"
                                             isLoading = false
