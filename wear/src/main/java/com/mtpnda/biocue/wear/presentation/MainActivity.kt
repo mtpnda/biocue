@@ -46,6 +46,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
+    private fun isEmulator(): Boolean {
+        return (android.os.Build.BRAND.startsWith("generic") && android.os.Build.DEVICE.startsWith("generic"))
+                || android.os.Build.FINGERPRINT.startsWith("generic")
+                || android.os.Build.FINGERPRINT.startsWith("unknown")
+                || android.os.Build.HARDWARE.contains("goldfish")
+                || android.os.Build.HARDWARE.contains("ranchu")
+                || android.os.Build.MODEL.contains("google_sdk")
+                || android.os.Build.MODEL.contains("Emulator")
+                || android.os.Build.MODEL.contains("Android SDK built for x86")
+                || android.os.Build.MANUFACTURER.contains("Genymotion")
+                || android.os.Build.PRODUCT.contains("sdk_google")
+                || android.os.Build.PRODUCT.contains("google_sdk")
+                || android.os.Build.PRODUCT.contains("sdk")
+                || android.os.Build.PRODUCT.contains("sdk_x86")
+                || android.os.Build.PRODUCT.contains("vbox86p")
+                || android.os.Build.PRODUCT.contains("emulator")
+                || android.os.Build.PRODUCT.contains("simulator")
+    }
+
 
     private var isTracking by mutableStateOf(false)
     private var sensorService by mutableStateOf<SensorCollectionService?>(null)
@@ -111,7 +130,7 @@ class MainActivity : ComponentActivity() {
 
             val senderPhoneReachable by sender.isPhoneReachable.collectAsState()
             val servicePhoneReachable by (sensorService?.isPhoneReachable ?: _isPhoneReachable).collectAsState()
-            val phoneReachable = senderPhoneReachable || servicePhoneReachable
+            val phoneReachable = senderPhoneReachable || servicePhoneReachable || isEmulator()
 
             val testModeEnabled by (sensorService?.isTestModeActive ?: kotlinx.coroutines.flow.MutableStateFlow(false)).collectAsState()
             val currentEventId = remember { mutableStateOf<String?>(null) }
