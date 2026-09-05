@@ -11,9 +11,18 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -51,15 +60,28 @@ fun ConnectionGuideScreen(
                 onRetry = { manager.recheckNow() },
             )
 
-            ConnectionState.APP_MISSING -> Guide(
-                emoji = "📲",
-                title = "Install BioCue on ${watchName ?: "your watch"}",
-                body = "Your watch is connected, but the BioCue watch app " +
-                    "isn't installed (or isn't running) on it yet.",
-                primaryLabel = "Install on watch",
-                onPrimary = { manager.promptInstallOnWatch() },
-                onRetry = { manager.recheckNow() },
-            )
+            ConnectionState.APP_MISSING -> {
+                var isInstalling by remember { mutableStateOf(false) }
+                val scope = rememberCoroutineScope()
+                
+                Guide(
+                    emoji = "📲",
+                    title = "Install BioCue on ${watchName ?: "your watch"}",
+                    body = "Your watch is connected, but the BioCue watch app " +
+                        "isn't installed (or isn't running) on it yet.",
+                    primaryLabel = "Install on watch",
+                    isPrimaryLoading = isInstalling,
+                    onPrimary = { 
+                        scope.launch {
+                            isInstalling = true
+                            manager.promptInstallOnWatch().join()
+                            delay(2000) // Keep the loading state briefly so the user sees it worked
+                            isInstalling = false
+                        }
+                    },
+                    onRetry = { manager.recheckNow() },
+                )
+            }
 
             ConnectionState.NO_TRANSPORT -> Guide(
                 emoji = "📡",
@@ -94,6 +116,7 @@ private fun Guide(
     primaryLabel: String,
     onPrimary: () -> Unit,
     onRetry: (() -> Unit)?,
+    isPrimaryLoading: Boolean = false,
 ) {
     Text(emoji, style = MaterialTheme.typography.displayMedium)
     Spacer(Modifier.height(8.dp))
@@ -101,7 +124,22 @@ private fun Guide(
     Spacer(Modifier.height(12.dp))
     Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
     Spacer(Modifier.height(24.dp))
-    Button(onClick = onPrimary) { Text(primaryLabel) }
+    Button(
+        onClick = onPrimary,
+        enabled = !isPrimaryLoading
+    ) { 
+        if (isPrimaryLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp
+            )
+            Spacer(Modifier.width(8.dp))
+            Text("Sending to watch...")
+        } else {
+            Text(primaryLabel) 
+        }
+    }
     if (onRetry != null) {
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = onRetry) { Text("Check again") }
