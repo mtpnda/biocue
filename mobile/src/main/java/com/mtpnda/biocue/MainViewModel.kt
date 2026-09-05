@@ -1,4 +1,5 @@
 package com.mtpnda.biocue
+import kotlinx.coroutines.isActive
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -38,29 +39,41 @@ enum class ConnectionStatus {
     CONNECTED, DISCONNECTED, OFF_BODY
 }
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-    fun injectFakeEvent(context: android.content.Context, isManual: Boolean, label: String = "NONE") {
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            try {
-                val event = com.mtpnda.biocue.core.data.local.StressEventEntity(
-                    id = java.util.UUID.randomUUID().toString(),
-                    startTime = System.currentTimeMillis() - 5 * 60 * 1000,
-                    endTime = System.currentTimeMillis(),
-                    triggerType = if (isManual) "MANUAL" else "AUTO",
-                    label = label,
-                    isResolved = false
-                )
-                db.eventDao().insertEvent(event)
-                
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    android.widget.Toast.makeText(context, "Injected fake event!", android.widget.Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    android.widget.Toast.makeText(context, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+class MainViewModel(
+    application: Application,
+    private val db: com.mtpnda.biocue.core.data.local.DetectionDatabase
+) : AndroidViewModel(application) {
+    private val _isMockingStream = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val isMockingStream = _isMockingStream.asStateFlow()
+    private var mockJob: kotlinx.coroutines.Job? = null
+
+    fun toggleMockStream(context: android.content.Context) {
+        _isMockingStream.value = !_isMockingStream.value
+        if (_isMockingStream.value) {
+            android.widget.Toast.makeText(context, "Started mock ML stream...", android.widget.Toast.LENGTH_SHORT).show()
+            mockJob = viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                var tick = 0
+                while (isActive) {
+                    val isSpike = (tick % 15) in 5..10 // Simulate a periodic spike every 30s
+                    val window = com.mtpnda.biocue.core.data.local.SensorWindowEntity(
+                        timestamp = System.currentTimeMillis(),
+                        hrMean = if (isSpike) 115.0 else 72.0,
+                        rmssd = if (isSpike) 12.0 else 45.0,
+                        accMag = if (isSpike) 0.6 else 0.1,
+                        repetitiveness = if (isSpike) 0.7 else 0.0,
+                        hrSlope = if (isSpike) 8.0 else 0.0,
+                        isOffBody = false,
+                        isExercising = false
+                    )
+                    db.sensorDataDao().insert(window)
+                    tick++
+                    kotlinx.coroutines.delay(2000)
                 }
             }
+        } else {
+            android.widget.Toast.makeText(context, "Stopped mock ML stream.", android.widget.Toast.LENGTH_SHORT).show()
+            mockJob?.cancel()
+            mockJob = null
         }
     }
 
@@ -71,12 +84,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _userName.value = name
     }
 
-    private val db by lazy {
-        Room.databaseBuilder(
-            application,
-            DetectionDatabase::class.java, "sensor-database"
-        ).build()
-    }
 
     private val scoringEngine = ScoringEngine()
     private val baseline = Baseline(hourOfDay = 12, hrMean = 75.0, hrStd = 5.0, hrvMean = 40.0, hrvStd = 8.0)
@@ -134,7 +141,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val currentWatchState = watchConnectionState.value
                     val windows = db.sensorDataDao().getRecentWindows(1)
                     
-                    if (currentWatchState == ConnectionState.CONNECTED) {
+                    val isMocking = _isMockingStream.value
+                    if (currentWatchState == ConnectionState.CONNECTED || isMocking) {
                         if (windows.isNotEmpty()) {
                             val latest = windows.first()
                             val timeSinceLastUpdate = System.currentTimeMillis() - latest.timestamp
@@ -142,7 +150,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 _connectionStatus.value = ConnectionStatus.OFF_BODY
                             } else {
                                 _connectionStatus.value = ConnectionStatus.CONNECTED
-                                if (timeSinceLastUpdate < 120_000) {
+                                if (timeSinceLastUpdate < 120_000 || isMocking) {
                                     processRealData(latest)
                                 }
                             }

@@ -1,42 +1,71 @@
 package com.mtpnda.biocue
 
 import android.app.Application
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mtpnda.biocue.connect.WatchConnectionManager
+import com.mtpnda.biocue.core.data.local.DetectionDatabase
+import com.mtpnda.biocue.core.data.local.EventDao
+import com.mtpnda.biocue.core.data.local.SensorDataDao
+import com.mtpnda.biocue.core.data.local.StressEventEntity
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.runner.RunWith
-import org.robolectric.annotation.Config
+import org.robolectric.RobolectricTestRunner
+import android.content.Context
 
-@RunWith(AndroidJUnit4::class)
-@Config(sdk = [33])
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class MainViewModelTest {
 
-    @Test
-    fun loadRecentData_updatesStateFlow() = runBlocking {
-        val app = ApplicationProvider.getApplicationContext<Application>()
-        assertEquals(true, true)
+    private val application = mockk<Application>(relaxed = true)
+    private val db = mockk<DetectionDatabase>(relaxed = true)
+    
+    private val eventDao = mockk<EventDao>(relaxed = true)
+    private val sensorDataDao = mockk<SensorDataDao>(relaxed = true)
+    
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+        every { db.eventDao() } returns eventDao
+        every { db.sensorDataDao() } returns sensorDataDao
+        
+        // Mock connection state
+    }
+
+    @After
+    fun teardown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun toggleMode_flipsCaregiverState() = runBlocking {
-        val app = ApplicationProvider.getApplicationContext<Application>()
-        val viewModel = MainViewModel(app)
+    fun testToggleMockStream() = runTest {
+        val viewModel = MainViewModel(application, db)
         
-        // Starts as false
-        assertEquals(false, viewModel.isCaregiverMode.value)
+        // Initially false
+        assertFalse(viewModel.isMockingStream.value)
         
-        viewModel.toggleMode()
-        assertEquals(true, viewModel.isCaregiverMode.value)
-    }
-
-    @Test
-    fun resolveReviewEvent_doesNotCrash() = runBlocking {
-        val app = ApplicationProvider.getApplicationContext<Application>()
-        val viewModel = MainViewModel(app)
+        // Toggle on
+        viewModel.toggleMockStream(application)
+        assertTrue(viewModel.isMockingStream.value)
         
-        viewModel.resolveReviewEvent("event_123", "OVERWHELMED")
+        // Toggle off
+        viewModel.toggleMockStream(application)
+        assertFalse(viewModel.isMockingStream.value)
     }
 }

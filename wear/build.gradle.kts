@@ -95,7 +95,7 @@ dependencies {
 }
 play {
     serviceAccountCredentials.set(rootProject.file("play-account.json"))
-    track.set("internal")
+    track.set("wear:internal")
     defaultToAppBundles.set(true)
 }
 
