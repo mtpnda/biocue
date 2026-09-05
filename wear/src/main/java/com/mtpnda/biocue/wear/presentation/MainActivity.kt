@@ -175,9 +175,14 @@ class MainActivity : ComponentActivity() {
             permissionsGrantedState = true
             startTrackingService()
         } else {
-            // Launch ONLY the first missing permission to avoid Wear OS batch drop bug
-            permissionLauncher.launch(arrayOf(missingPermissions.first()))
-            android.widget.Toast.makeText(this, "Requesting ${missingPermissions.first().substringAfterLast('.')}", android.widget.Toast.LENGTH_SHORT).show()
+            val nextPerm = missingPermissions.first()
+            if (shouldShowRequestPermissionRationale(nextPerm)) {
+                android.widget.Toast.makeText(this, "Please open Settings > Apps > BioCue and grant ${nextPerm.substringAfterLast('.')}", android.widget.Toast.LENGTH_LONG).show()
+                // Do not launch if they permanently denied it, just tell them.
+            } else {
+                permissionLauncher.launch(arrayOf(nextPerm))
+                android.widget.Toast.makeText(this, "Requesting ${nextPerm.substringAfterLast('.')}", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
