@@ -25,4 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "biocue"
 include(":mobile")
 include(":wear")
- 
+include(":core-detection")
