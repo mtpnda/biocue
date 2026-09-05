@@ -77,7 +77,8 @@ class WatchDataReceiverService : WearableListenerService() {
                         kotlinx.coroutines.runBlocking {
                             val eventToUpdate = db.eventDao().getEventById(id)
                             if (eventToUpdate != null) {
-                                db.eventDao().updateEvent(eventToUpdate.copy(label = label, isResolved = true))
+                                // Wearer labeled it, but we still want Caregiver to provide context, so leave isResolved = false
+                                db.eventDao().updateEvent(eventToUpdate.copy(label = label, isResolved = false))
                             }
                         }
                     }

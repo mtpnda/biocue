@@ -399,6 +399,7 @@ fun WearApp(
                                     transformation = SurfaceTransformation(transformationSpec),
                                     onClick = {
                                         selectedEmotion = emotion
+                                        onLabelEvent(emotion.label.uppercase())
                                         watchState = WatchState.ONGOING
                                     },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E2E))

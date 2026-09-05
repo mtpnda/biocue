@@ -51,8 +51,10 @@ Implemented as a scrolling vertical `Column` in Jetpack Compose.
   - Time range (e.g., `2:15 PM – 2:40 PM`)
   - Activity context (e.g., `Pacing`)
   - The wearer's label (e.g., `🌩️ Overwhelmed`).
-- **Pattern Review Nudge:** If an event is missing a label (because the wearer ignored the watch carousel), the card shows a "Needs Review" chip with four tagging options for the caregiver:
-  - `🌩️ Overwhelmed` | `✨ Excited` | `🏃 Active` | `🤷 Unsure`
+- **Pattern Review Nudge:**
+  - **Scenario A (Unlabeled ML Event):** The wearer ignored the prompt. The card shows "A stress spike was detected but [Name] didn't label it." The caregiver must select the wearer's internal state: `🌩️ Overwhelmed` | `✨ Excited` | `🏃 Active` | `🤷 Unsure`.
+  - **Scenario B (Manual Report or Wearer-Labeled Event):** The wearer explicitly reported their state (e.g., "Overwhelmed"). The card shows "[Name] reported feeling Overwhelmed. What triggered this?" The caregiver must select environmental context: `🔊 Loud Noise` | `👥 Crowded` | `📋 Demand/Task` | `🔄 Routine Change`.
+  - Once the caregiver selects an option, the event is marked as resolved and moves to the Journal.
 
 ### 2.2 Navigation
 - Utilize a `BottomNavigation` bar or `Scaffold` if extending beyond the dashboard (e.g., Settings, History).

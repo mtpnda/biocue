@@ -29,6 +29,8 @@ data class JournalEntry(
 data class ReviewEvent(
     val eventId: String,
     val time: String,
+    val triggerType: String,
+    val currentLabel: String,
     val cues: List<Pair<String, String>> // icon to text
 )
 
@@ -133,6 +135,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ReviewEvent(
                             eventId = event.id,
                             time = timeStr,
+                            triggerType = event.triggerType,
+                            currentLabel = event.label,
                             cues = listOf(
                                 "🔄" to if (event.triggerType == "AUTO") "Detected Spontaneous Spike" else "Manually Triggered",
                                 "📍" to "Unknown Location"
@@ -216,11 +220,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _isCaregiverMode.value = !_isCaregiverMode.value
     }
     
-    fun resolveReviewEvent(eventId: String, label: String) {
+    fun resolveReviewEvent(eventId: String, newLabelOrContext: String) {
         viewModelScope.launch {
             val event = db.eventDao().getEventById(eventId)
             if (event != null) {
-                db.eventDao().updateEvent(event.copy(label = label, isResolved = true))
+                val finalLabel = if (event.label == "NONE") {
+                    newLabelOrContext
+                } else {
+                    "${event.label} - $newLabelOrContext"
+                }
+                db.eventDao().updateEvent(event.copy(label = finalLabel, isResolved = true))
             }
         }
     }

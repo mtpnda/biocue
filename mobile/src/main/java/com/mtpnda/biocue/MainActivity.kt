@@ -368,7 +368,16 @@ fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (
                 }
             } else {
                 val rev = reviews.first()
-                Text("A stress spike was detected but ${userName} didn't label it on the watch.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
+                
+                val isUnlabeled = rev.currentLabel == "NONE"
+                
+                if (isUnlabeled) {
+                    Text("A stress spike was detected but ${userName} didn't label it on the watch.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
+                } else {
+                    val labelFormat = rev.currentLabel.lowercase().replaceFirstChar { it.uppercase() }
+                    Text("${userName} reported feeling ${labelFormat}. Please add environmental context to help BioCue learn.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
+                }
+                
                 Text(rev.time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
                 
                 Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color.Black.copy(alpha = 0.2f)).padding(12.dp)) {
@@ -382,13 +391,24 @@ fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (
                         }
                     }
                 }
-                Text("💡 Ask ${userName} first if you can — they may remember what happened.", fontSize = 12.sp, color = WarnColor, modifier = Modifier.padding(vertical = 14.dp))
                 
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LabelBtn("🌩️", "Overwhelmed", Color(0xFFA5B4FC)) { onResolve(rev.eventId, "OVERWHELMED") }
-                    LabelBtn("✨", "Excited", Color(0xFFFCD34D)) { onResolve(rev.eventId, "EXCITED") }
-                    LabelBtn("🏃", "Active", Color(0xFFCBD5E1)) { onResolve(rev.eventId, "ACTIVE") }
-                    LabelBtn("🤷", "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, "NONE") }
+                if (isUnlabeled) {
+                    Text("💡 Ask ${userName} first if you can — they may remember what happened.", fontSize = 12.sp, color = WarnColor, modifier = Modifier.padding(vertical = 14.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LabelBtn("🌩️", "Overwhelmed", Color(0xFFA5B4FC)) { onResolve(rev.eventId, "OVERWHELMED") }
+                        LabelBtn("✨", "Excited", Color(0xFFFCD34D)) { onResolve(rev.eventId, "EXCITED") }
+                        LabelBtn("🏃", "Active", Color(0xFFCBD5E1)) { onResolve(rev.eventId, "ACTIVE") }
+                        LabelBtn("🤷", "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, "NONE") }
+                    }
+                } else {
+                    Text("💡 What was happening around ${userName}?", fontSize = 12.sp, color = CalmColor, modifier = Modifier.padding(vertical = 14.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LabelBtn("🔊", "Loud Noises", Color(0xFFFCA5A5)) { onResolve(rev.eventId, "Loud Noises") }
+                        LabelBtn("👥", "Crowded Space", Color(0xFFFDBA74)) { onResolve(rev.eventId, "Crowded") }
+                        LabelBtn("📋", "Task Demand", Color(0xFF6EE7B7)) { onResolve(rev.eventId, "Demand") }
+                        LabelBtn("🔄", "Routine Change", Color(0xFF93C5FD)) { onResolve(rev.eventId, "Routine Change") }
+                        LabelBtn("🤷", "Unknown", TextDim) { onResolve(rev.eventId, "Unknown Context") }
+                    }
                 }
             }
         }
