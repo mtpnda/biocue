@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private var sensorService by mutableStateOf<SensorCollectionService?>(null)
     private val _isPhoneReachable = MutableStateFlow(true)
     private var permissionsGrantedState by mutableStateOf(false)
+    private var locationEnabledState by mutableStateOf(false)
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -87,6 +88,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permissionsGrantedState = hasAllPermissions()
+        val locManager = getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+        locationEnabledState = locManager.isLocationEnabled
         
         var launchState = WatchState.ANCHOR
         if (intent?.action == "com.mtpnda.biocue.ACTION_LOG_EMOTION" || 
@@ -115,9 +118,13 @@ class MainActivity : ComponentActivity() {
 
             WearApp(
                 hasPermissions = permissionsGrantedState,
+                isLocationEnabled = locationEnabledState,
                 isTracking = isTracking,
                 isPhoneReachable = phoneReachable,
                 isTestModeEnabled = testModeEnabled,
+                onOpenLocationSettings = {
+                    startActivity(android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                },
                 onRequestPermissions = { requestPermissions() },
                 onToggleTracking = {
                     if (isTracking) {
@@ -155,7 +162,11 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         val granted = hasAllPermissions()
         permissionsGrantedState = granted
-        if (granted && !isTracking) {
+        
+        val locManager = getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+        locationEnabledState = locManager.isLocationEnabled
+        
+        if (granted && locationEnabledState && !isTracking) {
             startTrackingService()
         }
     }
@@ -207,7 +218,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-enum class WatchState { SETUP_PERMISSIONS, SETUP_PHONE, ANCHOR, GLOWING, CAROUSEL, ONGOING, SUCCESS }
+enum class WatchState { SETUP_PERMISSIONS, SETUP_LOCATION, SETUP_PHONE, ANCHOR, GLOWING, CAROUSEL, ONGOING, SUCCESS }
 
 data class Emotion(val icon: String, val label: String, val color: Color)
 val emotions = listOf(
@@ -219,9 +230,11 @@ val emotions = listOf(
 @Composable
 fun WearApp(
     hasPermissions: Boolean,
+    isLocationEnabled: Boolean,
     isTracking: Boolean,
     isPhoneReachable: Boolean,
     isTestModeEnabled: Boolean,
+    onOpenLocationSettings: () -> Unit,
     onRequestPermissions: () -> Unit,
     onToggleTracking: () -> Unit,
     onToggleTestMode: () -> Unit,
@@ -236,6 +249,7 @@ fun WearApp(
             mutableStateOf(
                 when {
                     !hasPermissions -> WatchState.SETUP_PERMISSIONS
+                    !isLocationEnabled -> WatchState.SETUP_LOCATION
                     !isPhoneReachable -> WatchState.SETUP_PHONE
                     else -> launchState
                 }
@@ -243,15 +257,17 @@ fun WearApp(
         }
         var selectedEmotion by remember { mutableStateOf<Emotion?>(null) }
         
-        // When permissions change, auto-progress
-        LaunchedEffect(hasPermissions) {
-            if (hasPermissions && watchState == WatchState.SETUP_PERMISSIONS) {
+        // When permissions/location change, auto-progress
+        LaunchedEffect(hasPermissions, isLocationEnabled) {
+            if (hasPermissions && isLocationEnabled && (watchState == WatchState.SETUP_PERMISSIONS || watchState == WatchState.SETUP_LOCATION)) {
                 if (!isPhoneReachable) {
                     watchState = WatchState.SETUP_PHONE
                 } else {
                     watchState = launchState
                 }
-                onPermissionsResult?.invoke(true)
+                if (hasPermissions) onPermissionsResult?.invoke(true)
+            } else if (hasPermissions && !isLocationEnabled && watchState == WatchState.SETUP_PERMISSIONS) {
+                watchState = WatchState.SETUP_LOCATION
             }
         }
 
@@ -279,6 +295,22 @@ fun WearApp(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
                         ) {
                             Text("Grant Access")
+                        }
+                    }
+                }
+                WatchState.SETUP_LOCATION -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Location Disabled", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(bottom = 8.dp))
+                        Text("Please turn on location in settings to track stress patterns.", fontSize = 12.sp, color = Color.LightGray, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 16.dp))
+                        Button(
+                            onClick = onOpenLocationSettings,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E2E))
+                        ) {
+                            Text("Open Settings", fontSize = 12.sp, color = Color.White)
                         }
                     }
                 }
@@ -486,25 +518,25 @@ fun WearApp(
 @Preview(device = "id:wearos_large_round", showSystemUi = true, backgroundColor = 0xff000000, showBackground = true)
 @Composable
 fun WearAppPreview() {
-    WearApp(hasPermissions = true, isTracking = true, isPhoneReachable = true, isTestModeEnabled = false, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
+    WearApp(hasPermissions = true, isLocationEnabled = true, isTracking = true, isPhoneReachable = true, isTestModeEnabled = false, onOpenLocationSettings = {}, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
 }
 
 @Preview(device = "id:wearos_large_round", showSystemUi = true, backgroundColor = 0xff000000, showBackground = true)
 @Composable
 fun WearAppDisconnectedPreview() {
-    WearApp(hasPermissions = true, isTracking = true, isPhoneReachable = false, isTestModeEnabled = false, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
+    WearApp(hasPermissions = true, isLocationEnabled = true, isTracking = true, isPhoneReachable = false, isTestModeEnabled = false, onOpenLocationSettings = {}, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
 }
 
 @Preview(device = "id:wearos_large_round", showSystemUi = true, backgroundColor = 0xff000000, showBackground = true)
 @Composable
 fun WearAppSensorsOffPreview() {
-    WearApp(hasPermissions = true, isTracking = false, isPhoneReachable = true, isTestModeEnabled = false, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
+    WearApp(hasPermissions = true, isLocationEnabled = true, isTracking = false, isPhoneReachable = true, isTestModeEnabled = false, onOpenLocationSettings = {}, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
 }
 
 @Preview(device = "id:wearos_large_round", showSystemUi = true, backgroundColor = 0xff000000, showBackground = true)
 @Composable
 fun WearAppSetupPreview() {
-    WearApp(hasPermissions = false, isTracking = false, isPhoneReachable = true, isTestModeEnabled = false, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
+    WearApp(hasPermissions = false, isLocationEnabled = true, isTracking = false, isPhoneReachable = true, isTestModeEnabled = false, onOpenLocationSettings = {}, onRequestPermissions = {}, onToggleTracking = {}, onToggleTestMode = {}, onStartEvent = {}, onLabelEvent = {}, onEndEvent = {})
 }
 
 @Composable

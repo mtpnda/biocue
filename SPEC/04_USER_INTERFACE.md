@@ -5,7 +5,11 @@ This document outlines the exact UI hierarchy, components, and visual rules nece
 ## 1. Wear OS Interface (The Wearer)
 **Core Principle:** The watch UI must be a "zero-anxiety" interface. It must NEVER display raw numbers (HR, HRV) or chaotic, infinite animations.
 
-### 1.1 The Anchor Screen (Default)
+### 1.1 Setup & Permissions
+- **Permission Flow:** The app sequentially requests required permissions (Sensors, Activity, Location, Notifications).
+- **Location Services Check:** Even if permissions are granted, the app MUST check if device-level Location Services are enabled via `LocationManager`. If disabled, it displays a full-screen prompt ("Location Services Disabled") with a button that redirects the wearer to the Wear OS system Settings (`ACTION_LOCATION_SOURCE_SETTINGS`). The wearer cannot proceed to the Anchor screen until device location is toggled on.
+
+### 1.2 The Anchor Screen (Default)
 - **Background:** Solid black (`#000000`) to save OLED battery and reduce glare.
 - **Component:** A single, large, centrally aligned circular button taking up 60% of the screen.
 - **Iconography:** Use an abstract, calm shape (like a smooth wave or anchor). Do NOT use aggressive icons or text.
