@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                         viewModel.setUserName(name)
                     })
                 } else if (watchState == com.mtpnda.biocue.connect.ConnectionState.CONNECTED || isEmulator()) {
-                    DashboardScreen(viewModel, userName!!, isEmulator = isEmulator())
+                    DashboardScreen(viewModel, userName!!, isStubAllowed = (isEmulator() || com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email == "mvasecondary@gmail.com"))
                 } else {
                     com.mtpnda.biocue.connect.ConnectionGuideScreen(
                         manager = viewModel.watchConnectionManager,
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DashboardScreen(viewModel: MainViewModel, userName: String, isEmulator: Boolean = false) {
+fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: Boolean = false) {
     val isCaregiver by viewModel.isCaregiverMode.collectAsState()
     val tier by viewModel.tier.collectAsState()
     val sosLat by viewModel.sosLatitude.collectAsState()
@@ -141,6 +141,21 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isEmulator: Bool
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            if (isStubAllowed) {
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().background(Color(0xFF2D2D2D), RoundedCornerShape(12.dp)).padding(16.dp)) {
+                        Text("Developer Stubs", color = Color.Yellow, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { viewModel.injectFakeEvent(isManual = false) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                                Text("ML Spike", fontSize = 10.sp)
+                            }
+                            Button(onClick = { viewModel.injectFakeEvent(isManual = true, label = "OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                                Text("Manual Event", fontSize = 10.sp)
+                            }
+                        }
+                    }
+                }
+            }
             if (isCaregiver) {
                 item { CaregiverStatusCard(tier, connStatus, userName) }
                 item { CurrentStateCard(stress, activity, connStatus, userName) }
