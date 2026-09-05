@@ -100,6 +100,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: Boolean = false) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val isCaregiver by viewModel.isCaregiverMode.collectAsState()
     val tier by viewModel.tier.collectAsState()
     val sosLat by viewModel.sosLatitude.collectAsState()
@@ -146,10 +147,10 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
                     Column(modifier = Modifier.fillMaxWidth().background(Color(0xFF2D2D2D), RoundedCornerShape(12.dp)).padding(16.dp)) {
                         Text("Developer Stubs", color = Color.Yellow, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.injectFakeEvent(isManual = false) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                            Button(onClick = { viewModel.injectFakeEvent(context, isManual = false) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
                                 Text("ML Spike", fontSize = 10.sp)
                             }
-                            Button(onClick = { viewModel.injectFakeEvent(isManual = true, label = "OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                            Button(onClick = { viewModel.injectFakeEvent(context, isManual = true, label = "OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
                                 Text("Manual Event", fontSize = 10.sp)
                             }
                         }
