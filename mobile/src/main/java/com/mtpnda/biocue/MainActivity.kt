@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                         viewModel.setUserName(name)
                     })
                 } else if (watchState == com.mtpnda.biocue.connect.ConnectionState.CONNECTED || isEmulator()) {
-                    DashboardScreen(viewModel, userName!!)
+                    DashboardScreen(viewModel, userName!!, isEmulator = isEmulator())
                 } else {
                     com.mtpnda.biocue.connect.ConnectionGuideScreen(
                         manager = viewModel.watchConnectionManager,
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DashboardScreen(viewModel: MainViewModel, userName: String) {
+fun DashboardScreen(viewModel: MainViewModel, userName: String, isEmulator: Boolean = false) {
     val isCaregiver by viewModel.isCaregiverMode.collectAsState()
     val tier by viewModel.tier.collectAsState()
     val sosLat by viewModel.sosLatitude.collectAsState()

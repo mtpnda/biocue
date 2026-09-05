@@ -39,6 +39,20 @@ enum class ConnectionStatus {
 }
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+    fun injectFakeEvent(isManual: Boolean, label: String = "NONE") {
+        viewModelScope.launch {
+            val event = com.mtpnda.biocue.core.data.local.StressEventEntity(
+                id = java.util.UUID.randomUUID().toString(),
+                startTime = System.currentTimeMillis() - 5 * 60 * 1000,
+                endTime = System.currentTimeMillis(),
+                triggerType = if (isManual) "MANUAL" else "AUTO",
+                label = label,
+                isResolved = false
+            )
+            db.eventDao().insertEvent(event)
+        }
+    }
+
     private val _userName = MutableStateFlow<String?>(null)
     val userName: StateFlow<String?> = _userName.asStateFlow()
 
