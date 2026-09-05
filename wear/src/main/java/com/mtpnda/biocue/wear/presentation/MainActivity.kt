@@ -64,11 +64,23 @@ class MainActivity : ComponentActivity() {
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { _ ->
-        val granted = hasAllPermissions()
-        permissionsGrantedState = granted
-        if (granted) {
+    ) { results ->
+        val missing = permissionManager.getRequiredPermissions().filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isEmpty()) {
+            permissionsGrantedState = true
             startTrackingService()
+        } else {
+            val denied = results.filterValues { !it }.keys
+            if (denied.isNotEmpty()) {
+                // If they explicitly denied one, stop the chain and let them read the Toast.
+                android.widget.Toast.makeText(this, "Denied: ${denied.first().substringAfterLast('.')}. Please allow in Settings.", android.widget.Toast.LENGTH_LONG).show()
+                permissionsGrantedState = false
+            } else {
+                // If they granted it, but others are missing, auto-request the next one!
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ requestPermissions() }, 200)
+            }
         }
     }
 
@@ -163,7 +175,9 @@ class MainActivity : ComponentActivity() {
             permissionsGrantedState = true
             startTrackingService()
         } else {
-            permissionLauncher.launch(missingPermissions.toTypedArray())
+            // Launch ONLY the first missing permission to avoid Wear OS batch drop bug
+            permissionLauncher.launch(arrayOf(missingPermissions.first()))
+            android.widget.Toast.makeText(this, "Requesting ${missingPermissions.first().substringAfterLast('.')}", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
