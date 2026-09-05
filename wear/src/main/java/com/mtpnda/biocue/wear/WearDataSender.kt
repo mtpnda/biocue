@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class WearDataSender(context: Context) {
-    private val dataClient = Wearable.getDataClient(context)
+    private val dataClient = com.google.android.gms.wearable.Wearable.getDataClient(context)
     private val nodeClient = Wearable.getNodeClient(context)
     private val capabilityClient = Wearable.getCapabilityClient(context)
 
@@ -42,6 +42,25 @@ class WearDataSender(context: Context) {
             reachable
         } catch (e: Exception) {
             _isPhoneReachable.value = false
+            false
+        }
+    }
+
+    
+    suspend fun sendSosLocation(lat: Double, lng: Double): Boolean {
+        return try {
+            checkReachability()
+            val putDataReq = PutDataMapRequest.create("/sos_location").apply {
+                dataMap.putLong("timestamp", System.currentTimeMillis())
+                dataMap.putDouble("latitude", lat)
+                dataMap.putDouble("longitude", lng)
+            }.asPutDataRequest().setUrgent()
+            
+            dataClient.putDataItem(putDataReq).await()
+            Log.d("WearDataSender", "Sent SOS Location: $lat, $lng")
+            true
+        } catch (e: Exception) {
+            Log.e("WearDataSender", "Failed to send SOS Location", e)
             false
         }
     }

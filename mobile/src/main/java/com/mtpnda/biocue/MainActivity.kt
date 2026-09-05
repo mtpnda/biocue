@@ -83,6 +83,8 @@ class MainActivity : ComponentActivity() {
 fun DashboardScreen(viewModel: MainViewModel, userName: String) {
     val isCaregiver by viewModel.isCaregiverMode.collectAsState()
     val tier by viewModel.tier.collectAsState()
+    val sosLat by viewModel.sosLatitude.collectAsState()
+    val sosLng by viewModel.sosLongitude.collectAsState()
     val stress by viewModel.stressLevel.collectAsState()
     val activity by viewModel.activityLabel.collectAsState()
     val journal by viewModel.journal.collectAsState()

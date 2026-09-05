@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.compose.ui.tooling)
     implementation(libs.guava)
     implementation(libs.play.services.wearable)
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation(libs.androidx.health.services.client)
     implementation(libs.kotlinx.coroutines.play.services)
 

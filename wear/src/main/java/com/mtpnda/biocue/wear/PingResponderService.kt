@@ -1,11 +1,16 @@
 package com.mtpnda.biocue.wear
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import com.mtpnda.biocue.wear.location.LocationTracker
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 
 class PingResponderService : WearableListenerService() {
+    private val scope = CoroutineScope(Dispatchers.IO)
     companion object {
         private const val TAG = "PingResponderService"
         private const val PATH_PING = "/ping"

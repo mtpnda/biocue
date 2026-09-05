@@ -70,6 +70,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _activityLabel = MutableStateFlow("Waiting for data...")
     val activityLabel = _activityLabel.asStateFlow()
 
+    
+    private val _sosLatitude = MutableStateFlow<Double?>(null)
+    val sosLatitude: kotlinx.coroutines.flow.StateFlow<Double?> = _sosLatitude.asStateFlow()
+
+    private val _sosLongitude = MutableStateFlow<Double?>(null)
+    val sosLongitude: kotlinx.coroutines.flow.StateFlow<Double?> = _sosLongitude.asStateFlow()
+    
+    fun updateSosLocation(lat: Double, lng: Double) {
+        _sosLatitude.value = lat
+        _sosLongitude.value = lng
+    }
+
     private val _tier = MutableStateFlow(0)
     val tier = _tier.asStateFlow()
 
@@ -179,11 +191,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val mappedStress = ((score / 3.0) * 100).toInt().coerceIn(0, 100)
         _stressLevel.value = mappedStress
 
-        _tier.value = when {
+        
+        val tier = when {
             score > 2.5 -> 2
             score > 1.5 -> 1
             else -> 0
         }
+        _tier.value = tier
+        
+        if (tier == 2) {
+            requestSosLocation()
+        }
+
 
         _activityLabel.value = when {
             entity.isExercising -> "🏃 Exercising"
@@ -205,4 +224,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    private fun requestSosLocation() {
+        android.util.Log.d("MainViewModel", "Tier 2 Detected! Requesting SOS GPS from Watch...")
+        val application = getApplication<android.app.Application>()
+        val messageClient = com.google.android.gms.wearable.Wearable.getMessageClient(application)
+        val nodeClient = com.google.android.gms.wearable.Wearable.getNodeClient(application)
+        
+        nodeClient.connectedNodes.addOnSuccessListener { nodes ->
+            nodes.firstOrNull()?.also { node ->
+                messageClient.sendMessage(node.id, "/sos_gps_request", ByteArray(0))
+            }
+        }
+    }
 }
+
