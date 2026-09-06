@@ -73,10 +73,11 @@ Target: each SKILL.md stays under 500 lines.
 
 ## Agent Personas
 
-Three reusable agent personas in `agents/`:
+Four reusable agent personas in `agents/`:
 
 | Agent                 | Role                                                                                  | Use When                                     |
 |-----------------------|---------------------------------------------------------------------------------------|----------------------------------------------|
+| `spec-enforcer.md`    | Product Manager and Doc Enforcer                                                      | Updating/clarifying specs before writing code|
 | `code-reviewer.md`    | Five-axis code review (Correctness, Readability, Architecture, Security, Performance) | Reviewing PRs or self-reviewing              |
 | `test-engineer.md`    | Test design, coverage analysis, quality evaluation                                    | Designing test suites, finding coverage gaps |
 | `security-auditor.md` | OWASP Mobile Top 10, vulnerability assessment                                         | Security review before release               |

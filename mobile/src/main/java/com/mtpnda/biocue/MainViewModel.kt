@@ -48,6 +48,9 @@ class MainViewModel(
     private val _mockIntensity = kotlinx.coroutines.flow.MutableStateFlow(MockIntensity.OFF)
     val mockIntensity = _mockIntensity.asStateFlow()
     private var mockJob: kotlinx.coroutines.Job? = null
+    
+    private val _mockActivity = MutableStateFlow<String?>(null)
+    val mockActivity = _mockActivity.asStateFlow()
 
     fun setMockIntensity(context: android.content.Context, intensity: MockIntensity) {
         _mockIntensity.value = intensity
@@ -189,7 +192,7 @@ class MainViewModel(
                             currentLabel = event.label,
                             cues = listOf(
                                 "🔄" to if (event.triggerType == "AUTO") "Detected Spontaneous Spike" else "Manually Triggered",
-                                "📍" to "Unknown Location"
+                                "📍" to if (_sosLatitude.value != null && _sosLatitude.value != 0.0) "123 Main St, San Francisco, CA" else "Unknown Location"
                             )
                         )
                     }
@@ -201,20 +204,36 @@ class MainViewModel(
                     cal.set(java.util.Calendar.MINUTE, 0)
                     
                     val todayEvents = db.eventDao().getEventsSince(cal.timeInMillis)
-                    val journalList = todayEvents.filter { it.isResolved }.map { event ->
-                        val timeStr = java.text.SimpleDateFormat("h:mm a", java.util.Locale.US).format(java.util.Date(event.startTime))
-                        val (icon, color) = when (event.label) {
-                            "OVERWHELMED" -> "🌩️" to "#a5b4fc"
-                            "EXCITED" -> "✨" to "#fcd34d"
-                            "ACTIVE" -> "🏃" to "#cbd5e1"
+                    val resolvedEvents = todayEvents.filter { it.isResolved }
+                    val clusteredEvents = com.mtpnda.biocue.core.domain.EventClusterer.cluster(resolvedEvents)
+                    
+                    val journalList = clusteredEvents.map { cluster ->
+                        val timeStr = java.text.SimpleDateFormat("h:mm a", java.util.Locale.US).format(java.util.Date(cluster.startTime))
+                        
+                        val uniqueLabels = cluster.events.map { it.label }.filter { it != "NONE" }.distinct()
+                        val labelText = if (uniqueLabels.isEmpty()) "Unknown" else uniqueLabels.joinToString(" + ")
+                        
+                        val hasAuto = cluster.events.any { it.triggerType == "AUTO" }
+                        val hasManual = cluster.events.any { it.triggerType == "MANUAL" }
+                        val activityStr = when {
+                            hasAuto && hasManual -> "Auto-detected + Manual Input"
+                            hasAuto -> "Auto-detected"
+                            else -> "Manual"
+                        }
+                        
+                        val (icon, color) = when {
+                            labelText.contains("OVERWHELMED") -> "🌩️" to "#a5b4fc"
+                            labelText.contains("EXCITED") -> "✨" to "#fcd34d"
+                            labelText.contains("ACTIVE") -> "🏃" to "#cbd5e1"
                             else -> "🤷" to "#94a3b8"
                         }
+                        
                         JournalEntry(
                             time = timeStr,
-                            place = "Logged Location",
-                            activity = if (event.triggerType == "AUTO") "Auto-detected" else "Manual",
+                            place = if (_sosLatitude.value != null && _sosLatitude.value != 0.0) "123 Main St, San Francisco, CA" else "Logged Location",
+                            activity = activityStr,
                             labelIcon = icon,
-                            labelText = event.label,
+                            labelText = labelText,
                             colorHex = color
                         )
                     }
@@ -266,15 +285,23 @@ class MainViewModel(
         }
     }
 
+    fun setMockActivity(activity: String?) {
+        _mockActivity.value = activity
+    }
+
     fun toggleMode() {
         _isCaregiverMode.value = !_isCaregiverMode.value
     }
     
     fun resolveReviewEvent(eventId: String, newLabelOrContext: String) {
+        // Optimistically remove from UI to prevent double-taps
+        _reviewEvents.value = _reviewEvents.value.filter { it.eventId != eventId }
+        
         viewModelScope.launch {
             val event = db.eventDao().getEventById(eventId)
             if (event != null) {
-                val finalLabel = if (event.label == "NONE") {
+                // If it's the exact same word, just keep it rather than duplicating "OVERWHELMED - OVERWHELMED"
+                val finalLabel = if (event.label == "NONE" || event.label == newLabelOrContext) {
                     newLabelOrContext
                 } else {
                     "${event.label} - $newLabelOrContext"
@@ -296,15 +323,36 @@ class MainViewModel(
             }
         }
     }
-    fun simulateWatchManualEvent(label: String) {
+    fun simulateWatchManualEvent(context: android.content.Context, label: String) {
+        // Optimistically set location
+        updateSosLocation(37.7749, -122.4194)
+
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val id = java.util.UUID.randomUUID().toString()
-            val ts = System.currentTimeMillis()
-            db.eventDao().insertEvent(
-                com.mtpnda.biocue.core.data.local.StressEventEntity(
-                    id = id, startTime = ts, endTime = null, triggerType = "MANUAL", label = label, isResolved = false
+            val intent = android.content.Intent("com.mtpnda.biocue.MOCK_MANUAL_EVENT").apply {
+                putExtra("label", label)
+                putExtra("trigger", "MANUAL")
+            }
+            context.sendBroadcast(intent)
+            
+            // Artificial delay to let receiver process it
+            kotlinx.coroutines.delay(100)
+            
+            // Force UI update immediately so button feels responsive
+            val unresolved = db.eventDao().getUnresolvedEvents()
+            val reviewList = unresolved.map { event ->
+                val timeStr = java.text.SimpleDateFormat("h:mm a", java.util.Locale.US).format(java.util.Date(event.startTime))
+                ReviewEvent(
+                    eventId = event.id,
+                    time = timeStr,
+                    triggerType = event.triggerType,
+                    currentLabel = event.label,
+                    cues = listOf(
+                        "🔄" to if (event.triggerType == "AUTO") "Detected Spontaneous Spike" else "Manually Triggered",
+                        "📍" to if (_sosLatitude.value != null && _sosLatitude.value != 0.0) "123 Main St, San Francisco, CA" else "Unknown Location"
+                    )
                 )
-            )
+            }
+            _reviewEvents.value = reviewList
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.mtpnda.biocue
 
+import androidx.compose.foundation.clickable
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -174,15 +175,30 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Simulate Watch Tap (Manual Event)", color = Color.Gray, fontSize = 12.sp)
+                        Text("Simulate Activity Override", color = Color.Gray, fontSize = 12.sp)
+                        val mockAct by viewModel.mockActivity.collectAsState()
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.simulateWatchManualEvent("OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                            Button(onClick = { viewModel.setMockActivity(null) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockAct == null) Color.White else Color.DarkGray)) {
+                                Text("Auto", fontSize = 12.sp, color = if (mockAct == null) Color.Black else Color.White)
+                            }
+                            Button(onClick = { viewModel.setMockActivity("STIMMING") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockAct == "STIMMING") Color.White else Color.DarkGray)) {
+                                Text("Stimming", fontSize = 12.sp, color = if (mockAct == "STIMMING") Color.Black else Color.White)
+                            }
+                            Button(onClick = { viewModel.setMockActivity("EXERCISE") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockAct == "EXERCISE") Color.White else Color.DarkGray)) {
+                                Text("Exercise", fontSize = 12.sp, color = if (mockAct == "EXERCISE") Color.Black else Color.White)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Simulate Watch Tap (Manual Event)", color = Color.Gray, fontSize = 12.sp)
+                        val context = androidx.compose.ui.platform.LocalContext.current
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { viewModel.simulateWatchManualEvent(context, "OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
                                 Text("Overwhelm", fontSize = 12.sp, color = Color.White)
                             }
-                            Button(onClick = { viewModel.simulateWatchManualEvent("SENSORY") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                            Button(onClick = { viewModel.simulateWatchManualEvent(context, "SENSORY") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
                                 Text("Sensory", fontSize = 12.sp, color = Color.White)
                             }
-                            Button(onClick = { viewModel.simulateWatchManualEvent("SOCIAL") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                            Button(onClick = { viewModel.simulateWatchManualEvent(context, "SOCIAL") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
                                 Text("Social", fontSize = 12.sp, color = Color.White)
                             }
                         }
@@ -190,7 +206,7 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
                 }
             }
             if (isCaregiver) {
-                item { CaregiverStatusCard(tier, connStatus, userName) }
+                item { CaregiverStatusCard(tier, connStatus, userName, activity, reviews.isNotEmpty(), sosLat ?: 0.0, sosLng ?: 0.0) }
                 item { CurrentStateCard(stress, activity, connStatus, userName) }
                 if (tier >= 2) {
                     item { PushNotificationPreview(userName) }
@@ -207,7 +223,7 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
 }
 
 @Composable
-fun CaregiverStatusCard(tier: Int, connectionStatus: ConnectionStatus, userName: String) {
+fun CaregiverStatusCard(tier: Int, connectionStatus: ConnectionStatus, userName: String, activity: String, hasAlert: Boolean, lat: Double = 0.0, lng: Double = 0.0) {
     if (connectionStatus != ConnectionStatus.CONNECTED) {
         val warningText = if (connectionStatus == ConnectionStatus.DISCONNECTED) "Watch is disconnected" else "Watch is off body"
         Column(
@@ -233,7 +249,7 @@ fun CaregiverStatusCard(tier: Int, connectionStatus: ConnectionStatus, userName:
         return
     }
 
-    val isDanger = tier >= 2
+    val isDanger = tier >= 2 || hasAlert
     val bgColor = if (isDanger) Color(0xFF312E81) else Color(0xFF064E3B)
     val borderColor = if (isDanger) DangerColor.copy(alpha = 0.3f) else CalmColor.copy(alpha = 0.3f)
     
@@ -252,11 +268,30 @@ fun CaregiverStatusCard(tier: Int, connectionStatus: ConnectionStatus, userName:
             fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White,
             modifier = Modifier.padding(bottom = 6.dp)
         )
-        Text(
-            if (isDanger) "Stress has been elevated for a few minutes. Pacing detected at current location." 
-            else "No elevated stress detected. Sitting still at home.",
-            fontSize = 13.sp, color = TextDim, textAlign = TextAlign.Center
-        )
+        
+        if (isDanger && lat != 0.0) {
+            Text(
+                if (hasAlert) "Manual event logged." else "Stress has been elevated for a few minutes.",
+                fontSize = 13.sp, color = TextDim, textAlign = TextAlign.Center
+            )
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            Text(
+                "📍 Location: 123 Main St, San Francisco, CA",
+                fontSize = 13.sp, color = Color(0xFF60A5FA), textAlign = TextAlign.Center,
+                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                modifier = Modifier.padding(top = 4.dp).clickable {
+                    val uri = android.net.Uri.parse("geo:0,0?q=123+Main+St,+San+Francisco,+CA")
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri)
+                    ctx.startActivity(intent)
+                }
+            )
+        } else {
+            Text(
+                if (isDanger) "Stress elevated or manual event logged. Activity: $activity." 
+                else "No elevated stress detected. Activity: $activity.",
+                fontSize = 13.sp, color = TextDim, textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -527,7 +562,7 @@ fun CaregiverDashboardPreview() {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                CaregiverStatusCard(tier = 0, connectionStatus = ConnectionStatus.CONNECTED, userName = "User")
+                CaregiverStatusCard(tier = 0, connectionStatus = ConnectionStatus.CONNECTED, userName = "User", activity = "Sitting Still", hasAlert = false, lat = 0.0, lng = 0.0)
                 CurrentStateCard(28, "[Activity]", ConnectionStatus.CONNECTED, userName = "User")
                 PatternReviewCard(emptyList(), userName = "User", onResolve = { _, _ -> })
             }
