@@ -1,30 +1,38 @@
 package com.mtpnda.biocue.connect
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetCredentialResponse
 import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.mtpnda.biocue.ui.theme.*
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
-import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,128 +43,139 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     var errorMsg by remember { mutableStateOf<String?>(null) }
     
     var isRegisterMode by remember { mutableStateOf(false) }
-    // Email/Password state
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    
-    // Profile state
     var fullName by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("Male") }
-    var birthdate by remember { mutableStateOf("") }
-    var genderExpanded by remember { mutableStateOf(false) }
-    
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
 
     val auth = FirebaseAuth.getInstance()
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgSlate)
     ) {
-        Text("Welcome to BioCue", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Sign in to access your dashboard.", style = MaterialTheme.typography.bodyMedium)
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        if (isLoading) {
-            CircularProgressIndicator()
-        } else {
-            // Toggle Register/Login
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                TextButton(onClick = { isRegisterMode = false }, colors = ButtonDefaults.textButtonColors(contentColor = if (!isRegisterMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)) { Text("Sign In") }
-                TextButton(onClick = { isRegisterMode = true }, colors = ButtonDefaults.textButtonColors(contentColor = if (isRegisterMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)) { Text("Register") }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+        // Ambient Background
+        Box(
+            modifier = Modifier
+                .offset(x = (-100).dp, y = (-200).dp)
+                .size(500.dp)
+                .background(Color(0xFF0EA5E9).copy(alpha = 0.15f), shape = RoundedCornerShape(250.dp))
+                .blur(100.dp)
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset(x = 100.dp, y = 100.dp)
+                .size(500.dp)
+                .background(Color(0xFF34D399).copy(alpha = 0.15f), shape = RoundedCornerShape(250.dp))
+                .blur(100.dp)
+        )
 
-            if (isRegisterMode) {
-                OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text("Full Name") }, modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ExposedDropdownMenuBox(
-                        expanded = genderExpanded,
-                        onExpandedChange = { genderExpanded = !genderExpanded },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        OutlinedTextField(
-                            value = gender,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Gender") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded) },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                            modifier = Modifier.menuAnchor()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = genderExpanded,
-                            onDismissRequest = { genderExpanded = false }
-                        ) {
-                            DropdownMenuItem(text = { Text("Male") }, onClick = { gender = "Male"; genderExpanded = false })
-                            DropdownMenuItem(text = { Text("Female") }, onClick = { gender = "Female"; genderExpanded = false })
-                        }
-                    }
-                    
-                    OutlinedTextField(
-                        value = birthdate,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Birthdate") },
-                        modifier = Modifier.weight(1f),
-                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-                            .also { interactionSource ->
-                                LaunchedEffect(interactionSource) {
-                                    interactionSource.interactions.collect {
-                                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
-                                            showDatePicker = true
-                                        }
-                                    }
-                                }
-                            }
-                    )
-                }
-                
-                if (showDatePicker) {
-                    DatePickerDialog(
-                        onDismissRequest = { showDatePicker = false },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                datePickerState.selectedDateMillis?.let { millis ->
-                                    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                                    birthdate = formatter.format(Date(millis))
-                                }
-                                showDatePicker = false
-                            }) { Text("OK") }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
-                        }
-                    ) {
-                        DatePicker(state = datePickerState)
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // Logo / Header
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(GlassSurface)
+                    .border(1.dp, GlassBorder, RoundedCornerShape(32.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🧠", fontSize = 40.sp)
             }
-
-            // Email/Password Form
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Text(
+                text = "BioCue",
+                fontSize = 40.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
             )
             Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
+            Text(
+                text = "Find your center.\nStay connected.",
+                fontSize = 16.sp,
+                color = TextDim,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                lineHeight = 24.sp
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (isRegisterMode) {
+                TextField(
+                    value = fullName,
+                    onValueChange = { fullName = it },
+                    placeholder = { Text("Full Name", color = TextDim) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(1.dp, GlassBorder, RoundedCornerShape(16.dp)),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Black.copy(alpha = 0.2f),
+                        unfocusedContainerColor = Color.Black.copy(alpha = 0.2f),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    ),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = { Text("Email address", color = TextDim) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, GlassBorder, RoundedCornerShape(16.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Black.copy(alpha = 0.2f),
+                    unfocusedContainerColor = Color.Black.copy(alpha = 0.2f),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                placeholder = { Text("Password", color = TextDim) },
                 visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, GlassBorder, RoundedCornerShape(16.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Black.copy(alpha = 0.2f),
+                    unfocusedContainerColor = Color.Black.copy(alpha = 0.2f),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
+                singleLine = true
             )
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = {
                     if (isRegisterMode && fullName.isBlank()) {
@@ -174,9 +193,6 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                                     .setDisplayName(fullName)
                                     .build()
                                 user?.updateProfile(profileUpdates)?.addOnCompleteListener {
-                                    // Save Gender/Birthdate to SharedPreferences temporarily
-                                    context.getSharedPreferences("biocue_prefs", android.content.Context.MODE_PRIVATE)
-                                        .edit().putString("gender", gender).putString("birthdate", birthdate).apply()
                                     onLoginSuccess(fullName)
                                 }
                             } else {
@@ -189,7 +205,6 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     val user = auth.currentUser
-                                    // Always fallback to "User", never raw email
                                     var dName = user?.displayName
                                     if (dName.isNullOrBlank()) dName = "User"
                                     onLoginSuccess(dName)
@@ -200,31 +215,41 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                             }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
             ) {
-                Text(if (isRegisterMode) "Create Account" else "Sign In with Email")
+                Text(if (isRegisterMode) "Create Account" else "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("OR")
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Divider(modifier = Modifier.weight(1f), color = GlassBorder)
+                Text(" OR ", color = TextDim, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 8.dp))
+                Divider(modifier = Modifier.weight(1f), color = GlassBorder)
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Google Sign-In using Credential Manager & Firebase
-            OutlinedButton(
+            Button(
                 onClick = {
                     isLoading = true
                     errorMsg = null
                     coroutineScope.launch {
                         try {
                             val credentialManager = CredentialManager.create(context)
-                            
                             val rawNonce = UUID.randomUUID().toString()
                             val bytes = rawNonce.toByteArray()
                             val md = MessageDigest.getInstance("SHA-256")
                             val digest = md.digest(bytes)
                             val hashedNonce = digest.fold("") { str, it -> str + "%02x".format(it) }
 
-                            // Note: Replace with your actual Web Client ID from Firebase/Google Cloud Console
                             val webClientId = "970885034683-qcpn8q0e7b1klpoon7js1d7cq6pko423.apps.googleusercontent.com"
                             
                             val googleIdOption = GetGoogleIdOption.Builder()
@@ -267,15 +292,32 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .border(1.dp, GlassBorder, RoundedCornerShape(16.dp)),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GlassSurface)
             ) {
-                Text("Sign in with Google")
+                Text("Continue with Google", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
-        }
-        
-        if (errorMsg != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(errorMsg!!, color = MaterialTheme.colorScheme.error)
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Row(
+                modifier = Modifier.clickable { isRegisterMode = !isRegisterMode }
+            ) {
+                Text(
+                    text = if (isRegisterMode) "Already have an account? Sign In" else "Don't have an account? Create one",
+                    color = PrimaryBlue,
+                    fontSize = 14.sp
+                )
+            }
+
+            if (errorMsg != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(errorMsg!!, color = DangerColor, fontSize = 14.sp)
+            }
         }
     }
 }
