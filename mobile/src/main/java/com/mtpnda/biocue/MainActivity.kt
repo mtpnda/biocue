@@ -161,6 +161,7 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
                 item {
                     Column(modifier = Modifier.fillMaxWidth().background(Color(0xFF2D2D2D), RoundedCornerShape(12.dp)).padding(16.dp)) {
                         Text("Developer Stubs", color = Color.Yellow, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                        Text("Continuous Sensor Mock", color = Color.Gray, fontSize = 12.sp)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.LOW) MockIntensity.OFF else MockIntensity.LOW) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.LOW) Color(0xFF4ADE80) else Color.DarkGray)) {
                                 Text("Low", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.LOW) Color.Black else Color.White)
@@ -170,6 +171,19 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
                             }
                             Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.HIGH) MockIntensity.OFF else MockIntensity.HIGH) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.HIGH) Color(0xFFF87171) else Color.DarkGray)) {
                                 Text("High", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.HIGH) Color.Black else Color.White)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Simulate Watch Tap (Manual Event)", color = Color.Gray, fontSize = 12.sp)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { viewModel.simulateWatchManualEvent("OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                                Text("Overwhelm", fontSize = 12.sp, color = Color.White)
+                            }
+                            Button(onClick = { viewModel.simulateWatchManualEvent("SENSORY") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                                Text("Sensory", fontSize = 12.sp, color = Color.White)
+                            }
+                            Button(onClick = { viewModel.simulateWatchManualEvent("SOCIAL") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
+                                Text("Social", fontSize = 12.sp, color = Color.White)
                             }
                         }
                     }

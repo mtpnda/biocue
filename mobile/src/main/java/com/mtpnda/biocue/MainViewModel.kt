@@ -296,5 +296,15 @@ class MainViewModel(
             }
         }
     }
+    fun simulateWatchManualEvent(label: String) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val id = java.util.UUID.randomUUID().toString()
+            val ts = System.currentTimeMillis()
+            db.eventDao().insertEvent(
+                com.mtpnda.biocue.core.data.local.StressEventEntity(
+                    id = id, startTime = ts, endTime = null, triggerType = "MANUAL", label = label, isResolved = false
+                )
+            )
+        }
+    }
 }
-
