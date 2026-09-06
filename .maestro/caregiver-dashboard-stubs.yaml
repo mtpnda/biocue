@@ -2,5 +2,9 @@ appId: com.mtpnda.biocue
 ---
 - launchApp
 - tapOn: "Caregiver"
-- tapOn: "Mock ML Stream: OFF"
-- assertVisible: "Mock ML Stream: ON (Simulating Data)"
+- assertVisible: "Low"
+- assertVisible: "Medium"
+- assertVisible: "High"
+- tapOn: "Medium"
+- tapOn: "High"
+- tapOn: "Low"

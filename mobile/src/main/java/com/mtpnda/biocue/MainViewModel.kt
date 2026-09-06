@@ -35,6 +35,8 @@ data class ReviewEvent(
     val cues: List<Pair<String, String>> // icon to text
 )
 
+enum class MockIntensity { OFF, LOW, MEDIUM, HIGH }
+
 enum class ConnectionStatus {
     CONNECTED, DISCONNECTED, OFF_BODY
 }
@@ -43,22 +45,39 @@ class MainViewModel(
     application: Application,
     private val db: com.mtpnda.biocue.core.data.local.DetectionDatabase
 ) : AndroidViewModel(application) {
-    private val _isMockingStream = kotlinx.coroutines.flow.MutableStateFlow(false)
-    val isMockingStream = _isMockingStream.asStateFlow()
+    private val _mockIntensity = kotlinx.coroutines.flow.MutableStateFlow(MockIntensity.OFF)
+    val mockIntensity = _mockIntensity.asStateFlow()
     private var mockJob: kotlinx.coroutines.Job? = null
 
-    fun toggleMockStream(context: android.content.Context) {
-        _isMockingStream.value = !_isMockingStream.value
-        if (_isMockingStream.value) {
-            android.widget.Toast.makeText(context, "Started mock ML stream...", android.widget.Toast.LENGTH_SHORT).show()
+    fun setMockIntensity(context: android.content.Context, intensity: MockIntensity) {
+        _mockIntensity.value = intensity
+        mockJob?.cancel()
+        mockJob = null
+
+        if (intensity != MockIntensity.OFF) {
+            android.widget.Toast.makeText(context, "Started mock $intensity...", android.widget.Toast.LENGTH_SHORT).show()
             mockJob = viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                 var tick = 0
                 while (isActive) {
-                    val isSpike = (tick % 15) in 5..10 // Simulate a periodic spike every 30s
+                    val isSpike = (tick % 15) in 5..10
+                    
+                    val hrBase = when (intensity) {
+                        MockIntensity.LOW -> 72.0
+                        MockIntensity.MEDIUM -> 88.0
+                        MockIntensity.HIGH -> 110.0
+                        else -> 75.0
+                    }
+                    val hrvBase = when (intensity) {
+                        MockIntensity.LOW -> 45.0
+                        MockIntensity.MEDIUM -> 22.0
+                        MockIntensity.HIGH -> 10.0
+                        else -> 40.0
+                    }
+                    
                     val window = com.mtpnda.biocue.core.data.local.SensorWindowEntity(
                         timestamp = System.currentTimeMillis(),
-                        hrMean = if (isSpike) 115.0 else 72.0,
-                        rmssd = if (isSpike) 12.0 else 45.0,
+                        hrMean = if (isSpike) hrBase + 10.0 else hrBase,
+                        rmssd = if (isSpike) maxOf(hrvBase - 5.0, 2.0) else hrvBase,
                         accMag = if (isSpike) 0.6 else 0.1,
                         repetitiveness = if (isSpike) 0.7 else 0.0,
                         hrSlope = if (isSpike) 8.0 else 0.0,
@@ -71,9 +90,7 @@ class MainViewModel(
                 }
             }
         } else {
-            android.widget.Toast.makeText(context, "Stopped mock ML stream.", android.widget.Toast.LENGTH_SHORT).show()
-            mockJob?.cancel()
-            mockJob = null
+            android.widget.Toast.makeText(context, "Stopped mock stream.", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -141,7 +158,7 @@ class MainViewModel(
                     val currentWatchState = watchConnectionState.value
                     val windows = db.sensorDataDao().getRecentWindows(1)
                     
-                    val isMocking = _isMockingStream.value
+                    val isMocking = _mockIntensity.value != MockIntensity.OFF
                     if (currentWatchState == ConnectionState.CONNECTED || isMocking) {
                         if (windows.isNotEmpty()) {
                             val latest = windows.first()

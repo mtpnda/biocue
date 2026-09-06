@@ -1,51 +1,49 @@
 package com.mtpnda.biocue
 
 import android.app.Application
-import com.mtpnda.biocue.connect.WatchConnectionManager
 import com.mtpnda.biocue.core.data.local.DetectionDatabase
 import com.mtpnda.biocue.core.data.local.EventDao
 import com.mtpnda.biocue.core.data.local.SensorDataDao
-import com.mtpnda.biocue.core.data.local.StressEventEntity
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.assertTrue
-import org.junit.Assert.assertFalse
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import android.content.Context
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class MainViewModelTest {
 
+    // 1. Dependencies clearly grouped
     private val application = mockk<Application>(relaxed = true)
     private val db = mockk<DetectionDatabase>(relaxed = true)
-    
     private val eventDao = mockk<EventDao>(relaxed = true)
     private val sensorDataDao = mockk<SensorDataDao>(relaxed = true)
     
     private val testDispatcher = StandardTestDispatcher()
+    
+    // Subject under test
+    private lateinit var viewModel: MainViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        
+        // Setup mock behavior
         every { db.eventDao() } returns eventDao
         every { db.sensorDataDao() } returns sensorDataDao
         
-        // Mock connection state
+        // Initialize clean ViewModel for each test
+        viewModel = MainViewModel(application, db)
     }
 
     @After
@@ -53,19 +51,40 @@ class MainViewModelTest {
         Dispatchers.resetMain()
     }
 
+    /**
+     * Table-Driven Test pattern in Kotlin.
+     * 
+     * Instead of duplicating assertions, we define a "Table" of inputs and expected outputs.
+     * This is incredibly scalable and clean for Android/Kotlin development.
+     */
     @Test
-    fun testToggleMockStream() = runTest {
-        val viewModel = MainViewModel(application, db)
+    fun `toggleMockStream follows sequential state transitions`() = runTest {
+        // Define the test data structure (The "Table" Schema)
+        data class TestCase(
+            val stepDescription: String,
+            val performToggle: Boolean,
+            val expectedState: Boolean
+        )
         
-        // Initially false
-        assertFalse(viewModel.isMockingStream.value)
-        
-        // Toggle on
-        viewModel.toggleMockStream(application)
-        assertTrue(viewModel.isMockingStream.value)
-        
-        // Toggle off
-        viewModel.toggleMockStream(application)
-        assertFalse(viewModel.isMockingStream.value)
+        // Define the test cases (The "Table" Data)
+        val testTable = listOf(
+            TestCase("Initial state should be false", performToggle = false, expectedState = false),
+            TestCase("First toggle turns stream ON", performToggle = true, expectedState = true),
+            TestCase("Second toggle turns stream OFF", performToggle = true, expectedState = false),
+            TestCase("Third toggle turns stream ON again", performToggle = true, expectedState = true)
+        )
+
+        // Iterate through the table and execute assertions
+        testTable.forEach { case ->
+            if (case.performToggle) {
+                viewModel.setMockIntensity(application, com.mtpnda.biocue.MockIntensity.HIGH)
+            }
+            
+            assertEquals(
+                case.stepDescription, 
+                case.expectedState, 
+                viewModel.mockIntensity.value != com.mtpnda.biocue.MockIntensity.OFF
+            )
+        }
     }
 }

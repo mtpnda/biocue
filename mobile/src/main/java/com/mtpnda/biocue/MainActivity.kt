@@ -116,7 +116,7 @@ class MainActivity : ComponentActivity() {
 fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: Boolean = false) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val isCaregiver by viewModel.isCaregiverMode.collectAsState()
-    val isMockingStream by viewModel.isMockingStream.collectAsState()
+    val mockIntensity by viewModel.mockIntensity.collectAsState()
     val tier by viewModel.tier.collectAsState()
     val sosLat by viewModel.sosLatitude.collectAsState()
     val sosLng by viewModel.sosLongitude.collectAsState()
@@ -162,8 +162,14 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
                     Column(modifier = Modifier.fillMaxWidth().background(Color(0xFF2D2D2D), RoundedCornerShape(12.dp)).padding(16.dp)) {
                         Text("Developer Stubs", color = Color.Yellow, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.toggleMockStream(context) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = if (isMockingStream) Color(0xFF4ADE80) else Color.DarkGray)) {
-                                Text(if (isMockingStream) "Mock ML Stream: ON (Simulating Data)" else "Mock ML Stream: OFF", fontSize = 12.sp, color = if (isMockingStream) Color.Black else Color.White)
+                            Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.LOW) MockIntensity.OFF else MockIntensity.LOW) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.LOW) Color(0xFF4ADE80) else Color.DarkGray)) {
+                                Text("Low", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.LOW) Color.Black else Color.White)
+                            }
+                            Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.MEDIUM) MockIntensity.OFF else MockIntensity.MEDIUM) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.MEDIUM) Color(0xFFFACC15) else Color.DarkGray)) {
+                                Text("Medium", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.MEDIUM) Color.Black else Color.White)
+                            }
+                            Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.HIGH) MockIntensity.OFF else MockIntensity.HIGH) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.HIGH) Color(0xFFF87171) else Color.DarkGray)) {
+                                Text("High", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.HIGH) Color.Black else Color.White)
                             }
                         }
                     }
