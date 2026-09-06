@@ -1,48 +1,24 @@
 package com.mtpnda.biocue
 
-import androidx.compose.foundation.clickable
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.lifecycle.lifecycleScope
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.mtpnda.biocue.ui.theme.BiocueTheme
-import kotlinx.coroutines.delay
-
-val SurfaceColor = Color(0xFF1E293B)
-val CalmColor = Color(0xFF34D399)
-val WarnColor = Color(0xFFFBBF24)
-val DangerColor = Color(0xFF818CF8)
-val TextDim = Color(0xFF94A3B8)
+import com.mtpnda.biocue.ui.screens.profile.ProfileScreen
 
 class MainActivity : ComponentActivity() {
-    private fun isEmulator(): Boolean {
+
+    fun isEmulator(): Boolean {
         return (android.os.Build.BRAND.startsWith("generic") && android.os.Build.DEVICE.startsWith("generic"))
                 || android.os.Build.FINGERPRINT.startsWith("generic")
                 || android.os.Build.FINGERPRINT.startsWith("unknown")
@@ -68,13 +44,7 @@ class MainActivity : ComponentActivity() {
         ).build()
     }
     
-    private val viewModel: MainViewModel by viewModels {
-        object : androidx.lifecycle.ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                return MainViewModel(application, db) as T
-            }
-        }
-    }
+    private val appViewModel: AppViewModel by viewModels()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -92,21 +62,74 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             BiocueTheme {
-                val watchState by viewModel.watchConnectionState.collectAsState()
-                val userName by viewModel.userName.collectAsState()
-                
+                val auth = FirebaseAuth.getInstance()
+                var isUserLoggedIn by remember { mutableStateOf(auth.currentUser != null) }
+                val userRole by appViewModel.userRole.collectAsState()
+                val pairedWearer by appViewModel.pairedWearer.collectAsState()
+                val pairingRevoked by appViewModel.pairingRevoked.collectAsState()
+                var showProfileScreen by remember { mutableStateOf(false) }
 
-                if (userName == null) {
-                    com.mtpnda.biocue.connect.LoginScreen(onLoginSuccess = { name ->
-                        viewModel.setUserName(name)
+                LaunchedEffect(isUserLoggedIn) {
+                    if (isUserLoggedIn) {
+                        appViewModel.loadUserProfile()
+                    }
+                }
+
+                if (!isUserLoggedIn) {
+                    // Not logged in -> show login
+                    com.mtpnda.biocue.connect.LoginScreen(onLoginSuccess = { 
+                        isUserLoggedIn = true 
                     })
-                } else if (watchState == com.mtpnda.biocue.connect.ConnectionState.CONNECTED || isEmulator()) {
-                    DashboardScreen(viewModel, userName!!, isStubAllowed = (isEmulator() || com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email == "mvasecondary@gmail.com"))
-                } else {
-                    com.mtpnda.biocue.connect.ConnectionGuideScreen(
-                        manager = viewModel.watchConnectionManager,
-                        onConnected = {}
+                } else if (pairingRevoked) {
+                    // Caregiver was removed by wearer
+                    com.mtpnda.biocue.connect.AccessRevokedScreen(
+                        onDismiss = { appViewModel.acknowledgeRevocation() }
                     )
+                } else if (userRole == null) {
+                    // Logged in but no role selected yet
+                    com.mtpnda.biocue.connect.RoleSelectionScreen(
+                        onRoleSelected = { role -> appViewModel.saveUserRole(role) }
+                    )
+                } else if (showProfileScreen) {
+                    val roleStr = if (userRole == com.mtpnda.biocue.data.UserRole.CAREGIVER) 
+                        androidx.compose.ui.res.stringResource(R.string.mode_caregiver) else 
+                        androidx.compose.ui.res.stringResource(R.string.mode_wearer)
+                    ProfileScreen(
+                        userName = auth.currentUser?.displayName ?: "User",
+                        role = roleStr,
+                        onBack = { showProfileScreen = false },
+                        onLogout = { 
+                            auth.signOut()
+                            isUserLoggedIn = false
+                            showProfileScreen = false
+                        }
+                    )
+                } else if (userRole == com.mtpnda.biocue.data.UserRole.WEARER) {
+                    // WEARER FLOW
+                    val wearerViewModel: WearerDashboardViewModel = viewModel(
+                        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                                return WearerDashboardViewModel(application, db) as T
+                            }
+                        }
+                    )
+                    WearerDashboardRoute(wearerViewModel, auth.currentUser?.displayName ?: "Wearer", isEmulator(), onOpenProfile = { showProfileScreen = true })
+                } else {
+                    // CAREGIVER FLOW
+                    if (pairedWearer != null) {
+                        val caregiverViewModel: CaregiverDashboardViewModel = viewModel()
+                        LaunchedEffect(pairedWearer!!.wearerUid) {
+                            caregiverViewModel.startObservation(pairedWearer!!.wearerUid)
+                        }
+                        CaregiverDashboardRoute(caregiverViewModel, pairedWearer!!.wearerName, onOpenProfile = { showProfileScreen = true })
+                    } else {
+                        com.mtpnda.biocue.connect.CaregiverPairingScreen(
+                            status = appViewModel.caregiverPairingStatus.collectAsState().value,
+                            wearerName = pairedWearer?.wearerName,
+                            onSubmitCode = { code -> appViewModel.submitPairingCode(code) },
+                            onContinue = {}
+                        )
+                    }
                 }
             }
         }
@@ -114,9 +137,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: Boolean = false) {
+fun WearerDashboardRoute(viewModel: WearerDashboardViewModel, userName: String, isStubAllowed: Boolean = false, onOpenProfile: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val isCaregiver by viewModel.isCaregiverMode.collectAsState()
     val mockIntensity by viewModel.mockIntensity.collectAsState()
     val tier by viewModel.tier.collectAsState()
     val sosLat by viewModel.sosLatitude.collectAsState()
@@ -124,448 +146,54 @@ fun DashboardScreen(viewModel: MainViewModel, userName: String, isStubAllowed: B
     val stress by viewModel.stressLevel.collectAsState()
     val activity by viewModel.activityLabel.collectAsState()
     val journal by viewModel.journal.collectAsState()
+    val journalOffset by viewModel.journalOffset.collectAsState()
     val reviews by viewModel.reviewEvents.collectAsState()
+    val hasOngoing by viewModel.hasOngoingEvent.collectAsState()
     val connStatus by viewModel.connectionStatus.collectAsState()
-    
-    
+    val mockActivity by viewModel.mockActivity.collectAsState()
+    val isCalmAudioPlaying by viewModel.isCalmAudioPlaying.collectAsState()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .statusBarsPadding(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("BioCue", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                Button(
-                    onClick = { viewModel.toggleMode() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1f))
-                ) {
-                    Text(if (isCaregiver) "Caregiver" else "Wearer", color = TextDim)
-                }
-            }
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF0F172A))
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            if (isStubAllowed) {
-                item {
-                    Column(modifier = Modifier.fillMaxWidth().background(Color(0xFF2D2D2D), RoundedCornerShape(12.dp)).padding(16.dp)) {
-                        Text("Developer Stubs", color = Color.Yellow, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
-                        Text("Continuous Sensor Mock", color = Color.Gray, fontSize = 12.sp)
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.LOW) MockIntensity.OFF else MockIntensity.LOW) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.LOW) Color(0xFF4ADE80) else Color.DarkGray)) {
-                                Text("Low", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.LOW) Color.Black else Color.White)
-                            }
-                            Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.MEDIUM) MockIntensity.OFF else MockIntensity.MEDIUM) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.MEDIUM) Color(0xFFFACC15) else Color.DarkGray)) {
-                                Text("Medium", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.MEDIUM) Color.Black else Color.White)
-                            }
-                            Button(onClick = { viewModel.setMockIntensity(context, if (mockIntensity == MockIntensity.HIGH) MockIntensity.OFF else MockIntensity.HIGH) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.HIGH) Color(0xFFF87171) else Color.DarkGray)) {
-                                Text("High", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.HIGH) Color.Black else Color.White)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Simulate Activity Override", color = Color.Gray, fontSize = 12.sp)
-                        val mockAct by viewModel.mockActivity.collectAsState()
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.setMockActivity(null) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockAct == null) Color.White else Color.DarkGray)) {
-                                Text("Auto", fontSize = 12.sp, color = if (mockAct == null) Color.Black else Color.White)
-                            }
-                            Button(onClick = { viewModel.setMockActivity("STIMMING") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockAct == "STIMMING") Color.White else Color.DarkGray)) {
-                                Text("Stimming", fontSize = 12.sp, color = if (mockAct == "STIMMING") Color.Black else Color.White)
-                            }
-                            Button(onClick = { viewModel.setMockActivity("EXERCISE") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockAct == "EXERCISE") Color.White else Color.DarkGray)) {
-                                Text("Exercise", fontSize = 12.sp, color = if (mockAct == "EXERCISE") Color.Black else Color.White)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Simulate Watch Tap (Manual Event)", color = Color.Gray, fontSize = 12.sp)
-                        val context = androidx.compose.ui.platform.LocalContext.current
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.simulateWatchManualEvent(context, "OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                Text("Overwhelm", fontSize = 12.sp, color = Color.White)
-                            }
-                            Button(onClick = { viewModel.simulateWatchManualEvent(context, "SENSORY") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                Text("Sensory", fontSize = 12.sp, color = Color.White)
-                            }
-                            Button(onClick = { viewModel.simulateWatchManualEvent(context, "SOCIAL") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                Text("Social", fontSize = 12.sp, color = Color.White)
-                            }
-                        }
-                    }
-                }
-            }
-            if (isCaregiver) {
-                item { CaregiverStatusCard(tier, connStatus, userName, activity, reviews.isNotEmpty(), sosLat ?: 0.0, sosLng ?: 0.0) }
-                item { CurrentStateCard(stress, activity, connStatus, userName) }
-                if (tier >= 2) {
-                    item { PushNotificationPreview(userName) }
-                }
-                item { PatternReviewCard(reviews, userName, onResolve = { id, label -> viewModel.resolveReviewEvent(id, label) }) }
-                item { JournalCard(journal) }
-            } else {
-                item { CurrentStateCard(stress, activity, connStatus, userName) }
-                item { QuickActionsCard() }
-                item { JournalCard(journal) }
-            }
-        }
-    }
-}
-
-@Composable
-fun CaregiverStatusCard(tier: Int, connectionStatus: ConnectionStatus, userName: String, activity: String, hasAlert: Boolean, lat: Double = 0.0, lng: Double = 0.0) {
-    if (connectionStatus != ConnectionStatus.CONNECTED) {
-        val warningText = if (connectionStatus == ConnectionStatus.DISCONNECTED) "Watch is disconnected" else "Watch is off body"
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFF332200)) // Warning brown
-                .border(1.dp, WarnColor.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                .padding(vertical = 32.dp, horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("⚠️", fontSize = 48.sp, modifier = Modifier.padding(bottom = 12.dp))
-            Text(
-                warningText, 
-                fontSize = 18.sp, fontWeight = FontWeight.Bold, color = WarnColor,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            Text(
-                "Unable to monitor ${userName}'s stress levels. Please ensure the watch is worn and connected.",
-                fontSize = 13.sp, color = TextDim, textAlign = TextAlign.Center
-            )
-        }
-        return
-    }
-
-    val isDanger = tier >= 2 || hasAlert
-    val bgColor = if (isDanger) Color(0xFF312E81) else Color(0xFF064E3B)
-    val borderColor = if (isDanger) DangerColor.copy(alpha = 0.3f) else CalmColor.copy(alpha = 0.3f)
-    
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
-            .padding(vertical = 32.dp, horizontal = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(if (isDanger) "🌩️" else "✨", fontSize = 48.sp, modifier = Modifier.padding(bottom = 12.dp))
-        Text(
-            if (isDanger) "${userName} may need support" else "${userName} is doing fine", 
-            fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
-        
-        if (isDanger && lat != 0.0) {
-            Text(
-                if (hasAlert) "Manual event logged." else "Stress has been elevated for a few minutes.",
-                fontSize = 13.sp, color = TextDim, textAlign = TextAlign.Center
-            )
-            val ctx = androidx.compose.ui.platform.LocalContext.current
-            Text(
-                "📍 Location: 123 Main St, San Francisco, CA",
-                fontSize = 13.sp, color = Color(0xFF60A5FA), textAlign = TextAlign.Center,
-                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                modifier = Modifier.padding(top = 4.dp).clickable {
-                    val uri = android.net.Uri.parse("geo:0,0?q=123+Main+St,+San+Francisco,+CA")
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri)
-                    ctx.startActivity(intent)
-                }
-            )
-        } else {
-            Text(
-                if (isDanger) "Stress elevated or manual event logged. Activity: $activity." 
-                else "No elevated stress detected. Activity: $activity.",
-                fontSize = 13.sp, color = TextDim, textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-fun CurrentStateCard(stressLevel: Int, activity: String, connectionStatus: ConnectionStatus, userName: String) {
-    val isAvailable = connectionStatus == ConnectionStatus.CONNECTED
-    val meterColor = when {
-        !isAvailable -> TextDim
-        stressLevel < 40 -> CalmColor
-        stressLevel < 65 -> WarnColor
-        else -> DangerColor
-    }
-    val meterLabel = when {
-        !isAvailable -> "—"
-        stressLevel < 40 -> "Low"
-        stressLevel < 65 -> "Moderate"
-        else -> "High"
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            SectionLabel("Current State")
-            
-            if (!isAvailable) {
-                val warningText = if (connectionStatus == ConnectionStatus.DISCONNECTED) "Watch disconnected" else "Watch is off body"
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp).clip(RoundedCornerShape(8.dp)).background(WarnColor.copy(alpha = 0.12f)).padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("⚠️", fontSize = 14.sp, modifier = Modifier.padding(end = 8.dp))
-                    Text(warningText, fontSize = 12.sp, color = WarnColor, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            // Always show the meter structure, but with placeholder values when unavailable
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Stress Level", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isAvailable) Color.White else TextDim)
-                Text(meterLabel, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = meterColor)
-            }
-            Box(modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.08f))) {
-                val animatedWidth by animateFloatAsState(targetValue = if (isAvailable) stressLevel / 100f else 0f)
-                Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(animatedWidth).clip(CircleShape).background(meterColor))
-            }
-            Row(modifier = Modifier.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("ACTIVITY:", fontSize = 11.sp, color = TextDim, modifier = Modifier.padding(end = 10.dp))
-                Text(
-                    if (isAvailable) activity else "— No data",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isAvailable) Color.White else TextDim
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun QuickActionsCard() {
-    var muted by remember { mutableStateOf(false) }
-    var playing by remember { mutableStateOf(false) }
-    var msgSent by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            SectionLabel("Quick Actions")
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ActionBtn(text = if (muted) "✓ Phone Muted" else "🔇 Mute Phone", isOn = muted, modifier = Modifier.weight(1f)) { muted = !muted }
-                ActionBtn(text = if (playing) "✓ Playing" else "🎵 Calm Audio", isOn = playing, modifier = Modifier.weight(1f)) { playing = !playing }
-            }
-            ActionBtn(
-                text = if (msgSent) "✓ Message Sent" else "💬 Message Caregiver", 
-                isOn = msgSent, 
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                msgSent = true
-            }
-            LaunchedEffect(msgSent) {
-                if (msgSent) {
-                    delay(3000)
-                    msgSent = false
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ActionBtn(text: String, isOn: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(48.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isOn) CalmColor.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f),
-            contentColor = Color.White
-        ),
-        shape = RoundedCornerShape(12.dp),
-        contentPadding = PaddingValues(0.dp)
-    ) {
-        Text(text, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun JournalCard(journal: List<JournalEntry>) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            SectionLabel("Today's Journal")
-            if (journal.isEmpty()) {
-                Text("No events today. All calm ✨", fontSize = 13.sp, color = TextDim, modifier = Modifier.fillMaxWidth().padding(20.dp), textAlign = TextAlign.Center)
-            } else {
-                journal.forEach { entry ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-                        Box(modifier = Modifier.padding(top = 5.dp, end = 12.dp).size(8.dp).clip(CircleShape).background(Color(android.graphics.Color.parseColor(entry.colorHex))))
-                        Column {
-                            Text(entry.time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Text("${entry.place} · ${entry.activity}", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(top = 2.dp))
-                            Row(modifier = Modifier.padding(top = 4.dp)) {
-                                Text(entry.labelIcon, fontSize = 13.sp, modifier = Modifier.padding(end = 4.dp))
-                                Text(entry.labelText, fontSize = 13.sp, color = Color(android.graphics.Color.parseColor(entry.colorHex)))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun PushNotificationPreview(userName: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = DangerColor.copy(alpha = 0.08f)),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            Text("PUSH NOTIFICATION", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DangerColor, modifier = Modifier.padding(bottom = 6.dp))
-            Text("${userName}'s stress has been elevated for 5 minutes. They may need support.", fontSize = 13.sp, color = Color.White)
-        }
-    }
-}
-
-@Composable
-fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (String, String) -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                SectionLabel("Pattern Review")
-                if (reviews.isNotEmpty()) {
-                    Box(modifier = Modifier.clip(CircleShape).background(DangerColor).padding(horizontal = 8.dp, vertical = 2.dp)) {
-                        Text(reviews.size.toString(), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-            if (reviews.isEmpty()) {
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("✨", fontSize = 24.sp, modifier = Modifier.padding(bottom = 6.dp))
-                    Text("All caught up", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CalmColor)
-                    Text("BioCue is learning ${userName}'s patterns.", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(top = 4.dp))
-                }
-            } else {
-                val rev = reviews.first()
-                
-                val isUnlabeled = rev.currentLabel == "NONE"
-                
-                if (isUnlabeled) {
-                    Text("A stress spike was detected but ${userName} didn't label it on the watch.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
-                } else {
-                    val labelFormat = rev.currentLabel.lowercase().replaceFirstChar { it.uppercase() }
-                    Text("${userName} reported feeling ${labelFormat}. Please add environmental context to help BioCue learn.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
-                }
-                
-                Text(rev.time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
-                
-                Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color.Black.copy(alpha = 0.2f)).padding(12.dp)) {
-                    Column {
-                        Text("CONTEXT CUES", fontSize = 10.sp, color = TextDim, modifier = Modifier.padding(bottom = 8.dp))
-                        rev.cues.forEach { cue ->
-                            Row(modifier = Modifier.padding(bottom = 4.dp)) {
-                                Text(cue.first, fontSize = 13.sp, modifier = Modifier.padding(end = 8.dp))
-                                Text(cue.second, fontSize = 13.sp, color = Color(0xFFCBD5E1))
-                            }
-                        }
-                    }
-                }
-                
-                if (isUnlabeled) {
-                    Text("💡 Ask ${userName} first if you can — they may remember what happened.", fontSize = 12.sp, color = WarnColor, modifier = Modifier.padding(vertical = 14.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LabelBtn("🌩️", "Overwhelmed", Color(0xFFA5B4FC)) { onResolve(rev.eventId, "OVERWHELMED") }
-                        LabelBtn("✨", "Excited", Color(0xFFFCD34D)) { onResolve(rev.eventId, "EXCITED") }
-                        LabelBtn("🏃", "Active", Color(0xFFCBD5E1)) { onResolve(rev.eventId, "ACTIVE") }
-                        LabelBtn("🤷", "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, "NONE") }
-                    }
-                } else {
-                    Text("💡 What was happening around ${userName}?", fontSize = 12.sp, color = CalmColor, modifier = Modifier.padding(vertical = 14.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LabelBtn("🔊", "Loud Noises", Color(0xFFFCA5A5)) { onResolve(rev.eventId, "Loud Noises") }
-                        LabelBtn("👥", "Crowded Space", Color(0xFFFDBA74)) { onResolve(rev.eventId, "Crowded") }
-                        LabelBtn("📋", "Task Demand", Color(0xFF6EE7B7)) { onResolve(rev.eventId, "Demand") }
-                        LabelBtn("🔄", "Routine Change", Color(0xFF93C5FD)) { onResolve(rev.eventId, "Routine Change") }
-                        LabelBtn("🤷", "Unknown", TextDim) { onResolve(rev.eventId, "Unknown Context") }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun LabelBtn(icon: String, text: String, color: Color, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = color.copy(alpha = 0.15f),
-            contentColor = color
-        ),
-        shape = RoundedCornerShape(10.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
-            Text(icon, fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
-            Text(text, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
-fun SectionLabel(text: String) {
-    Text(
-        text = text.uppercase(),
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        color = TextDim,
-        letterSpacing = 1.sp,
-        modifier = Modifier.padding(bottom = 10.dp)
+    com.mtpnda.biocue.ui.screens.wearer.WearerDashboardScreen(
+        userName = userName,
+        isStubAllowed = isStubAllowed,
+        mockIntensity = mockIntensity,
+        mockActivity = mockActivity,
+        tier = tier,
+        sosLat = sosLat ?: 0.0,
+        sosLng = sosLng ?: 0.0,
+        stress = stress,
+        activity = activity,
+        journal = journal,
+        journalOffset = journalOffset,
+        reviews = reviews,
+        hasOngoing = hasOngoing,
+        connStatus = connStatus,
+        isCalmAudioPlaying = isCalmAudioPlaying,
+        onToggleCalmAudio = { viewModel.toggleCalmAudio(context) },
+        onSetMockIntensity = { viewModel.setMockIntensity(context, it) },
+        onSetMockActivity = { viewModel.setMockActivity(it) },
+        onSimulateManualEvent = { viewModel.simulateWatchManualEvent(context, it) },
+        onResolveReview = { id, label -> viewModel.resolveReviewEvent(id, label) },
+        onChangeJournalDate = { delta -> viewModel.changeJournalDate(delta) },
+        onOpenProfile = onOpenProfile
     )
 }
 
-
-
-@Preview(showBackground = true, name = "Wearer Dashboard")
-
-@Preview(showBackground = true, name = "Caregiver Dashboard")
 @Composable
-fun CaregiverDashboardPreview() {
-    BiocueTheme {
-        Surface(color = Color(0xFF0F172A)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                CaregiverStatusCard(tier = 0, connectionStatus = ConnectionStatus.CONNECTED, userName = "User", activity = "Sitting Still", hasAlert = false, lat = 0.0, lng = 0.0)
-                CurrentStateCard(28, "[Activity]", ConnectionStatus.CONNECTED, userName = "User")
-                PatternReviewCard(emptyList(), userName = "User", onResolve = { _, _ -> })
-            }
-        }
-    }
+fun CaregiverDashboardRoute(viewModel: CaregiverDashboardViewModel, userName: String, onOpenProfile: () -> Unit) {
+    val journal by viewModel.journal.collectAsState()
+    val journalOffset by viewModel.journalOffset.collectAsState()
+    val reviews by viewModel.reviewEvents.collectAsState()
+    val hasOngoing by viewModel.hasOngoingEvent.collectAsState()
+
+    com.mtpnda.biocue.ui.screens.caregiver.CaregiverDashboardScreen(
+        userName = userName,
+        journal = journal,
+        journalOffset = journalOffset,
+        reviews = reviews,
+        hasOngoing = hasOngoing,
+        onResolveReview = { _, _ -> },
+        onChangeJournalDate = { viewModel.changeJournalDate(it) },
+        onOpenProfile = onOpenProfile
+    )
 }
