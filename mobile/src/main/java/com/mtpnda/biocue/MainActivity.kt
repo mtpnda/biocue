@@ -4,7 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mtpnda.biocue.ui.theme.BiocueTheme
 import com.mtpnda.biocue.ui.screens.profile.ProfileScreen
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     fun isEmulator(): Boolean {
         return (android.os.Build.BRAND.startsWith("generic") && android.os.Build.DEVICE.startsWith("generic"))
@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
                 val userRole by appViewModel.userRole.collectAsState()
                 val pairedWearer by appViewModel.pairedWearer.collectAsState()
                 val pairingRevoked by appViewModel.pairingRevoked.collectAsState()
+                val userName by appViewModel.userName.collectAsState()
                 var showProfileScreen by remember { mutableStateOf(false) }
 
                 LaunchedEffect(isUserLoggedIn) {
@@ -95,7 +96,7 @@ class MainActivity : ComponentActivity() {
                         androidx.compose.ui.res.stringResource(R.string.mode_caregiver) else 
                         androidx.compose.ui.res.stringResource(R.string.mode_wearer)
                     ProfileScreen(
-                        userName = auth.currentUser?.displayName ?: "User",
+                        userName = userName,
                         role = roleStr,
                         onBack = { showProfileScreen = false },
                         onLogout = { 
@@ -113,7 +114,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     )
-                    WearerDashboardRoute(wearerViewModel, auth.currentUser?.displayName ?: "Wearer", isEmulator(), onOpenProfile = { showProfileScreen = true })
+                    WearerDashboardRoute(wearerViewModel, userName, isEmulator(), onOpenProfile = { showProfileScreen = true })
                 } else {
                     // CAREGIVER FLOW
                     if (pairedWearer != null) {
