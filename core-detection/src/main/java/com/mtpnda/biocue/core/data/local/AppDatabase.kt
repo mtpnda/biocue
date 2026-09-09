@@ -38,22 +38,29 @@ interface EventDao {
     @Query("SELECT * FROM stress_events WHERE id = :id LIMIT 1")
     suspend fun getEventById(id: String): StressEventEntity?
 
-    @Query("SELECT * FROM stress_events ORDER BY startTime DESC LIMIT 1")
-    suspend fun getLatestEvent(): StressEventEntity?
+    @Query("SELECT * FROM stress_events WHERE userId = :userId ORDER BY startTime DESC LIMIT 1")
+    suspend fun getLatestEvent(userId: String): StressEventEntity?
 
-    @Query("SELECT * FROM stress_events WHERE isResolved = 0 ORDER BY startTime DESC")
-    suspend fun getUnresolvedEvents(): List<StressEventEntity>
+    @Query("SELECT * FROM stress_events WHERE userId = :userId AND isResolved = 0 AND endTime IS NOT NULL ORDER BY startTime DESC")
+    suspend fun getUnresolvedEvents(userId: String): List<StressEventEntity>
+    
+    @Query("SELECT * FROM stress_events WHERE userId = :userId AND endTime IS NULL ORDER BY startTime DESC LIMIT 1")
+    suspend fun getOngoingEvent(userId: String): StressEventEntity?
 
-    @Query("SELECT * FROM stress_events WHERE startTime >= :startOfDay ORDER BY startTime DESC")
-    suspend fun getEventsSince(startOfDay: Long): List<StressEventEntity>
+    @Query("SELECT * FROM stress_events WHERE userId = :userId AND startTime >= :startOfDay ORDER BY startTime DESC")
+    suspend fun getEventsSince(userId: String, startOfDay: Long): List<StressEventEntity>
+
+    @Query("SELECT * FROM stress_events WHERE userId = :userId AND startTime >= :start AND startTime < :end ORDER BY startTime DESC")
+    suspend fun getEventsBetween(userId: String, start: Long, end: Long): List<StressEventEntity>
 }
 
 @Database(
     entities = [SensorWindowEntity::class, StressEventEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class DetectionDatabase : RoomDatabase() {
     abstract fun sensorDataDao(): SensorDataDao
     abstract fun eventDao(): EventDao
 }
+

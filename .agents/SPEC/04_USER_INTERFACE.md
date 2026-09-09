@@ -31,6 +31,8 @@ Triggered when the wearer taps the Anchor button.
 ## 2. Mobile Interface (The Caregiver)
 **Core Principle:** The Phone UI must instantly convey the wearer's status without causing caregiver panic, and it must provide a structured journal for ML labeling.
 
+**Communication Constraint:** There is no generic "Message Caregiver" feature. The ONLY time a caregiver receives a notification/message is when a meltdown is detected (either Auto Tier 2 or a Manual SOS event).
+
 ### 2.0 Authentication & Onboarding
 - **Sign In / Sign Up:** The app must provide an authentication gateway before accessing the dashboard.
 - **Registration Data:** When registering a new account, the app must collect: `Email`, `Password`, `Name`, `Gender`, and `Birthdate`.
@@ -61,8 +63,8 @@ Implemented as a scrolling vertical `Column` in Jetpack Compose.
   - Activity context (e.g., `Pacing`)
   - The wearer's label (e.g., `🌩️ Overwhelmed`).
 - **Pattern Review Nudge:**
-  - **Scenario A (Unlabeled ML Event):** The wearer ignored the prompt. The card shows "A stress spike was detected but [Name] didn't label it." The caregiver must select the wearer's internal state: `🌩️ Overwhelmed` | `✨ Excited` | `🏃 Active` | `🤷 Unsure`.
-  - **Scenario B (Manual Report or Wearer-Labeled Event):** The wearer explicitly reported their state (e.g., "Overwhelmed"). The card shows "[Name] reported feeling Overwhelmed. What triggered this?" The caregiver must select environmental context: `🔊 Loud Noise` | `👥 Crowded` | `📋 Demand/Task` | `🔄 Routine Change`.
+  - **Scenario A (Unlabeled ML Event):** The wearer ignored the prompt. The card shows "A stress spike was detected but [Name] didn't label it." The caregiver must select the wearer's internal state: `🌩️ Overwhelmed` | `✨ Excited` | `🏃 Active` | `🤷 Unsure / Wasn't Present`.
+  - **Scenario B (Manual Report or Wearer-Labeled Event):** The wearer explicitly reported their state (e.g., "Overwhelmed"). The card shows "What was happening around [Name]?" The caregiver must select environmental context: `🔊 Loud Noises` | `👥 Crowded Space` | `📋 Task Demand` | `🔄 Routine Change` | `🤷 Unknown Context`.
   - Once the caregiver selects an option, the event is marked as resolved and moves to the Journal.
 
 ### 2.2 Navigation

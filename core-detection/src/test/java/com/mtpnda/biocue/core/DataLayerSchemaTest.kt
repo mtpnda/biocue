@@ -25,7 +25,7 @@ class DataLayerSchemaTest {
         assertEquals("isOffBody", DataLayerSchema.KEY_IS_OFF_BODY)
         assertEquals("isExercising", DataLayerSchema.KEY_IS_EXERCISING)
         assertEquals("eventId", DataLayerSchema.KEY_EVENT_ID)
-        assertEquals("eventLabel", DataLayerSchema.KEY_EVENT_LABEL)
+        assertEquals("label", DataLayerSchema.KEY_EVENT_LABEL)
         assertEquals("triggerType", DataLayerSchema.KEY_EVENT_TRIGGER_TYPE)
     }
 }

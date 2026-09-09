@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 val pairingRevoked by appViewModel.pairingRevoked.collectAsState()
                 val userName by appViewModel.userName.collectAsState()
                 var showProfileScreen by remember { mutableStateOf(false) }
+                var showManageConnections by remember { mutableStateOf(false) }
 
                 LaunchedEffect(isUserLoggedIn) {
                     if (isUserLoggedIn) {
@@ -79,7 +80,8 @@ class MainActivity : AppCompatActivity() {
                 if (!isUserLoggedIn) {
                     // Not logged in -> show login
                     com.mtpnda.biocue.connect.LoginScreen(onLoginSuccess = { 
-                        isUserLoggedIn = true 
+                        isUserLoggedIn = true
+                        appViewModel.loadUserProfile()
                     })
                 } else if (pairingRevoked) {
                     // Caregiver was removed by wearer
@@ -91,6 +93,31 @@ class MainActivity : AppCompatActivity() {
                     com.mtpnda.biocue.connect.RoleSelectionScreen(
                         onRoleSelected = { role -> appViewModel.saveUserRole(role) }
                     )
+                } else if (showManageConnections) {
+                    if (userRole == com.mtpnda.biocue.data.UserRole.WEARER) {
+                        com.mtpnda.biocue.connect.PairingScreen(
+                            pairingCode = appViewModel.pairingCode.collectAsState().value,
+                            timeRemainingSeconds = appViewModel.timeRemainingSeconds.collectAsState().value,
+                            connectedCaregivers = appViewModel.connectedCaregivers.collectAsState().value,
+                            pendingRequests = appViewModel.pendingRequests.collectAsState().value,
+                            onGenerateCode = { appViewModel.generatePairingCode() },
+                            onApprove = { id -> appViewModel.approveCaregiver(id) },
+                            onDeny = { id -> appViewModel.denyCaregiver(id) },
+                            onRemove = { id -> appViewModel.removeCaregiver(id) },
+                            onContinue = { showManageConnections = false }
+                        )
+                    } else {
+                        com.mtpnda.biocue.connect.CaregiverPairingScreen(
+                            status = appViewModel.caregiverPairingStatus.collectAsState().value,
+                            wearerName = pairedWearer?.wearerName,
+                            onSubmitCode = { code -> appViewModel.submitPairingCode(code) },
+                            onUnlink = { 
+                                pairedWearer?.id?.let { id -> appViewModel.removeCaregiver(id) }
+                                appViewModel.acknowledgeRevocation()
+                            },
+                            onContinue = { showManageConnections = false }
+                        )
+                    }
                 } else if (showProfileScreen) {
                     val roleStr = if (userRole == com.mtpnda.biocue.data.UserRole.CAREGIVER) 
                         androidx.compose.ui.res.stringResource(R.string.mode_caregiver) else 
@@ -99,6 +126,13 @@ class MainActivity : AppCompatActivity() {
                         userName = userName,
                         role = roleStr,
                         onBack = { showProfileScreen = false },
+                        onManageConnections = {
+                            showProfileScreen = false
+                            showManageConnections = true
+                            if (userRole == com.mtpnda.biocue.data.UserRole.WEARER) {
+                                appViewModel.generatePairingCode()
+                            }
+                        },
                         onLogout = { 
                             auth.signOut()
                             isUserLoggedIn = false
@@ -128,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                             status = appViewModel.caregiverPairingStatus.collectAsState().value,
                             wearerName = pairedWearer?.wearerName,
                             onSubmitCode = { code -> appViewModel.submitPairingCode(code) },
+                            onUnlink = {},
                             onContinue = {}
                         )
                     }
@@ -149,7 +184,7 @@ fun WearerDashboardRoute(viewModel: WearerDashboardViewModel, userName: String, 
     val journal by viewModel.journal.collectAsState()
     val journalOffset by viewModel.journalOffset.collectAsState()
     val reviews by viewModel.reviewEvents.collectAsState()
-    val hasOngoing by viewModel.hasOngoingEvent.collectAsState()
+    val ongoingEventLabel by viewModel.ongoingEventLabel.collectAsState()
     val connStatus by viewModel.connectionStatus.collectAsState()
     val mockActivity by viewModel.mockActivity.collectAsState()
     val isCalmAudioPlaying by viewModel.isCalmAudioPlaying.collectAsState()
@@ -167,13 +202,14 @@ fun WearerDashboardRoute(viewModel: WearerDashboardViewModel, userName: String, 
         journal = journal,
         journalOffset = journalOffset,
         reviews = reviews,
-        hasOngoing = hasOngoing,
+        ongoingEventLabel = ongoingEventLabel,
         connStatus = connStatus,
         isCalmAudioPlaying = isCalmAudioPlaying,
         onToggleCalmAudio = { viewModel.toggleCalmAudio(context) },
         onSetMockIntensity = { viewModel.setMockIntensity(context, it) },
         onSetMockActivity = { viewModel.setMockActivity(it) },
         onSimulateManualEvent = { viewModel.simulateWatchManualEvent(context, it) },
+        onEndOngoingEvent = { viewModel.endOngoingEvent() },
         onResolveReview = { id, label -> viewModel.resolveReviewEvent(id, label) },
         onChangeJournalDate = { delta -> viewModel.changeJournalDate(delta) },
         onOpenProfile = onOpenProfile
@@ -186,14 +222,16 @@ fun CaregiverDashboardRoute(viewModel: CaregiverDashboardViewModel, userName: St
     val journalOffset by viewModel.journalOffset.collectAsState()
     val reviews by viewModel.reviewEvents.collectAsState()
     val hasOngoing by viewModel.hasOngoingEvent.collectAsState()
+    val tier = if (hasOngoing) 2 else 0
 
     com.mtpnda.biocue.ui.screens.caregiver.CaregiverDashboardScreen(
         userName = userName,
+        tier = tier,
         journal = journal,
         journalOffset = journalOffset,
         reviews = reviews,
         hasOngoing = hasOngoing,
-        onResolveReview = { _, _ -> },
+        onResolveReview = { id, label -> viewModel.resolveReviewEvent(id, label) },
         onChangeJournalDate = { viewModel.changeJournalDate(it) },
         onOpenProfile = onOpenProfile
     )

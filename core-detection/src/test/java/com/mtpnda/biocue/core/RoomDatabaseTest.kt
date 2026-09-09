@@ -78,10 +78,12 @@ class RoomDatabaseTest {
     @Test
     fun eventDao_insertsUpdatesAndQueriesEvents() = runBlocking {
         val now = System.currentTimeMillis()
+        val userId = "test_user_id"
         val event = StressEventEntity(
             id = "evt_001",
+            userId = userId,
             startTime = now,
-            endTime = null,
+            endTime = now - 1000,
             triggerType = "MANUAL",
             label = "NONE",
             isResolved = false
@@ -89,21 +91,21 @@ class RoomDatabaseTest {
 
         eventDao.insertEvent(event)
 
-        val unresolved = eventDao.getUnresolvedEvents()
+        val unresolved = eventDao.getUnresolvedEvents(userId)
         assertEquals(1, unresolved.size)
         assertEquals("evt_001", unresolved.first().id)
 
-        val latestBeforeUpdate = eventDao.getLatestEvent()
+        val latestBeforeUpdate = eventDao.getLatestEvent(userId)
         assertNotNull(latestBeforeUpdate)
         assertEquals("evt_001", latestBeforeUpdate?.id)
 
         val updatedEvent = event.copy(label = "OVERWHELMED", isResolved = true, endTime = now + 5000)
         eventDao.updateEvent(updatedEvent)
 
-        val unresolvedAfter = eventDao.getUnresolvedEvents()
+        val unresolvedAfter = eventDao.getUnresolvedEvents(userId)
         assertTrue(unresolvedAfter.isEmpty())
 
-        val eventsToday = eventDao.getEventsSince(now - 1000)
+        val eventsToday = eventDao.getEventsSince(userId, now - 1000)
         assertEquals(1, eventsToday.size)
         assertEquals("OVERWHELMED", eventsToday.first().label)
     }

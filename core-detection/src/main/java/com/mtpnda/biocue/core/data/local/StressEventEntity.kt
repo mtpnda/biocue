@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class StressEventEntity(
     @PrimaryKey
     val id: String, // UUID string
+    val userId: String,   // Firebase UID — isolates data per account
     val startTime: Long,
     val endTime: Long?,
     val triggerType: String, // "AUTO" or "MANUAL"

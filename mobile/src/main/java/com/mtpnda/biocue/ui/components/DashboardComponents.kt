@@ -1,6 +1,7 @@
 package com.mtpnda.biocue.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -139,9 +140,11 @@ fun CurrentStateCard(stressLevel: Int, activity: String, connectionStatus: Conne
 @Composable
 fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeOffset: (Int) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, GlassBorder, RoundedCornerShape(32.dp)),
+        colors = CardDefaults.cardColors(containerColor = GlassSurface),
+        shape = RoundedCornerShape(32.dp)
     ) {
         Column(Modifier.padding(18.dp)) {
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -203,9 +206,11 @@ fun PushNotificationPreview(userName: String) {
 @Composable
 fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (String, String) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, GlassBorder, RoundedCornerShape(32.dp)),
+        colors = CardDefaults.cardColors(containerColor = GlassSurface),
+        shape = RoundedCornerShape(32.dp)
     ) {
         Column(Modifier.padding(18.dp)) {
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -250,19 +255,21 @@ fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (
                 if (isUnlabeled) {
                     Text("💡 Ask ${userName} first if you can — they may remember what happened.", fontSize = 12.sp, color = WarnColor, modifier = Modifier.padding(vertical = 14.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LabelBtn("🌩️", "Overwhelmed", Color(0xFFA5B4FC)) { onResolve(rev.eventId, "OVERWHELMED") }
-                        LabelBtn("✨", "Excited", Color(0xFFFCD34D)) { onResolve(rev.eventId, "EXCITED") }
-                        LabelBtn("🏃", "Active", Color(0xFFCBD5E1)) { onResolve(rev.eventId, "ACTIVE") }
-                        LabelBtn("🤷", "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, "NONE") }
+                        val EventTypes = com.mtpnda.biocue.core.domain.model.EventTypes
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_OVERWHELMED), EventTypes.LABEL_OVERWHELMED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_OVERWHELMED)))) { onResolve(rev.eventId, EventTypes.LABEL_OVERWHELMED) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_EXCITED), EventTypes.LABEL_EXCITED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_EXCITED)))) { onResolve(rev.eventId, EventTypes.LABEL_EXCITED) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_ACTIVE), EventTypes.LABEL_ACTIVE, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_ACTIVE)))) { onResolve(rev.eventId, EventTypes.LABEL_ACTIVE) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_NONE), "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, EventTypes.LABEL_NONE) }
                     }
                 } else {
                     Text("💡 What was happening around ${userName}?", fontSize = 12.sp, color = CalmColor, modifier = Modifier.padding(vertical = 14.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LabelBtn("🔊", "Loud Noises", Color(0xFFFCA5A5)) { onResolve(rev.eventId, "Loud Noises") }
-                        LabelBtn("👥", "Crowded Space", Color(0xFFFDBA74)) { onResolve(rev.eventId, "Crowded") }
-                        LabelBtn("📋", "Task Demand", Color(0xFF6EE7B7)) { onResolve(rev.eventId, "Demand") }
-                        LabelBtn("🔄", "Routine Change", Color(0xFF93C5FD)) { onResolve(rev.eventId, "Routine Change") }
-                        LabelBtn("🤷", "Unknown", TextDim) { onResolve(rev.eventId, "Unknown Context") }
+                        val EventTypes = com.mtpnda.biocue.core.domain.model.EventTypes
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_LOUD_NOISES), EventTypes.CONTEXT_LOUD_NOISES, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_LOUD_NOISES)))) { onResolve(rev.eventId, EventTypes.CONTEXT_LOUD_NOISES) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_CROWDED), EventTypes.CONTEXT_CROWDED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_CROWDED)))) { onResolve(rev.eventId, EventTypes.CONTEXT_CROWDED) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_DEMAND), EventTypes.CONTEXT_DEMAND, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_DEMAND)))) { onResolve(rev.eventId, EventTypes.CONTEXT_DEMAND) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_ROUTINE), EventTypes.CONTEXT_ROUTINE, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_ROUTINE)))) { onResolve(rev.eventId, EventTypes.CONTEXT_ROUTINE) }
+                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_UNKNOWN), EventTypes.CONTEXT_UNKNOWN, TextDim) { onResolve(rev.eventId, EventTypes.CONTEXT_UNKNOWN) }
                     }
                 }
             }

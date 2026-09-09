@@ -9,6 +9,12 @@ plugins {
 }
 
 android {
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     namespace = "com.mtpnda.biocue.wear"
     compileSdk = 35
 

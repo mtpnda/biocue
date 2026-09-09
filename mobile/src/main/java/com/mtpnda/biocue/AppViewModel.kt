@@ -11,7 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import java.util.UUID
+import kotlin.random.Random
+import android.util.Log
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val firestoreRepo = FirestoreRepository
@@ -31,6 +34,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _userName = MutableStateFlow<String>("User")
     val userName: StateFlow<String> = _userName.asStateFlow()
     
+    // WEARER PAIRING STATES
+    private val _pairingCode = MutableStateFlow("")
+    val pairingCode: StateFlow<String> = _pairingCode.asStateFlow()
+
+    private val _timeRemainingSeconds = MutableStateFlow(0)
+    val timeRemainingSeconds: StateFlow<Int> = _timeRemainingSeconds.asStateFlow()
+
+    private val _connectedCaregivers = MutableStateFlow<List<Pairing>>(emptyList())
+    val connectedCaregivers: StateFlow<List<Pairing>> = _connectedCaregivers.asStateFlow()
+
+    private val _pendingRequests = MutableStateFlow<List<Pairing>>(emptyList())
+    val pendingRequests: StateFlow<List<Pairing>> = _pendingRequests.asStateFlow()
+
     private val currentUserId: String
         get() = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
         
@@ -52,6 +68,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     _userName.value = profile.displayName
                     if (profile.role == UserRole.CAREGIVER) {
                         observeCaregiverPairings(uid)
+                    } else if (profile.role == UserRole.WEARER) {
+                        observeWearerPairings(uid)
                     }
                 }
             }
@@ -68,6 +86,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
+    // CAREGIVER LOGIC
     private fun observeCaregiverPairings(caregiverUid: String) {
         viewModelScope.launch {
             firestoreRepo.getPairedWearer(caregiverUid).collect { pairing ->
@@ -94,21 +113,26 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         
         viewModelScope.launch {
             _caregiverPairingStatus.value = "SEARCHING"
-            val wearerProfile = firestoreRepo.findWearerByCode(code)
-            if (wearerProfile != null) {
-                val success = firestoreRepo.requestPairing(
-                    wearerUid = wearerProfile.uid,
-                    caregiverUid = caregiverUid,
-                    caregiverName = currentDisplayName,
-                    wearerName = wearerProfile.displayName
-                )
-                if (success) {
-                    _caregiverPairingStatus.value = "PENDING"
+            try {
+                val wearerProfile = firestoreRepo.findWearerByCode(code)
+                if (wearerProfile != null) {
+                    val success = firestoreRepo.requestPairing(
+                        wearerUid = wearerProfile.uid,
+                        caregiverUid = caregiverUid,
+                        caregiverName = currentDisplayName,
+                        wearerName = wearerProfile.displayName
+                    )
+                    if (success) {
+                        _caregiverPairingStatus.value = "PENDING"
+                    } else {
+                        _caregiverPairingStatus.value = "MAX_REACHED"
+                    }
                 } else {
-                    _caregiverPairingStatus.value = "ERROR"
+                    _caregiverPairingStatus.value = "NOT_FOUND"
                 }
-            } else {
-                _caregiverPairingStatus.value = "NOT_FOUND"
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Error submitting pairing code", e)
+                _caregiverPairingStatus.value = "ERROR"
             }
         }
     }
@@ -116,5 +140,73 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun acknowledgeRevocation() {
         _pairingRevoked.value = false
         _caregiverPairingStatus.value = null
+    }
+
+    // WEARER LOGIC
+    private fun observeWearerPairings(wearerUid: String) {
+        viewModelScope.launch {
+            firestoreRepo.getCaregiversForWearer(wearerUid).collect { pairings ->
+                _connectedCaregivers.value = pairings.filter { it.status == com.mtpnda.biocue.data.PairingStatus.APPROVED }
+                _pendingRequests.value = pairings.filter { it.status == com.mtpnda.biocue.data.PairingStatus.PENDING }
+            }
+        }
+    }
+
+    fun generatePairingCode() {
+        val uid = currentUserId
+        if (uid == "anonymous") return
+        
+        val initialCode = String.format("%06d", Random.nextInt(1000000))
+        viewModelScope.launch {
+            try {
+                val uniqueCode = firestoreRepo.updatePairingCode(uid, initialCode)
+                if (uniqueCode != null) {
+                    _pairingCode.value = uniqueCode
+                    _timeRemainingSeconds.value = 300
+                    
+                    // simple timer
+                    while (_timeRemainingSeconds.value > 0 && _pairingCode.value == uniqueCode) {
+                        delay(1000)
+                        _timeRemainingSeconds.value -= 1
+                    }
+                    if (_pairingCode.value == uniqueCode) {
+                        _pairingCode.value = ""
+                        firestoreRepo.updatePairingCode(uid, null)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Error generating pairing code", e)
+            }
+        }
+    }
+
+    fun approveCaregiver(pairingId: String) {
+        viewModelScope.launch {
+            try {
+                firestoreRepo.updatePairingStatus(pairingId, com.mtpnda.biocue.data.PairingStatus.APPROVED)
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Error approving caregiver", e)
+            }
+        }
+    }
+
+    fun denyCaregiver(pairingId: String) {
+        viewModelScope.launch {
+            try {
+                firestoreRepo.updatePairingStatus(pairingId, com.mtpnda.biocue.data.PairingStatus.REMOVED)
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Error denying caregiver", e)
+            }
+        }
+    }
+
+    fun removeCaregiver(pairingId: String) {
+        viewModelScope.launch {
+            try {
+                firestoreRepo.updatePairingStatus(pairingId, com.mtpnda.biocue.data.PairingStatus.REMOVED)
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Error removing caregiver", e)
+            }
+        }
     }
 }

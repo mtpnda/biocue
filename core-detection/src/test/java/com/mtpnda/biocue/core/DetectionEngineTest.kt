@@ -34,7 +34,7 @@ class DetectionEngineTest {
     }
 
     @Test
-    fun exercise_gate_suppresses_scoring() {
+    fun exercise_gate_does_not_suppress_scoring() {
         val baseline = Baseline(14, 80.0, 5.0, 50.0, 10.0)
         val window = SensorWindow(
             timestamp = System.currentTimeMillis(),
@@ -44,7 +44,10 @@ class DetectionEngineTest {
         )
 
         val score = engine.computeRuleBasedScore(window, baseline)
-        assertEquals(0.0, score, 0.0) // Should be completely suppressed
+        
+        // hrZ = 8.0, hrvZ = 4.0
+        // s = (0.35 * 8) + (0.35 * 4) + (0.15 * 0.1) + (0.15 * 5.0) = 2.8 + 1.4 + 0.015 + 0.75 = 4.965
+        assertEquals(4.965, score, 0.01) // Score should STILL be computed, not suppressed to 0.0
     }
 
     @Test

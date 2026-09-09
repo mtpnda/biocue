@@ -26,13 +26,14 @@ fun WearerPlatformCompletePreview() {
             journal = listOf(),
             journalOffset = 0,
             reviews = listOf(),
-            hasOngoing = false,
+            ongoingEventLabel = null,
             connStatus = ConnectionStatus.CONNECTED,
             isCalmAudioPlaying = false,
             onToggleCalmAudio = {},
             onSetMockIntensity = {},
             onSetMockActivity = {},
             onSimulateManualEvent = {},
+            onEndOngoingEvent = {},
             onResolveReview = { _, _ -> },
             onChangeJournalDate = {},
             onOpenProfile = {}
@@ -57,13 +58,14 @@ fun WearerPlatformDebugPreview() {
             journal = listOf(),
             journalOffset = 0,
             reviews = listOf(),
-            hasOngoing = false,
+            ongoingEventLabel = null,
             connStatus = ConnectionStatus.CONNECTED,
             isCalmAudioPlaying = true,
             onToggleCalmAudio = {},
             onSetMockIntensity = {},
             onSetMockActivity = {},
             onSimulateManualEvent = {},
+            onEndOngoingEvent = {},
             onResolveReview = { _, _ -> },
             onChangeJournalDate = {},
             onOpenProfile = {}
@@ -77,6 +79,7 @@ fun CaregiverPlatformCompletePreview() {
     BiocueTheme {
         CaregiverDashboardScreen(
             userName = "Alex",
+            tier = 0,
             journal = listOf(),
             journalOffset = 0,
             reviews = listOf(

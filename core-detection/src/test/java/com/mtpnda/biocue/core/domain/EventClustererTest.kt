@@ -96,6 +96,7 @@ class EventClustererTest {
     private fun createEvent(id: Int, start: Long, end: Long?, trigger: String = "AUTO"): StressEventEntity {
         return StressEventEntity(
             id = id.toString(),
+            userId = "test_user",
             startTime = start,
             endTime = end,
             triggerType = trigger,

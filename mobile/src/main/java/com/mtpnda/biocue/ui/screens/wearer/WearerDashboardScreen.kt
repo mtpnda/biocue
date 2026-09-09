@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mtpnda.biocue.ui.theme.*
@@ -16,6 +18,7 @@ import com.mtpnda.biocue.JournalEntry
 import com.mtpnda.biocue.ReviewEvent
 import com.mtpnda.biocue.ConnectionStatus
 import com.mtpnda.biocue.MockIntensity
+import com.mtpnda.biocue.ui.theme.BiocueTheme
 
 @Composable
 fun WearerDashboardScreen(
@@ -31,30 +34,105 @@ fun WearerDashboardScreen(
     journal: List<JournalEntry>,
     journalOffset: Int,
     reviews: List<ReviewEvent>,
-    hasOngoing: Boolean,
+    ongoingEventLabel: String?,
     connStatus: ConnectionStatus,
     isCalmAudioPlaying: Boolean,
     onToggleCalmAudio: () -> Unit,
     onSetMockIntensity: (MockIntensity) -> Unit,
     onSetMockActivity: (String?) -> Unit,
     onSimulateManualEvent: (String) -> Unit,
+    onEndOngoingEvent: () -> Unit,
     onResolveReview: (String, String) -> Unit,
     onChangeJournalDate: (Int) -> Unit,
     onOpenProfile: () -> Unit
 ) {
+    var isGeneratingPairingCode by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             DashboardTopBar(isCaregiver = false, onOpenProfile = onOpenProfile)
         },
-        containerColor = Color(0xFF0F172A)
+        containerColor = Color(0xFF000000)
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
-            
+
+            item { CurrentStateCard(stress, activity, connStatus, userName) }
+
+            if (tier >= 2) {
+                item { PushNotificationPreview(userName) }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(Modifier.padding(18.dp)) {
+                        SectionLabel("Quick Actions")
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                LabelBtn(
+                                    icon = if (isCalmAudioPlaying) "✓" else "🎵",
+                                    text = if (isCalmAudioPlaying) "Playing" else "Calm Audio",
+                                    color = if (isCalmAudioPlaying) CalmColor else Color.White,
+                                    onClick = onToggleCalmAudio
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            item { PatternReviewCard(reviews, userName, onResolve = onResolveReview) }
+            item { JournalCard(journal, journalOffset, onChangeJournalDate) }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(Modifier.padding(18.dp)) {
+                        SectionLabel("Your Caregivers")
+                        Spacer(modifier = Modifier.height(12.dp))
+                        if (isGeneratingPairingCode) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "842 195",
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    letterSpacing = 4.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Expires in 09:59",
+                                    color = Color.Gray,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        } else {
+                            Button(
+                                onClick = { isGeneratingPairingCode = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27272A))
+                            ) {
+                                Text("Generate pairing code", color = Color.White)
+                            }
+                        }
+                    }
+                }
+            }
+
             if (isStubAllowed) {
                 item {
                     Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF27272A))) {
@@ -103,37 +181,38 @@ fun WearerDashboardScreen(
                 }
             }
 
-            item { CurrentStateCard(stress, activity, connStatus, userName) }
-            
-            if (tier >= 2) {
-                item { PushNotificationPreview(userName) }
-            }
-            
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(Modifier.padding(18.dp)) {
-                        SectionLabel("Quick Actions")
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                LabelBtn(
-                                    icon = if (isCalmAudioPlaying) "✓" else "🎵",
-                                    text = if (isCalmAudioPlaying) "Playing" else "Calm Audio",
-                                    color = if (isCalmAudioPlaying) CalmColor else Color.White,
-                                    onClick = onToggleCalmAudio
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            
-            item { PatternReviewCard(reviews, userName, onResolve = onResolveReview) }
-            item { JournalCard(journal, journalOffset, onChangeJournalDate) }
             item { Spacer(modifier = Modifier.height(20.dp)) }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WearerDashboardScreenPreview() {
+    BiocueTheme {
+        WearerDashboardScreen(
+            userName = "Alex",
+            isStubAllowed = true,
+            mockIntensity = MockIntensity.LOW,
+            mockActivity = null,
+            tier = 2,
+            sosLat = 0.0,
+            sosLng = 0.0,
+            stress = 40,
+            activity = "STATIONARY",
+            journal = emptyList(),
+            journalOffset = 0,
+            reviews = emptyList(),
+            hasOngoing = false,
+            connStatus = ConnectionStatus.CONNECTED,
+            isCalmAudioPlaying = false,
+            onToggleCalmAudio = {},
+            onSetMockIntensity = {},
+            onSetMockActivity = {},
+            onSimulateManualEvent = {},
+            onResolveReview = { _, _ -> },
+            onChangeJournalDate = {},
+            onOpenProfile = {}
+        )
     }
 }

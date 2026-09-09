@@ -15,6 +15,12 @@ play {
 }
 
 android {
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     namespace = "com.mtpnda.biocue"
     compileSdk = 35
 
@@ -86,11 +92,13 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
 
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation(libs.play.services.wearable)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.room.runtime)
@@ -98,6 +106,7 @@ dependencies {
     implementation(project(":core-detection"))
     implementation("androidx.credentials:credentials:1.7.0-alpha03")
     implementation("androidx.credentials:credentials-play-services-auth:1.7.0-alpha03")
+    implementation("androidx.appcompat:appcompat:1.7.0")
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)

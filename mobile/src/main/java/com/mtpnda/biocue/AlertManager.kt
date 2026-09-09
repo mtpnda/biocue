@@ -34,7 +34,7 @@ class AlertManager(private val context: Context) {
         val notification = NotificationCompat.Builder(context, "tier1_alerts")
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("Elevated Stress Signals")
-            .setContentText("Score: ${String.format("%.2f", score)}. Wearer may need a break.")
+            .setContentText("Stress Level: ${((score / 3.0) * 100).toInt().coerceIn(0, 100)}%. Wearer may need a break.")
             .build()
         notificationManager.notify(1, notification)
     }
@@ -43,7 +43,7 @@ class AlertManager(private val context: Context) {
         val notification = NotificationCompat.Builder(context, "tier2_alerts")
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("Sustained Distress Pattern")
-            .setContentText("Score: ${String.format("%.2f", score)}. Caregiver attention required immediately.")
+            .setContentText("Stress Level: ${((score / 3.0) * 100).toInt().coerceIn(0, 100)}%. Caregiver attention required immediately.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
         notificationManager.notify(2, notification)

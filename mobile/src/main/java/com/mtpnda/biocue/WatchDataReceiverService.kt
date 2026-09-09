@@ -24,10 +24,46 @@ class WatchDataReceiverService : WearableListenerService() {
                 androidx.room.Room.databaseBuilder(
                     applicationContext,
                     com.mtpnda.biocue.core.data.local.DetectionDatabase::class.java, "sensor-database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
             }
+
+    private val currentUserId: String
+        get() = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
     
     // Hardcoded baseline for demonstration
+    private val mockReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+            if (intent?.action == "com.mtpnda.biocue.MOCK_SENSOR_WINDOW") {
+                val window = SensorWindow(
+                    timestamp = intent.getLongExtra("timestamp", System.currentTimeMillis()),
+                    hrMean = intent.getDoubleExtra("hrMean", 75.0),
+                    rmssd = intent.getDoubleExtra("rmssd", 40.0),
+                    accMag = intent.getDoubleExtra("accMag", 0.1),
+                    repetitiveness = intent.getDoubleExtra("repetitiveness", 0.0),
+                    hrSlope = intent.getDoubleExtra("hrSlope", 0.0),
+                    isOffBody = intent.getBooleanExtra("isOffBody", false),
+                    isExercising = intent.getBooleanExtra("isExercising", false)
+                )
+                processWindow(window)
+            } else if (intent?.action == "com.mtpnda.biocue.MOCK_MANUAL_EVENT") {
+                val trigger = intent.getStringExtra("trigger") ?: "MANUAL"
+                kotlinx.coroutines.runBlocking {
+                    val newEvent = com.mtpnda.biocue.core.data.local.StressEventEntity(
+                        id = java.util.UUID.randomUUID().toString(),
+                        userId = currentUserId,
+                        startTime = System.currentTimeMillis(),
+                        endTime = null,
+                        triggerType = trigger,
+                        label = "NONE",
+                        isResolved = false
+                    )
+                    db.eventDao().insertEvent(newEvent)
+                    syncEventToCloud(newEvent)
+                }
+            }
+        }
+    }
+
     private val dummyBaseline = Baseline(
         hourOfDay = 12, hrMean = 75.0, hrStd = 5.0, hrvMean = 40.0, hrvStd = 8.0
     )
@@ -35,6 +71,15 @@ class WatchDataReceiverService : WearableListenerService() {
     override fun onCreate() {
         super.onCreate()
         alertManager = AlertManager(this)
+        val filter = android.content.IntentFilter().apply {
+            addAction("com.mtpnda.biocue.MOCK_SENSOR_WINDOW")
+            addAction("com.mtpnda.biocue.MOCK_MANUAL_EVENT")
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(mockReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(mockReceiver, filter)
+        }
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -64,11 +109,11 @@ class WatchDataReceiverService : WearableListenerService() {
                         val ts = map.getLong(com.mtpnda.biocue.core.domain.model.DataLayerSchema.KEY_TIMESTAMP)
                         val trigger = map.getString(com.mtpnda.biocue.core.domain.model.DataLayerSchema.KEY_EVENT_TRIGGER_TYPE) ?: "MANUAL"
                         kotlinx.coroutines.runBlocking {
-                            db.eventDao().insertEvent(
-                                com.mtpnda.biocue.core.data.local.StressEventEntity(
-                                    id = id, startTime = ts, endTime = null, triggerType = trigger, label = "NONE", isResolved = false
-                                )
+                            val newEvent = com.mtpnda.biocue.core.data.local.StressEventEntity(
+                                id = id, userId = currentUserId, startTime = ts, endTime = null, triggerType = trigger, label = "NONE", isResolved = false
                             )
+                            db.eventDao().insertEvent(newEvent)
+                            syncEventToCloud(newEvent)
                         }
                     }
                     com.mtpnda.biocue.core.domain.model.DataLayerSchema.PATH_EVENT_LABEL -> {
@@ -77,8 +122,9 @@ class WatchDataReceiverService : WearableListenerService() {
                         kotlinx.coroutines.runBlocking {
                             val eventToUpdate = db.eventDao().getEventById(id)
                             if (eventToUpdate != null) {
-                                // Wearer labeled it, but we still want Caregiver to provide context, so leave isResolved = false
-                                db.eventDao().updateEvent(eventToUpdate.copy(label = label, isResolved = false))
+                                val updated = eventToUpdate.copy(label = label, isResolved = false)
+                                db.eventDao().updateEvent(updated)
+                                syncEventToCloud(updated)
                             }
                         }
                     }
@@ -88,12 +134,32 @@ class WatchDataReceiverService : WearableListenerService() {
                         kotlinx.coroutines.runBlocking {
                             val eventToUpdate = db.eventDao().getEventById(id)
                             if (eventToUpdate != null) {
-                                db.eventDao().updateEvent(eventToUpdate.copy(endTime = ts))
+                                val updated = eventToUpdate.copy(endTime = ts)
+                                db.eventDao().updateEvent(updated)
+                                syncEventToCloud(updated)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun syncEventToCloud(event: com.mtpnda.biocue.core.data.local.StressEventEntity) {
+        val uid = currentUserId
+        if (uid == "anonymous") return
+        try {
+            com.mtpnda.biocue.data.FirestoreRepository.syncEvent(
+                wearerUid = uid,
+                eventId = event.id,
+                startTime = event.startTime,
+                endTime = event.endTime,
+                triggerType = event.triggerType,
+                label = event.label,
+                isResolved = event.isResolved
+            )
+        } catch (e: Exception) {
+            // Firestore handles offline caching automatically
         }
     }
 
@@ -120,25 +186,35 @@ class WatchDataReceiverService : WearableListenerService() {
                 alertManager.triggerTier2Alert(score)
                 
                 // AUTO EVENT GENERATION
-                val latestEvent = db.eventDao().getLatestEvent()
+                val latestEvent = db.eventDao().getLatestEvent(currentUserId)
                 // If there's no ongoing event (either null, or the last one ended, OR the last one started >15 mins ago and is orphaned)
                 val isOngoing = latestEvent != null && latestEvent.endTime == null && (System.currentTimeMillis() - latestEvent.startTime < 15 * 60 * 1000)
                 
                 if (!isOngoing) {
                     val newId = java.util.UUID.randomUUID().toString()
-                    db.eventDao().insertEvent(
-                        com.mtpnda.biocue.core.data.local.StressEventEntity(
-                            id = newId,
-                            startTime = window.timestamp,
-                            endTime = null,
-                            triggerType = "AUTO",
-                            label = "NONE",
-                            isResolved = false
-                        )
+                    val newEvent = com.mtpnda.biocue.core.data.local.StressEventEntity(
+                        id = newId,
+                        userId = currentUserId,
+                        startTime = window.timestamp,
+                        endTime = null,
+                        triggerType = "AUTO",
+                        label = "NONE",
+                        isResolved = false
                     )
+                    db.eventDao().insertEvent(newEvent)
+                    syncEventToCloud(newEvent)
                 }
             } else if (score > 1.5) {
                 alertManager.triggerTier1Alert(score)
+            } else {
+                // Score has fallen back to Tier 0 (< 1.5). The person is calm.
+                // Close any ongoing event automatically.
+                val latestEvent = db.eventDao().getLatestEvent(currentUserId)
+                if (latestEvent != null && latestEvent.endTime == null) {
+                    val updated = latestEvent.copy(endTime = window.timestamp)
+                    db.eventDao().updateEvent(updated)
+                    syncEventToCloud(updated)
+                }
             }
         }
     }
@@ -146,5 +222,6 @@ class WatchDataReceiverService : WearableListenerService() {
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
+        unregisterReceiver(mockReceiver)
     }
 }

@@ -19,6 +19,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -241,9 +243,9 @@ enum class WatchState { SETUP_PERMISSIONS, SETUP_LOCATION, SETUP_PHONE, ANCHOR, 
 
 data class Emotion(val icon: String, val label: String, val color: Color)
 val emotions = listOf(
-    Emotion("🌩️", "Overwhelmed", Color(0xFFA5B4FC)),
-    Emotion("✨", "Excited", Color(0xFFFCD34D)),
-    Emotion("🏃", "Active", Color(0xFFCBD5E1))
+    Emotion(com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_OVERWHELMED), com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_OVERWHELMED, Color(android.graphics.Color.parseColor(com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_OVERWHELMED)))),
+    Emotion(com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_EXCITED), com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_EXCITED, Color(android.graphics.Color.parseColor(com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_EXCITED)))),
+    Emotion(com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_ACTIVE), com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_ACTIVE, Color(android.graphics.Color.parseColor(com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_ACTIVE))))
 )
 
 @Composable
@@ -405,65 +407,65 @@ fun WearApp(
                             )
                         } else {
                             Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    if (isTestModeEnabled) "Test Mode: ON" else "Test Mode: OFF",
-                                    color = if (isTestModeEnabled) Color(0xFF34D399) else Color.Gray,
-                                    fontSize = 10.sp,
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable { onToggleTestMode() }
-                                        .padding(8.dp)
-                                )
-                            }
+                            Text(
+                                text = "Breathe · tap if you need help",
+                                color = Color.Gray,
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
                         }
                     }
                 }
                 WatchState.CAROUSEL -> {
-                    val listState = rememberTransformingLazyColumnState()
-                    val transformationSpec = rememberTransformationSpec()
-                    ScreenScaffold(scrollState = listState) { contentPadding ->
-                        TransformingLazyColumn(
-                            state = listState,
-                            contentPadding = contentPadding,
-                            flingBehavior = TransformingLazyColumnDefaults.snapFlingBehavior(listState),
-                            rotaryScrollableBehavior = RotaryScrollableDefaults.snapBehavior(listState)
-                        ) {
-                            item { 
-                                ListHeader(
-                                    modifier = Modifier.fillMaxWidth().transformedHeight(this, transformationSpec),
-                                    transformation = SurfaceTransformation(transformationSpec)
-                                ) { 
-                                    Text("How do you feel?", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) 
-                                } 
-                            }
-                            items(emotions.size) { index ->
-                                val emotion = emotions[index]
-                                Button(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .transformedHeight(this, transformationSpec),
-                                    transformation = SurfaceTransformation(transformationSpec),
-                                    onClick = {
+                    val pagerState = rememberPagerState(pageCount = { emotions.size })
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize()
+                        ) { page ->
+                            val emotion = emotions[page]
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable {
                                         selectedEmotion = emotion
                                         onLabelEvent(emotion.label.uppercase())
                                         watchState = WatchState.ONGOING
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E2E))
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(emotion.icon, fontSize = 24.sp, modifier = Modifier.padding(end = 8.dp))
-                                        Text(emotion.label, color = emotion.color, fontWeight = FontWeight.Bold)
-                                    }
-                                }
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = emotion.icon,
+                                    fontSize = 48.sp,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    text = emotion.label,
+                                    color = emotion.color,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                        
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            repeat(emotions.size) { iteration ->
+                                val color = if (pagerState.currentPage == iteration) Color.White else Color.DarkGray
+                                Box(
+                                    modifier = Modifier
+                                        .padding(2.dp)
+                                        .clip(CircleShape)
+                                        .background(color)
+                                        .size(6.dp)
+                                )
                             }
                         }
                     }
@@ -561,11 +563,11 @@ fun WearAppSetupPreview() {
 @Composable
 fun AnchorButton(isGlowing: Boolean, onClick: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition()
-    val glowScale by infiniteTransition.animateFloat(
+    val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.3f,
+        targetValue = 1.15f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
+            animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         )
     )
@@ -574,31 +576,22 @@ fun AnchorButton(isGlowing: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .size(100.dp)
             .clip(CircleShape)
-            .background(if (isGlowing) Color(0xFF4F46E5).copy(alpha = 0.2f) else Color(0xFF1E293B))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        if (isGlowing) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp * glowScale)
-                    .clip(CircleShape)
-                    .background(Color(0xFF818CF8).copy(alpha = 0.4f))
-            )
-        }
+        // Outer pulsing ring
+        Box(
+            modifier = Modifier
+                .size(80.dp * pulseScale)
+                .clip(CircleShape)
+                .background(Color(0xFF64748B).copy(alpha = 0.2f))
+        )
+        // Inner button
         Box(
             modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF334155)),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(if (isGlowing) Color(0xFF818CF8) else Color(0xFF94A3B8))
-            )
-        }
+                .background(Color(0xFF334155).copy(alpha = 0.8f))
+        )
     }
 }

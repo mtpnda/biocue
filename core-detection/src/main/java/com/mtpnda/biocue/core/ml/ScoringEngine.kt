@@ -12,7 +12,7 @@ class ScoringEngine {
         baseline: Baseline, 
         poorSleepFlag: Boolean = false
     ): Double {
-        if (window.isOffBody || window.isExercising) return 0.0
+        if (window.isOffBody) return 0.0
 
         val hrZ = (window.hrMean - baseline.hrMean) / max(baseline.hrStd, 1.0)
         // Inverted: HRV drop -> positive score
@@ -30,7 +30,7 @@ class ScoringEngine {
         baseline: Baseline,
         weights: DoubleArray
     ): Double {
-        if (window.isOffBody || window.isExercising) return 0.0
+        if (window.isOffBody) return 0.0
         
         val hrZ = (window.hrMean - baseline.hrMean) / max(baseline.hrStd, 1.0)
         val hrvZ = (baseline.hrvMean - window.rmssd) / max(baseline.hrvStd, 1.0)
