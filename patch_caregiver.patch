@@ -1,0 +1,46 @@
+--- mobile/src/main/java/com/mtpnda/biocue/CaregiverDashboardViewModel.kt
++++ mobile/src/main/java/com/mtpnda/biocue/CaregiverDashboardViewModel.kt
+@@ -34,4 +34,6 @@
+ 
++    private var currentWearerUid: String? = null
++
+     fun startObservation(wearerUid: String) {
++        currentWearerUid = wearerUid
+         viewModelScope.launch {
+@@ -107,17 +109,21 @@
+     fun resolveReviewEvent(eventId: String, newLabelOrContext: String) {
+         viewModelScope.launch {
+-            val wearerUid = _connectedWearerUid.value ?: return@launch
+-            val event = db.eventDao().getEventById(eventId)
+-            if (event != null) {
+-                val (finalLabel, resolved) = com.mtpnda.biocue.shared.ResolveLogic.processResolution(event.label, newLabelOrContext)
+-                val updated = event.copy(label = finalLabel, isResolved = resolved)
+-                db.eventDao().updateEvent(updated)
+-                
+-                try {
+-                    firestoreRepo.syncEvent(
+-                        wearerUid = wearerUid,
+-                        event = updated
+-                    )
+-                } catch (e: Exception) {
+-                    e.printStackTrace()
+-                }
+-            }
++            val wearerUid = currentWearerUid ?: return@launch
++            val currentEvent = _reviewEvents.value.find { it.eventId == eventId } ?: return@launch
++            
++            val (finalLabel, resolved) = com.mtpnda.biocue.shared.ResolveLogic.processResolution(currentEvent.currentLabel, newLabelOrContext)
++            
++            if (resolved) {
++                _reviewEvents.value = _reviewEvents.value.filter { it.eventId != eventId }
++            } else {
++                _reviewEvents.value = _reviewEvents.value.map { if (it.eventId == eventId) it.copy(currentLabel = finalLabel) else it }
++            }
++            
++            try {
++                firestoreRepo.updateEventLabelAndStatus(wearerUid, eventId, finalLabel, resolved)
++            } catch (e: Exception) {
++                e.printStackTrace()
++            }
+         }
+     }

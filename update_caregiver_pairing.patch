@@ -1,0 +1,136 @@
+--- mobile/src/main/java/com/mtpnda/biocue/connect/PairingScreen.kt
++++ mobile/src/main/java/com/mtpnda/biocue/connect/PairingScreen.kt
+@@ -231,6 +231,7 @@
+     status: String?,
+     wearerName: String?,
+     onSubmitCode: (String) -> Unit,
++    onUnlink: () -> Unit,
+     onContinue: () -> Unit
+ ) {
+     var code by remember { mutableStateOf("") }
+@@ -259,51 +260,78 @@
+             Spacer(modifier = Modifier.height(24.dp))
+             
+-            Text(
+-                text = stringResource(R.string.pairing_caregiver_title),
+-                color = Color.White,
+-                fontSize = 28.sp,
+-                fontWeight = FontWeight.SemiBold,
+-                textAlign = TextAlign.Center
+-            )
+-            Spacer(modifier = Modifier.height(32.dp))
+-
+-            OutlinedTextField(
+-                value = code,
+-                onValueChange = { if (it.length <= 6) code = it.uppercase() },
+-                label = { Text(stringResource(R.string.pairing_enter_code), color = TextDim) },
+-                singleLine = true,
+-                colors = OutlinedTextFieldDefaults.colors(
+-                    focusedTextColor = Color.White,
+-                    unfocusedTextColor = Color.White,
+-                    focusedBorderColor = PrimaryBlue,
+-                    unfocusedBorderColor = GlassBorder,
+-                    unfocusedContainerColor = GlassSurface,
+-                    focusedContainerColor = GlassSurface
+-                ),
+-                modifier = Modifier.fillMaxWidth(),
+-                shape = RoundedCornerShape(16.dp)
+-            )
+-
+-            Spacer(modifier = Modifier.height(24.dp))
+-
+-            Button(
+-                onClick = { onSubmitCode(code) },
+-                modifier = Modifier.fillMaxWidth().height(56.dp),
+-                enabled = code.length == 6,
+-                shape = RoundedCornerShape(16.dp),
+-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+-            ) {
+-                Text(stringResource(R.string.pairing_connect), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+-            }
+-
+-            Spacer(modifier = Modifier.height(32.dp))
+-
+-            if (status != null) {
++            if (status == "CONNECTED") {
++                Text(
++                    text = "Connected to Wearer",
++                    color = Color.White,
++                    fontSize = 24.sp,
++                    fontWeight = FontWeight.SemiBold,
++                    textAlign = TextAlign.Center
++                )
++                Spacer(modifier = Modifier.height(16.dp))
++                
++                Box(
++                    modifier = Modifier
++                        .fillMaxWidth()
++                        .clip(RoundedCornerShape(16.dp))
++                        .background(GlassSurface)
++                        .border(1.dp, GlassBorder, RoundedCornerShape(16.dp))
++                        .padding(16.dp),
++                    contentAlignment = Alignment.Center
++                ) {
++                    Text(
++                        text = wearerName ?: "Unknown",
++                        color = Color.White,
++                        fontSize = 20.sp,
++                        fontWeight = FontWeight.Medium,
++                        textAlign = TextAlign.Center
++                    )
++                }
++                
++                Spacer(modifier = Modifier.height(32.dp))
++                
++                Button(
++                    onClick = onUnlink,
++                    modifier = Modifier.fillMaxWidth().height(56.dp),
++                    shape = RoundedCornerShape(16.dp),
++                    colors = ButtonDefaults.buttonColors(containerColor = DangerColor)
++                ) {
++                    Text("Unlink", fontSize = 16.sp, fontWeight = FontWeight.Medium)
++                }
++            } else {
++                Text(
++                    text = stringResource(R.string.pairing_caregiver_title),
++                    color = Color.White,
++                    fontSize = 28.sp,
++                    fontWeight = FontWeight.SemiBold,
++                    textAlign = TextAlign.Center
++                )
++                Spacer(modifier = Modifier.height(32.dp))
++
++                OutlinedTextField(
++                    value = code,
++                    onValueChange = { if (it.length <= 6) code = it.uppercase() },
++                    label = { Text(stringResource(R.string.pairing_enter_code), color = TextDim) },
++                    singleLine = true,
++                    colors = OutlinedTextFieldDefaults.colors(
++                        focusedTextColor = Color.White,
++                        unfocusedTextColor = Color.White,
++                        focusedBorderColor = PrimaryBlue,
++                        unfocusedBorderColor = GlassBorder,
++                        unfocusedContainerColor = GlassSurface,
++                        focusedContainerColor = GlassSurface
++                    ),
++                    modifier = Modifier.fillMaxWidth(),
++                    shape = RoundedCornerShape(16.dp)
++                )
++
++                Spacer(modifier = Modifier.height(24.dp))
++
++                Button(
++                    onClick = { onSubmitCode(code) },
++                    modifier = Modifier.fillMaxWidth().height(56.dp),
++                    enabled = code.length == 6,
++                    shape = RoundedCornerShape(16.dp),
++                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
++                ) {
++                    Text(stringResource(R.string.pairing_connect), fontSize = 16.sp, fontWeight = FontWeight.Medium)
++                }
++                
++                Spacer(modifier = Modifier.height(32.dp))
++
++                if (status != null) {
+                 val statusText = when (status) {
+                     "SEARCHING" -> stringResource(R.string.pairing_searching)

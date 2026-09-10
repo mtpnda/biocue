@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     )
-                    WearerDashboardRoute(wearerViewModel, userName, isEmulator(), onOpenProfile = { showProfileScreen = true })
+                    WearerDashboardRoute(wearerViewModel, appViewModel, userName, isEmulator(), onOpenProfile = { showProfileScreen = true })
                 } else {
                     // CAREGIVER FLOW
                     if (pairedWearer != null) {
@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun WearerDashboardRoute(viewModel: WearerDashboardViewModel, userName: String, isStubAllowed: Boolean = false, onOpenProfile: () -> Unit) {
+fun WearerDashboardRoute(viewModel: WearerDashboardViewModel, appViewModel: AppViewModel, userName: String, isStubAllowed: Boolean = false, onOpenProfile: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val mockIntensity by viewModel.mockIntensity.collectAsState()
     val tier by viewModel.tier.collectAsState()
@@ -212,7 +212,12 @@ fun WearerDashboardRoute(viewModel: WearerDashboardViewModel, userName: String, 
         onEndOngoingEvent = { viewModel.endOngoingEvent() },
         onResolveReview = { id, label -> viewModel.resolveReviewEvent(id, label) },
         onChangeJournalDate = { delta -> viewModel.changeJournalDate(delta) },
-        onOpenProfile = onOpenProfile
+        onOpenProfile = onOpenProfile,
+        pairingCode = appViewModel.pairingCode.collectAsState().value,
+        timeRemainingSeconds = appViewModel.timeRemainingSeconds.collectAsState().value,
+        connectedCaregivers = appViewModel.connectedCaregivers.collectAsState().value,
+        onGeneratePairingCode = { appViewModel.generatePairingCode() },
+        onRemoveCaregiver = { appViewModel.removeCaregiver(it) }
     )
 }
 

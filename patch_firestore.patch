@@ -1,0 +1,17 @@
+--- mobile/src/main/java/com/mtpnda/biocue/data/FirestoreRepository.kt
++++ mobile/src/main/java/com/mtpnda/biocue/data/FirestoreRepository.kt
+@@ -166,4 +166,13 @@
+         }
+     }
++
++    suspend fun updateEventLabelAndStatus(wearerUid: String, eventId: String, finalLabel: String, isResolved: Boolean) {
++        try {
++            db.collection("events").document(wearerUid)
++                .collection("userEvents").document(eventId)
++                .update("label", finalLabel, "isResolved", isResolved)
++                .await()
++        } catch (e: Exception) {
++            e.printStackTrace()
++        }
++    }
+ }

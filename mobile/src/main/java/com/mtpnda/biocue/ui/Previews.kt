@@ -36,7 +36,12 @@ fun WearerPlatformCompletePreview() {
             onEndOngoingEvent = {},
             onResolveReview = { _, _ -> },
             onChangeJournalDate = {},
-            onOpenProfile = {}
+            onOpenProfile = {},
+            pairingCode = "123456",
+            timeRemainingSeconds = 600,
+            connectedCaregivers = emptyList(),
+            onGeneratePairingCode = {},
+            onRemoveCaregiver = {}
         )
     }
 }
@@ -68,7 +73,12 @@ fun WearerPlatformDebugPreview() {
             onEndOngoingEvent = {},
             onResolveReview = { _, _ -> },
             onChangeJournalDate = {},
-            onOpenProfile = {}
+            onOpenProfile = {},
+            pairingCode = "123456",
+            timeRemainingSeconds = 600,
+            connectedCaregivers = emptyList(),
+            onGeneratePairingCode = {},
+            onRemoveCaregiver = {}
         )
     }
 }

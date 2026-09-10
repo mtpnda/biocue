@@ -33,7 +33,7 @@ fun CaregiverDashboardScreen(
         topBar = {
             DashboardTopBar(isCaregiver = true, onOpenProfile = onOpenProfile)
         },
-        containerColor = Color(0xFF0F172A)
+        containerColor = CanvasA
     ) { padding ->
         LazyColumn(
             modifier = Modifier

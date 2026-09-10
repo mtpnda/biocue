@@ -1,0 +1,27 @@
+--- mobile/src/main/java/com/mtpnda/biocue/CaregiverDashboardViewModel.kt
++++ mobile/src/main/java/com/mtpnda/biocue/CaregiverDashboardViewModel.kt
+@@ -107,4 +107,24 @@
+         }
+     }
++
++    fun resolveReviewEvent(eventId: String, newLabelOrContext: String) {
++        viewModelScope.launch {
++            val wearerUid = _connectedWearerUid.value ?: return@launch
++            val event = db.eventDao().getEventById(eventId)
++            if (event != null) {
++                val (finalLabel, resolved) = com.mtpnda.biocue.shared.ResolveLogic.processResolution(event.label, newLabelOrContext)
++                val updated = event.copy(label = finalLabel, isResolved = resolved)
++                db.eventDao().updateEvent(updated)
++                
++                try {
++                    firestoreRepo.syncEvent(
++                        wearerUid = wearerUid,
++                        event = updated
++                    )
++                } catch (e: Exception) {
++                    e.printStackTrace()
++                }
++            }
++        }
++    }
+ }

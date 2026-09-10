@@ -1,0 +1,11 @@
+--- wear/src/main/java/com/mtpnda/biocue/wear/presentation/MainActivity.kt
++++ wear/src/main/java/com/mtpnda/biocue/wear/presentation/MainActivity.kt
+@@ -48,7 +48,7 @@
+ val emotions = listOf(
+-    Emotion("🌩️", "Overwhelmed", Color(0xFFA5B4FC)),
+-    Emotion("✨", "Excited", Color(0xFFFCD34D)),
+-    Emotion("🏃", "Active", Color(0xFFCBD5E1))
++    Emotion(com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_OVERWHELMED), com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_OVERWHELMED, Color(android.graphics.Color.parseColor(com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_OVERWHELMED)))),
++    Emotion(com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_EXCITED), com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_EXCITED, Color(android.graphics.Color.parseColor(com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_EXCITED)))),
++    Emotion(com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_ACTIVE), com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_ACTIVE, Color(android.graphics.Color.parseColor(com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(com.mtpnda.biocue.core.domain.model.EventTypes.LABEL_ACTIVE))))
+ )

@@ -100,7 +100,7 @@ fun CurrentStateCard(stressLevel: Int, activity: String, connectionStatus: Conne
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+        colors = CardDefaults.cardColors(containerColor = GlassCard),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(Modifier.padding(18.dp)) {

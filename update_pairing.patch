@@ -1,0 +1,38 @@
+--- mobile/src/main/java/com/mtpnda/biocue/data/FirestoreRepository.kt
++++ mobile/src/main/java/com/mtpnda/biocue/data/FirestoreRepository.kt
+@@ -37,12 +37,28 @@
+                 "pairingCodeExpiresAt", null
+             ).await()
+         } else {
+-            val expiresAt = System.currentTimeMillis() + 10 * 60 * 1000 // now + 10 min
+-            db.collection("users").document(wearerUid).update(
+-                "pairingCode", code,
+-                "pairingCodeExpiresAt", expiresAt
+-            ).await()
++            // Guarantee Uniqueness: Check if the code is currently in use by any active wearer
++            var isUnique = false
++            var uniqueCode = code
++            val now = System.currentTimeMillis()
++            
++            while (!isUnique) {
++                val snapshot = db.collection("users")
++                    .whereEqualTo("pairingCode", uniqueCode)
++                    .whereGreaterThan("pairingCodeExpiresAt", now)
++                    .limit(1)
++                    .get()
++                    .await()
++                    
++                if (snapshot.isEmpty) {
++                    isUnique = true
++                    val expiresAt = System.currentTimeMillis() + 10 * 60 * 1000 // now + 10 min
++                    db.collection("users").document(wearerUid).update(
++                        "pairingCode", uniqueCode,
++                        "pairingCodeExpiresAt", expiresAt
++                    ).await()
++                } else {
++                    // Collision detected! Generate a new random code and try again
++                    uniqueCode = String.format("%06d", Random.nextInt(1000000))
++                }
++            }
+         }
+     }

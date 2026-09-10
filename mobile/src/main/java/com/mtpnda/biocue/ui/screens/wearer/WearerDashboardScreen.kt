@@ -17,6 +17,7 @@ import com.mtpnda.biocue.ui.components.*
 import com.mtpnda.biocue.JournalEntry
 import com.mtpnda.biocue.ReviewEvent
 import com.mtpnda.biocue.ConnectionStatus
+import com.mtpnda.biocue.data.Pairing
 import com.mtpnda.biocue.MockIntensity
 import com.mtpnda.biocue.ui.theme.BiocueTheme
 
@@ -44,16 +45,21 @@ fun WearerDashboardScreen(
     onEndOngoingEvent: () -> Unit,
     onResolveReview: (String, String) -> Unit,
     onChangeJournalDate: (Int) -> Unit,
-    onOpenProfile: () -> Unit
+    onOpenProfile: () -> Unit,
+    pairingCode: String,
+    timeRemainingSeconds: Int,
+    connectedCaregivers: List<com.mtpnda.biocue.data.Pairing>,
+    onGeneratePairingCode: () -> Unit,
+    onRemoveCaregiver: (String) -> Unit
 ) {
-    var isGeneratingPairingCode by remember { mutableStateOf(false) }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             DashboardTopBar(isCaregiver = false, onOpenProfile = onOpenProfile)
         },
-        containerColor = Color(0xFF000000)
+        containerColor = CanvasA
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
@@ -70,7 +76,7 @@ fun WearerDashboardScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                    colors = CardDefaults.cardColors(containerColor = GlassCard),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(Modifier.padding(18.dp)) {
@@ -95,19 +101,19 @@ fun WearerDashboardScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                    colors = CardDefaults.cardColors(containerColor = GlassCard),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(Modifier.padding(18.dp)) {
                         SectionLabel("Your Caregivers")
                         Spacer(modifier = Modifier.height(12.dp))
-                        if (isGeneratingPairingCode) {
+                        if (pairingCode.isNotEmpty()) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = "842 195",
+                                    text = pairingCode.chunked(3).joinToString(" "),
                                     fontSize = 32.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -115,18 +121,37 @@ fun WearerDashboardScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Expires in 09:59",
+                                    text = "Expires in \${{timeRemainingSeconds / 60}:${(timeRemainingSeconds % 60).toString().padStart(2, '0')}",
                                     color = Color.Gray,
                                     fontSize = 12.sp
                                 )
                             }
                         } else {
                             Button(
-                                onClick = { isGeneratingPairingCode = true },
+                                onClick = { onGeneratePairingCode() },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27272A))
                             ) {
                                 Text("Generate pairing code", color = Color.White)
+                            }
+                        }
+
+                        if (connectedCaregivers.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            connectedCaregivers.forEach { pairing ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(pairing.caregiverName, color = LabelColor, fontWeight = FontWeight.Bold)
+                                        Text("Connected", color = StatusGreen, fontSize = 12.sp)
+                                    }
+                                    TextButton(onClick = { onRemoveCaregiver(pairing.id) }) {
+                                        Text("Remove", color = StatusRed)
+                                    }
+                                }
                             }
                         }
                     }
@@ -213,7 +238,12 @@ fun WearerDashboardScreenPreview() {
             onEndOngoingEvent = {},
             onResolveReview = { _, _ -> },
             onChangeJournalDate = {},
-            onOpenProfile = {}
+            onOpenProfile = {},
+            pairingCode = "",
+            timeRemainingSeconds = 0,
+            connectedCaregivers = emptyList(),
+            onGeneratePairingCode = {},
+            onRemoveCaregiver = {}
         )
     }
 }

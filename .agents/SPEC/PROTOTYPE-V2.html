@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioCue V2 — Prototype (Apple HIG · Liquid Glass)</title>
+<style>
+/* ============================================================
+   BioCue V2 — Design tokens
+   Apple HIG type scale · Liquid Glass materials · 44pt targets
+   ============================================================ */
+:root{
+  /* Canvas */
+  --canvas-a:#EDF1F5; --canvas-b:#F6F4F0;
+  /* Ink (iOS label colors) */
+  --label:#1C1C1E;
+  --label-2:rgba(60,60,67,.60);
+  --label-3:rgba(60,60,67,.33);
+  --separator:rgba(60,60,67,.14);
+  /* Brand + semantics (spec Tier-1 blue drives the brand) */
+  --calm-blue:#4A90E2;
+  --green:#34C759; --amber:#FF9500; --red:#FF3B30; --teal:#5AC8FA;
+  /* Liquid Glass */
+  --glass:rgba(255,255,255,.60);
+  --glass-strong:rgba(255,255,255,.78);
+  --glass-border:rgba(255,255,255,.65);
+  --glass-shadow:0 10px 30px rgba(31,42,58,.10), 0 1px 3px rgba(31,42,58,.06);
+  /* Radii — hierarchy, not one-size */
+  --r-sheet:28px; --r-card:22px; --r-control:14px; --r-chip:100px;
+  /* HIG type scale */
+  --large-title:34px; --title-2:22px; --headline:17px; --body:17px;
+  --subhead:15px; --footnote:13px; --caption:11px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Inter,sans-serif;
+  background:linear-gradient(160deg,var(--canvas-a),var(--canvas-b));
+  color:var(--label);
+  min-height:100vh;
+  padding:48px 24px 80px;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; border:none; cursor:pointer; background:none; color:inherit;}
+button:focus-visible{outline:3px solid var(--calm-blue); outline-offset:2px;}
+
+/* ---------- Page header ---------- */
+.page-head{max-width:1240px; margin:0 auto 8px;}
+.page-head h1{font-size:var(--large-title); font-weight:700; letter-spacing:-.02em; margin:0;}
+.page-head p{font-size:var(--body); color:var(--label-2); margin:6px 0 0; max-width:62ch; line-height:1.45;}
+
+/* ---------- Demo tier control (prototype-only chrome) ---------- */
+.demo-bar{
+  max-width:1240px; margin:20px auto 40px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:var(--glass); backdrop-filter:blur(28px) saturate(180%); -webkit-backdrop-filter:blur(28px) saturate(180%);
+  border:1px solid var(--glass-border); border-radius:var(--r-card);
+  box-shadow:var(--glass-shadow);
+  padding:12px 16px;
+}
+.demo-bar .demo-label{font-size:var(--footnote); color:var(--label-2); font-weight:600;}
+.seg{
+  display:flex; background:rgba(120,120,128,.12); border-radius:12px; padding:3px; gap:2px;
+}
+.seg button{
+  min-height:38px; padding:0 16px; border-radius:9px;
+  font-size:var(--subhead); font-weight:600; color:var(--label-2);
+  transition:all .25s cubic-bezier(.25,1,.5,1);
+}
+.seg button.on{background:#fff; color:var(--label); box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.seg button.on.t1{color:#B06A00;}
+.seg button.on.t2{color:var(--red);}
+
+/* ---------- Frame layout ---------- */
+.stage{
+  max-width:1240px; margin:0 auto;
+  display:flex; gap:56px; justify-content:center; align-items:flex-start; flex-wrap:wrap;
+}
+.frame-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
+.frame-col .frame-title{font-size:var(--headline); font-weight:600;}
+.frame-col .frame-sub{font-size:var(--footnote); color:var(--label-2); margin-top:-10px;}
+
+/* ============================================================
+   WATCH — round Wear OS face (Galaxy Watch 4 per spec)
+   ============================================================ */
+.watch-shell{
+  width:250px; height:250px; border-radius:50%;
+  background:#000;
+  border:9px solid #2B2B2E;
+  box-shadow:inset 0 0 0 2px #48484A, 0 24px 48px rgba(20,28,40,.35);
+  position:relative; overflow:hidden;
+  color:#fff;
+}
+.watch-time{position:absolute; top:14px; left:0; right:0; text-align:center; font-size:12px; font-weight:600; color:rgba(255,255,255,.55); z-index:5;}
+.w-screen{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s ease;}
+.w-screen.show{opacity:1; pointer-events:auto;}
+
+/* Anchor button — the one bold element. 150px ≈ 60% of screen. */
+.anchor-btn{
+  width:150px; height:150px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 35% 30%, #3A3A3C, #262628 70%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:inset 0 2px 6px rgba(255,255,255,.07), 0 8px 24px rgba(0,0,0,.6);
+  transition:box-shadow 1.2s ease, background 1.2s ease, transform .15s ease;
+}
+.anchor-btn:active{transform:scale(.95);}
+.anchor-btn svg{opacity:.5; transition:opacity 1.2s ease;}
+/* Tier 1: soft glow, slow breathing — never chaotic */
+.watch-shell.tier1 .anchor-btn{
+  background:radial-gradient(circle at 35% 30%, #4A90E2, #2E5E97 75%);
+  animation:breathe 4s ease-in-out infinite;
+}
+.watch-shell.tier1 .anchor-btn svg{opacity:.95;}
+@keyframes breathe{
+  0%,100%{box-shadow:0 0 0 0 rgba(74,144,226,.0), 0 0 24px 4px rgba(74,144,226,.35);}
+  50%{box-shadow:0 0 0 0 rgba(74,144,226,.0), 0 0 40px 10px rgba(74,144,226,.55);}
+}
+.anchor-hint{margin-top:14px; font-size:11px; font-weight:500; color:rgba(255,255,255,.38); letter-spacing:.02em;}
+
+/* Check-in pager: one emoji per screen, swipe or edge-tap */
+.pager-title{font-size:13px; font-weight:600; color:rgba(255,255,255,.75); margin-bottom:10px;}
+.pager-window{width:190px; overflow:hidden; border-radius:24px;}
+.pager-track{display:flex; transition:transform .35s cubic-bezier(.25,1,.5,1);}
+.pager-item{min-width:190px; display:flex; align-items:center; justify-content:center;}
+.checkin-btn{
+  width:150px; height:110px; border-radius:26px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.12);
+  transition:transform .15s ease;
+}
+.checkin-btn:active{transform:scale(.95);}
+.checkin-btn .em{font-size:38px; line-height:1;}
+.checkin-btn .lab{font-size:14px; font-weight:600;}
+.pager-dots{display:flex; gap:6px; margin-top:12px;}
+.pager-dots span{width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.25); transition:background .3s;}
+.pager-dots span.on{background:#fff;}
+.pager-arrows{position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center; pointer-events:none;}
+.pager-arrows button{pointer-events:auto; width:44px; height:100%; color:rgba(255,255,255,.35); font-size:18px;}
+
+/* Got it! */
+.gotit-ring{width:76px; height:76px; border-radius:50%; background:rgba(52,199,89,.16); display:flex; align-items:center; justify-content:center; margin-bottom:10px;}
+.gotit-txt{color:var(--green); font-size:16px; font-weight:600;}
+
+/* ============================================================
+   iPHONE frames
+   ============================================================ */
+.phone-shell{
+  width:390px; height:820px;
+  background:#000; border-radius:56px; border:11px solid #1F1F22;
+  box-shadow:inset 0 0 0 2px #48484A, 0 34px 64px -18px rgba(20,28,40,.45);
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.island{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:118px; height:34px; background:#000; border-radius:20px; z-index:60;}
+.phone-bg{
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(420px 360px at 82% -6%, rgba(90,200,250,.20), transparent 62%),
+    radial-gradient(460px 420px at -12% 46%, rgba(74,144,226,.14), transparent 60%),
+    radial-gradient(380px 340px at 70% 104%, rgba(52,199,89,.10), transparent 60%),
+    linear-gradient(170deg,#F4F6F9,#F2EFEA);
+}
+.statusbar{position:relative; z-index:50; height:54px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 30px 4px; font-size:15px; font-weight:600; color:var(--label);}
+.scroll{position:relative; z-index:10; flex:1; overflow-y:auto; padding:8px 18px 120px; display:flex; flex-direction:column; gap:20px; scroll-behavior:smooth;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* Liquid Glass card */
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(28px) saturate(180%); -webkit-backdrop-filter:blur(28px) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--r-card);
+  box-shadow:var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.section-h{font-size:var(--footnote); font-weight:600; color:var(--label-2); text-transform:uppercase; letter-spacing:.05em; margin:0 8px 8px;}
+.lgtitle{font-size:var(--large-title); font-weight:700; letter-spacing:-.02em; margin:14px 8px 2px;}
+.lgsub{font-size:var(--subhead); color:var(--label-2); margin:0 8px 14px;}
+
+/* iOS list rows — 52px rows, full-width targets */
+.list{overflow:hidden; padding:0;}
+.row{min-height:52px; display:flex; align-items:center; gap:12px; padding:8px 16px;}
+.row + .row{border-top:1px solid var(--separator);}
+.row .ic{width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+.row .txt{flex:1; min-width:0;}
+.row .t{font-size:var(--body); font-weight:500;}
+.row .s{font-size:var(--footnote); color:var(--label-2); margin-top:1px;}
+
+/* Buttons — HIG filled / tinted / plain, all ≥ 50px */
+.btn{min-height:50px; border-radius:var(--r-control); font-size:var(--body); font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; padding:0 18px; transition:transform .12s ease, opacity .2s;}
+.btn:active{transform:scale(.97);}
+.btn-filled{background:var(--calm-blue); color:#fff; box-shadow:0 4px 14px rgba(74,144,226,.35);}
+.btn-tinted{background:rgba(74,144,226,.13); color:#2E6DB4;}
+.btn-red-tinted{background:rgba(255,59,48,.11); color:#C93028;}
+.btn-plain{color:#2E6DB4;}
+
+/* Pairing code */
+.code-digits{display:flex; gap:8px; justify-content:center; margin:14px 0 8px;}
+.code-digits b{
+  width:44px; height:56px; border-radius:12px;
+  background:rgba(255,255,255,.75); border:1px solid var(--separator);
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; font-weight:700; font-variant-numeric:tabular-nums;
+  box-shadow:inset 0 1px 0 #fff, 0 1px 3px rgba(31,42,58,.08);
+}
+.code-ttl{text-align:center; font-size:var(--footnote); color:var(--label-2); font-variant-numeric:tabular-nums;}
+
+/* Caregiver status hero */
+.status-hero{padding:22px 20px 20px;}
+.status-line{font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin:0;}
+.meter{margin-top:16px;}
+.meter-track{height:14px; border-radius:var(--r-chip); background:rgba(120,120,128,.14); overflow:hidden; position:relative;}
+.meter-fill{height:100%; border-radius:var(--r-chip); width:18%; background:var(--green); transition:width .8s cubic-bezier(.25,1,.5,1), background .8s;}
+.meter-legend{display:flex; justify-content:space-between; font-size:var(--caption); font-weight:600; color:var(--label-3); margin-top:6px; padding:0 2px;}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+  min-height:32px; padding:0 12px; border-radius:var(--r-chip);
+  background:rgba(120,120,128,.10); border:1px solid var(--separator);
+  font-size:var(--footnote); font-weight:600; color:var(--label-2);
+}
+
+/* SOS card */
+.sos-card{
+  border-radius:var(--r-card); padding:18px;
+  background:linear-gradient(140deg, rgba(255,59,48,.92), rgba(215,35,45,.94));
+  color:#fff;
+  box-shadow:0 14px 34px rgba(255,59,48,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  display:none;
+}
+.sos-card.show{display:block; animation:sosIn .45s cubic-bezier(.25,1,.5,1);}
+@keyframes sosIn{from{opacity:0; transform:translateY(-8px) scale(.98);} to{opacity:1; transform:none;}}
+.sos-card h3{margin:0 0 4px; font-size:var(--headline); font-weight:700;}
+.sos-card .coords{font-size:var(--subhead); font-variant-numeric:tabular-nums; opacity:.92;}
+.sos-card .btn{margin-top:14px; background:rgba(255,255,255,.92); color:#C81E14; width:100%;}
+
+/* Review option buttons */
+.opt-grid{display:flex; flex-direction:column; gap:10px;}
+.opt{
+  min-height:52px; border-radius:var(--r-control);
+  display:flex; align-items:center; gap:12px; padding:0 16px; text-align:left;
+  background:rgba(255,255,255,.65); border:1px solid var(--separator);
+  font-size:var(--subhead); font-weight:600; color:var(--label);
+  box-shadow:0 1px 3px rgba(31,42,58,.06);
+  transition:transform .12s ease, background .2s;
+}
+.opt:active{transform:scale(.98); background:rgba(74,144,226,.10);}
+.opt .em{font-size:20px;}
+.review-card{padding:18px; transition:opacity .5s, transform .5s;}
+.review-card.done{opacity:0; transform:translateY(8px);}
+.review-q{font-size:var(--subhead); font-weight:600; color:#2E6DB4; margin:14px 0 10px;}
+.review-meta{font-size:var(--footnote); color:var(--label-2); margin:2px 0 0;}
+.badge{display:inline-flex; align-items:center; min-height:22px; padding:0 10px; border-radius:var(--r-chip); font-size:var(--caption); font-weight:700; color:#fff; background:var(--red);}
+
+/* Journal */
+.j-entry{display:flex; gap:12px; padding:14px 16px;}
+.j-entry + .j-entry{border-top:1px solid var(--separator);}
+.j-em{width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;}
+.j-t{font-size:var(--body); font-weight:600;}
+.j-s{font-size:var(--footnote); color:var(--label-2); margin-top:2px; line-height:1.4;}
+.j-time{margin-left:auto; font-size:var(--footnote); color:var(--label-3); font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+/* Glass tab bar */
+.tabbar{
+  position:absolute; left:14px; right:14px; bottom:14px; z-index:40;
+  border-radius:var(--r-chip);
+  display:flex; padding:6px;
+  background:var(--glass-strong);
+  backdrop-filter:blur(30px) saturate(180%); -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow), inset 0 1px 0 #fff;
+}
+.tab{flex:1; min-height:48px; border-radius:var(--r-chip); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:var(--caption); font-weight:600; color:var(--label-2);}
+.tab.on{background:rgba(74,144,226,.14); color:#2E6DB4;}
+.tab .g{font-size:19px;}
+
+.toast{
+  position:absolute; left:50%; bottom:96px; transform:translateX(-50%) translateY(10px); z-index:70;
+  background:rgba(28,28,30,.92); color:#fff; font-size:var(--subhead); font-weight:600;
+  padding:12px 20px; border-radius:var(--r-chip); opacity:0; pointer-events:none;
+  transition:opacity .35s, transform .35s; white-space:nowrap;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important; transition:none!important;}
+}
+@media (max-width:900px){ body{padding:32px 12px 60px;} .stage{gap:36px;} }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1>BioCue V2</h1>
+  <p>Redesigned prototype. Apple HIG type scale, Liquid Glass materials, and 44pt-minimum tap targets — grounded in the spec's zero-anxiety principle: no raw vitals, no chaotic motion, calm by default.</p>
+</header>
+
+<!-- Prototype-only: simulate the wearer's stress tier across all devices -->
+<div class="demo-bar" role="group" aria-label="Prototype tier simulator">
+  <span class="demo-label">Simulate stress tier</span>
+  <div class="seg" id="tierSeg">
+    <button class="on" data-tier="0" onclick="setTier(0)">Tier 0 · Calm</button>
+    <button data-tier="1" class="t1" onclick="setTier(1)">Tier 1 · Rising</button>
+    <button data-tier="2" class="t2" onclick="setTier(2)">Tier 2 · SOS</button>
+  </div>
+  <span class="demo-label" style="margin-left:auto">Watch never shows numbers · GPS only on SOS</span>
+</div>
+
+<main class="stage">
+
+  <!-- ================= WATCH (WEARER) ================= -->
+  <section class="frame-col">
+    <div class="frame-title">Watch · Wearer</div>
+    <div class="frame-sub">Wear OS · Anchor → Check-in → Got it</div>
+
+    <div class="watch-shell" id="watch">
+      <div class="watch-time">9:41</div>
+
+      <!-- Anchor -->
+      <div class="w-screen show" id="w-anchor">
+        <button class="anchor-btn" onclick="openCarousel()" aria-label="I need help — open check-in">
+          <!-- calm wave -->
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M8 34c6-8 10-8 16 0s10 8 16 0 10-8 16 0" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            <path d="M8 46c6-8 10-8 16 0s10 8 16 0 10-8 16 0" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".45"/>
+          </svg>
+        </button>
+        <div class="anchor-hint" id="anchorHint">Tap if you need help</div>
+      </div>
+
+      <!-- Check-in carousel: one emoji per screen -->
+      <div class="w-screen" id="w-carousel" style="position:absolute;">
+        <div class="pager-title">How do you feel?</div>
+        <div class="pager-window">
+          <div class="pager-track" id="pagerTrack">
+            <div class="pager-item"><button class="checkin-btn" style="color:#FF6B60" onclick="confirmLabel('Overwhelmed','🌩️')"><span class="em">🌩️</span><span class="lab">Overwhelmed</span></button></div>
+            <div class="pager-item"><button class="checkin-btn" style="color:#FFB84D" onclick="confirmLabel('Excited','✨')"><span class="em">✨</span><span class="lab">Excited</span></button></div>
+            <div class="pager-item"><button class="checkin-btn" style="color:#6ECFF6" onclick="confirmLabel('Active','🏃')"><span class="em">🏃</span><span class="lab">Active</span></button></div>
+          </div>
+        </div>
+        <div class="pager-dots" id="pagerDots"><span class="on"></span><span></span><span></span></div>
+        <div class="pager-arrows">
+          <button onclick="movePager(-1)" aria-label="Previous">‹</button>
+          <button onclick="movePager(1)" aria-label="Next">›</button>
+        </div>
+      </div>
+
+      <!-- Got it -->
+      <div class="w-screen" id="w-gotit">
+        <div class="gotit-ring">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="gotit-txt">Got it!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WEARER PHONE ================= -->
+  <section class="frame-col">
+    <div class="frame-title">iPhone · Wearer</div>
+    <div class="frame-sub">Pairing, consent &amp; privacy — the wearer owns the data</div>
+
+    <div class="phone-shell">
+      <div class="island"></div>
+      <div class="phone-bg"></div>
+      <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+
+      <div class="scroll">
+        <h1 class="lgtitle">My Circle</h1>
+        <p class="lgsub">Hi Alex — you control who can see your day.</p>
+
+        <!-- Pending approval request -->
+        <div class="section-h">Waiting for your approval</div>
+        <div class="glass review-card" id="pendingCard" style="padding:18px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="j-em" style="background:rgba(74,144,226,.14); font-size:16px;">👤</div>
+            <div>
+              <div class="j-t">Allow Jordan to connect?</div>
+              <div class="review-meta">They'll see stress events only — never your heart rate or location history.</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <button class="btn btn-filled" style="flex:1" onclick="approvePairing(this)">Approve</button>
+            <button class="btn btn-red-tinted" style="flex:1" onclick="denyPairing()">Deny</button>
+          </div>
+        </div>
+
+        <!-- Connected caregivers -->
+        <div class="section-h">Connected caregivers · <span id="cgCount">1</span> of 2</div>
+        <div class="glass list" id="cgList">
+          <div class="row" id="cgRowMom">
+            <div class="ic" style="background:rgba(52,199,89,.14)">🧑‍⚕️</div>
+            <div class="txt"><div class="t">Sam (Support worker)</div><div class="s">Connected since May · reads stress events</div></div>
+            <button class="btn-plain" style="min-height:44px; padding:0 10px; font-weight:600; color:#C93028;" onclick="removeCaregiver('cgRowMom','Sam')">Remove</button>
+          </div>
+        </div>
+
+        <!-- Pairing code -->
+        <div class="section-h">Add a caregiver</div>
+        <div class="glass" style="padding:18px;">
+          <div class="j-t">Pairing code</div>
+          <div class="review-meta">Single-use · expires in 10 minutes. Share it out loud or in person.</div>
+          <div class="code-digits" id="codeDigits" aria-live="polite">
+            <b>·</b><b>·</b><b>·</b><b>·</b><b>·</b><b>·</b>
+          </div>
+          <div class="code-ttl" id="codeTtl">No active code</div>
+          <button class="btn btn-tinted" style="width:100%; margin-top:12px;" id="genBtn" onclick="generateCode()">Generate pairing code</button>
+        </div>
+
+        <!-- Privacy summary -->
+        <div class="section-h">What leaves this phone</div>
+        <div class="glass list">
+          <div class="row"><div class="ic" style="background:rgba(74,144,226,.14)">📤</div><div class="txt"><div class="t">Stress events</div><div class="s">Start, end, activity and your label — synced to your circle</div></div></div>
+          <div class="row"><div class="ic" style="background:rgba(120,120,128,.14)">🔒</div><div class="txt"><div class="t">Heart data &amp; movement</div><div class="s">Stays on this phone, always</div></div></div>
+          <div class="row"><div class="ic" style="background:rgba(255,149,0,.14)">📍</div><div class="txt"><div class="t">Location</div><div class="s">Sent once, only when you trigger an SOS</div></div></div>
+        </div>
+      </div>
+
+      <div class="tabbar" role="tablist">
+        <button class="tab on"><span class="g">👥</span>Circle</button>
+        <button class="tab"><span class="g">⌚️</span>Watch</button>
+        <button class="tab"><span class="g">⚙️</span>Settings</button>
+      </div>
+      <div class="toast" id="wearerToast"></div>
+    </div>
+  </section>
+
+  <!-- ================= CAREGIVER PHONE ================= -->
+  <section class="frame-col">
+    <div class="frame-title">iPhone · Caregiver</div>
+    <div class="frame-sub">Dashboard · status, review nudges &amp; journal</div>
+
+    <div class="phone-shell">
+      <div class="island"></div>
+      <div class="phone-bg"></div>
+      <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+
+      <div class="scroll" id="cgScroll">
+        <h1 class="lgtitle">Alex</h1>
+        <p class="lgsub">Watch connected · updated just now</p>
+
+        <!-- Status hero -->
+        <div class="glass status-hero">
+          <p class="status-line" id="statusLine">Alex is calm ✨</p>
+          <div class="meter" aria-label="Stress level">
+            <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+            <div class="meter-legend"><span>Low</span><span>Med</span><span>High</span></div>
+          </div>
+          <div class="chip" id="activityChip">🪑 Sitting still</div>
+        </div>
+
+        <!-- SOS location card (Tier 2 only) -->
+        <div class="sos-card" id="sosCard" role="alert">
+          <h3>🚨 SOS location received</h3>
+          <div class="coords">37.7749° N, 122.4194° W · 2 min ago</div>
+          <button class="btn" onclick="toastCg('Opening Google Maps…')">Open in Google Maps</button>
+        </div>
+
+        <!-- Pattern review -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin:0 8px 8px;">
+            <span class="section-h" style="margin:0;">Pattern review</span>
+            <span class="badge" id="reviewBadge">2 pending</span>
+          </div>
+
+          <!-- Scenario A: unlabeled ML event → internal state -->
+          <div class="glass review-card" id="reviewA" style="margin-bottom:14px;">
+            <div class="j-t">A stress spike was detected but Alex didn't label it</div>
+            <p class="review-meta">2:15 PM – 2:40 PM · 🔄 Pacing · Auto-detected</p>
+            <p class="review-q">How do you think Alex was feeling?</p>
+            <div class="opt-grid">
+              <button class="opt" onclick="resolveReview('reviewA','🌩️ Overwhelmed · 2:15 PM – 2:40 PM','Pacing · Auto-detected · You labeled it','🌩️','rgba(255,59,48,.13)')"><span class="em">🌩️</span>Overwhelmed</button>
+              <button class="opt" onclick="resolveReview('reviewA','✨ Excited · 2:15 PM – 2:40 PM','Pacing · Auto-detected · You labeled it','✨','rgba(255,149,0,.13)')"><span class="em">✨</span>Excited</button>
+              <button class="opt" onclick="resolveReview('reviewA','🏃 Active · 2:15 PM – 2:40 PM','Pacing · Auto-detected · You labeled it','🏃','rgba(90,200,250,.15)')"><span class="em">🏃</span>Active</button>
+              <button class="opt" onclick="resolveReview('reviewA',null)"><span class="em">🤷</span>Unsure / wasn't present</button>
+            </div>
+          </div>
+
+          <!-- Scenario B: wearer-labeled → environmental context -->
+          <div class="glass review-card" id="reviewB">
+            <div class="j-t">Alex reported feeling 🌩️ Overwhelmed</div>
+            <p class="review-meta">3:30 PM · 🚶 Walking · Manual check-in</p>
+            <p class="review-q">What was happening around Alex?</p>
+            <div class="opt-grid">
+              <button class="opt" onclick="resolveReview('reviewB','🌩️ Overwhelmed · Loud noises · 3:30 PM','Walking · Manual check-in · Context added','🔊','rgba(255,59,48,.13)')"><span class="em">🔊</span>Loud noises</button>
+              <button class="opt" onclick="resolveReview('reviewB','🌩️ Overwhelmed · Crowded space · 3:30 PM','Walking · Manual check-in · Context added','👥','rgba(255,149,0,.13)')"><span class="em">👥</span>Crowded space</button>
+              <button class="opt" onclick="resolveReview('reviewB','🌩️ Overwhelmed · Task demand · 3:30 PM','Walking · Manual check-in · Context added','📋','rgba(52,199,89,.13)')"><span class="em">📋</span>Task demand</button>
+              <button class="opt" onclick="resolveReview('reviewB','🌩️ Overwhelmed · Routine change · 3:30 PM','Walking · Manual check-in · Context added','🔄','rgba(90,200,250,.15)')"><span class="em">🔄</span>Routine change</button>
+              <button class="opt" onclick="resolveReview('reviewB',null)"><span class="em">🤷</span>Unknown context</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Journal -->
+        <div>
+          <div class="section-h">Journal · Today</div>
+          <div class="glass list" id="journal">
+            <!-- Clustered entry: auto + manual merged per spec 06 -->
+            <div class="j-entry">
+              <div class="j-em" style="background:rgba(255,59,48,.13)">🌩️</div>
+              <div>
+                <div class="j-t">Overwhelmed + Loud noises</div>
+                <div class="j-s">11:05 AM – 11:32 AM · Pacing · Auto-detected + manual check-in (merged)</div>
+              </div>
+              <div class="j-time">11:05 AM</div>
+            </div>
+            <div class="j-entry">
+              <div class="j-em" style="background:rgba(255,149,0,.13)">✨</div>
+              <div>
+                <div class="j-t">Excited</div>
+                <div class="j-s">8:30 AM – 8:44 AM · Walking · Manual check-in</div>
+              </div>
+              <div class="j-time">8:30 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabbar" role="tablist">
+        <button class="tab on"><span class="g">🏠</span>Dashboard</button>
+        <button class="tab"><span class="g">📖</span>History</button>
+        <button class="tab"><span class="g">⚙️</span>Settings</button>
+      </div>
+      <div class="toast" id="cgToast"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* =============== Tier simulation (drives watch + caregiver) =============== */
+function setTier(t){
+  document.querySelectorAll('#tierSeg button').forEach(b=>b.classList.toggle('on', +b.dataset.tier===t));
+  const watch=document.getElementById('watch');
+  watch.classList.toggle('tier1', t>=1);
+  document.getElementById('anchorHint').textContent = t>=1 ? 'Breathe · tap if you need help' : 'Tap if you need help';
+
+  const line=document.getElementById('statusLine');
+  const fill=document.getElementById('meterFill');
+  const chip=document.getElementById('activityChip');
+  const sos=document.getElementById('sosCard');
+
+  if(t===0){
+    line.textContent='Alex is calm ✨'; line.style.color='#1C7A3D';
+    fill.style.width='18%'; fill.style.background='var(--green)';
+    chip.textContent='🪑 Sitting still';
+    sos.classList.remove('show');
+  }else if(t===1){
+    line.textContent="Alex's stress is rising 📈"; line.style.color='#9A6A00';
+    fill.style.width='55%'; fill.style.background='var(--amber)';
+    chip.textContent='🔄 Pacing';
+    sos.classList.remove('show');
+  }else{
+    line.textContent='Alex may need support 🚨'; line.style.color='#C81E14';
+    fill.style.width='92%'; fill.style.background='var(--red)';
+    chip.textContent='🔄 Pacing';
+    sos.classList.add('show');
+    document.getElementById('cgScroll').scrollTop=0;
+  }
+}
+
+/* =============== Watch flow =============== */
+let dismissTimer=null, page=0;
+function showW(id){
+  ['w-anchor','w-carousel','w-gotit'].forEach(s=>document.getElementById(s).classList.toggle('show', s===id));
+}
+function openCarousel(){
+  page=0; renderPager();
+  showW('w-carousel');
+  clearTimeout(dismissTimer);
+  dismissTimer=setTimeout(()=>showW('w-anchor'), 30000); // auto-dismiss after 30 s
+}
+function movePager(d){
+  page=Math.max(0, Math.min(2, page+d));
+  renderPager();
+}
+function renderPager(){
+  document.getElementById('pagerTrack').style.transform=`translateX(${-page*190}px)`;
+  document.querySelectorAll('#pagerDots span').forEach((s,i)=>s.classList.toggle('on', i===page));
+}
+function confirmLabel(label, emoji){
+  clearTimeout(dismissTimer);
+  showW('w-gotit');
+  setTimeout(()=>showW('w-anchor'), 1800);
+}
+/* swipe support */
+(function(){
+  const win=document.querySelector('.pager-window'); let x0=null;
+  win.addEventListener('pointerdown', e=>x0=e.clientX);
+  win.addEventListener('pointerup', e=>{
+    if(x0===null) return;
+    const dx=e.clientX-x0; x0=null;
+    if(Math.abs(dx)>30) movePager(dx<0?1:-1);
+  });
+})();
+
+/* =============== Wearer phone: pairing =============== */
+let ttlTimer=null, caregivers=1;
+function toast(id,msg){
+  const el=document.getElementById(id);
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2200);
+}
+function toastCg(m){toast('cgToast',m);}
+function generateCode(){
+  if(caregivers>=2){ toast('wearerToast','Maximum caregivers reached'); return; }
+  const code=String(Math.floor(100000+Math.random()*900000));
+  const cells=document.querySelectorAll('#codeDigits b');
+  cells.forEach((c,i)=>c.textContent=code[i]);
+  let left=600;
+  clearInterval(ttlTimer);
+  const ttl=document.getElementById('codeTtl');
+  const tick=()=>{
+    const m=Math.floor(left/60), s=String(left%60).padStart(2,'0');
+    ttl.textContent=`Expires in ${m}:${s}`;
+    if(left--<=0){ clearInterval(ttlTimer); cells.forEach(c=>c.textContent='·'); ttl.textContent='Code expired'; }
+  };
+  tick(); ttlTimer=setInterval(tick,1000);
+  toast('wearerToast','Code created — share it with your caregiver');
+}
+function approvePairing(btn){
+  const card=document.getElementById('pendingCard');
+  card.classList.add('done');
+  setTimeout(()=>{
+    card.style.display='none';
+    caregivers++;
+    document.getElementById('cgCount').textContent=caregivers;
+    const row=document.createElement('div');
+    row.className='row'; row.id='cgRowJordan';
+    row.innerHTML=`<div class="ic" style="background:rgba(74,144,226,.14)">👤</div>
+      <div class="txt"><div class="t">Jordan (Parent)</div><div class="s">Connected just now · reads stress events</div></div>
+      <button class="btn-plain" style="min-height:44px;padding:0 10px;font-weight:600;color:#C93028;" onclick="removeCaregiver('cgRowJordan','Jordan')">Remove</button>`;
+    document.getElementById('cgList').appendChild(row);
+    updateGenState();
+    toast('wearerToast','Jordan connected');
+  },450);
+}
+function denyPairing(){
+  const card=document.getElementById('pendingCard');
+  card.classList.add('done');
+  setTimeout(()=>card.style.display='none',450);
+  toast('wearerToast','Request denied');
+}
+function removeCaregiver(rowId,name){
+  const row=document.getElementById(rowId);
+  row.style.transition='opacity .4s, transform .4s';
+  row.style.opacity='0'; row.style.transform='translateX(12px)';
+  setTimeout(()=>{
+    row.remove();
+    caregivers=Math.max(0,caregivers-1);
+    document.getElementById('cgCount').textContent=caregivers;
+    updateGenState();
+  },400);
+  toast('wearerToast',`${name} removed — access revoked, data wiped`);
+}
+function updateGenState(){
+  const btn=document.getElementById('genBtn');
+  if(caregivers>=2){ btn.textContent='Maximum caregivers reached'; btn.style.opacity='.5'; }
+  else{ btn.textContent='Generate pairing code'; btn.style.opacity='1'; }
+}
+
+/* =============== Caregiver: pattern review =============== */
+let pending=2;
+function resolveReview(cardId, journalTitle, journalSub, emoji, tint){
+  const card=document.getElementById(cardId);
+  card.classList.add('done');
+  setTimeout(()=>{
+    card.style.display='none';
+    pending--;
+    const badge=document.getElementById('reviewBadge');
+    badge.textContent = pending>0 ? `${pending} pending` : 'All caught up';
+    if(pending<=0) badge.style.background='var(--green)';
+    if(journalTitle){
+      const e=document.createElement('div');
+      e.className='j-entry';
+      e.innerHTML=`<div class="j-em" style="background:${tint}">${emoji}</div>
+        <div><div class="j-t">${journalTitle}</div><div class="j-s">${journalSub}</div></div>
+        <div class="j-time">Now</div>`;
+      const j=document.getElementById('journal');
+      j.insertBefore(e, j.firstChild);
+    }
+    toastCg('Saved — BioCue will learn from this');
+  },500);
+}
+</script>
+</body>
+</html>
