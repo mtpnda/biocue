@@ -22,7 +22,7 @@ android {
         applicationId = "com.mtpnda.biocue"
         minSdk = 30
         targetSdk = 36
-        versionCode = getGitCommitCount() + 10000
+        versionCode = 10050
         versionName = project.findProperty("biocue.versionName").toString()
 
     }

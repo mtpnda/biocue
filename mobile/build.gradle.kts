@@ -28,7 +28,7 @@ android {
         applicationId = "com.mtpnda.biocue"
         minSdk = 29
         targetSdk = 36
-        versionCode = getGitCommitCount()
+        versionCode = 50
         versionName = project.findProperty("biocue.versionName").toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -30,50 +30,40 @@ fun CaregiverDashboardScreen(
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = CanvasB,
         topBar = {
             DashboardTopBar(isCaregiver = true, onOpenProfile = onOpenProfile)
-        },
-        containerColor = CanvasA
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
+            // Top Status Card
             item {
-                val statusText = when (tier) {
-                    0 -> "$userName is calm ✨"
-                    1 -> "$userName's stress is rising 📈"
-                    else -> "$userName is overwhelmed 🛑"
-                }
-                val statusColor = when (tier) {
-                    0 -> CalmColor
-                    1 -> WarnColor
-                    else -> DangerColor
-                }
-
-                Text(
-                    text = statusText,
-                    color = statusColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    textAlign = TextAlign.Center
-                )
+                StatusMeterCard(userName, tier, "Sitting still") // Could pass activity dynamically
             }
             
-            if (hasOngoing) {
-                item { PushNotificationPreview(userName) }
+            // SOS Alert
+            if (tier >= 2) {
+                item {
+                    SosAlertCard(userName)
+                }
             }
             
-            item { PatternReviewCard(reviews, userName, onResolve = onResolveReview) }
+            // Pattern Review
+            if (reviews.isNotEmpty()) {
+                item { PatternReviewCard(reviews, userName, onResolve = onResolveReview) }
+            }
+            
+            // Journal
             item { JournalCard(journal, journalOffset, onChangeJournalDate) }
+            
             item { Spacer(modifier = Modifier.height(20.dp)) }
         }
     }

@@ -1,5 +1,6 @@
 package com.mtpnda.biocue.ui.screens.wearer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +20,6 @@ import com.mtpnda.biocue.ReviewEvent
 import com.mtpnda.biocue.ConnectionStatus
 import com.mtpnda.biocue.data.Pairing
 import com.mtpnda.biocue.MockIntensity
-import com.mtpnda.biocue.ui.theme.BiocueTheme
 
 @Composable
 fun WearerDashboardScreen(
@@ -48,109 +48,82 @@ fun WearerDashboardScreen(
     onOpenProfile: () -> Unit,
     pairingCode: String,
     timeRemainingSeconds: Int,
-    connectedCaregivers: List<com.mtpnda.biocue.data.Pairing>,
+    connectedCaregivers: List<Pairing>,
     onGeneratePairingCode: () -> Unit,
     onRemoveCaregiver: (String) -> Unit
 ) {
-
-
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        containerColor = CanvasA,
         topBar = {
-            DashboardTopBar(isCaregiver = false, onOpenProfile = onOpenProfile)
-        },
-        containerColor = CanvasA
-    ) { padding ->
+            ConnectionBanner(
+                connStatus = connStatus,
+                onOpenProfile = onOpenProfile,
+                backgroundColor = CanvasA
+            )
+        }
+    ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            item { CurrentStateCard(stress, activity, connStatus, userName) }
-
-            if (tier >= 2) {
-                item { PushNotificationPreview(userName) }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "My Circle",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LabelColor
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Hi $userName — you control who can see your day.",
+                    fontSize = 17.sp,
+                    color = TextDim
+                )
             }
 
+            // Connected Caregivers
             item {
+                SectionHeader("Connected caregivers · ${connectedCaregivers.size} of 2")
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = GlassCard),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GlassCard)
                 ) {
-                    Column(Modifier.padding(18.dp)) {
-                        SectionLabel("Quick Actions")
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                LabelBtn(
-                                    icon = if (isCalmAudioPlaying) "✓" else "🎵",
-                                    text = if (isCalmAudioPlaying) "Playing" else "Calm Audio",
-                                    color = if (isCalmAudioPlaying) CalmColor else Color.White,
-                                    onClick = onToggleCalmAudio
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            item { PatternReviewCard(reviews, userName, onResolve = onResolveReview) }
-            item { JournalCard(journal, journalOffset, onChangeJournalDate) }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = GlassCard),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(Modifier.padding(18.dp)) {
-                        SectionLabel("Your Caregivers")
-                        Spacer(modifier = Modifier.height(12.dp))
-                        if (pairingCode.isNotEmpty()) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = pairingCode.chunked(3).joinToString(" "),
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    letterSpacing = 4.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Expires in \${{timeRemainingSeconds / 60}:${(timeRemainingSeconds % 60).toString().padStart(2, '0')}",
-                                    color = Color.Gray,
-                                    fontSize = 12.sp
-                                )
-                            }
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        if (connectedCaregivers.isEmpty()) {
+                            Text("No caregivers connected yet.", color = TextDim, fontSize = 15.sp)
                         } else {
-                            Button(
-                                onClick = { onGeneratePairingCode() },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27272A))
-                            ) {
-                                Text("Generate pairing code", color = Color.White)
-                            }
-                        }
-
-                        if (connectedCaregivers.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            connectedCaregivers.forEach { pairing ->
+                            connectedCaregivers.forEachIndexed { index, pairing ->
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
-                                        Text(pairing.caregiverName, color = LabelColor, fontWeight = FontWeight.Bold)
-                                        Text("Connected", color = StatusGreen, fontSize = 12.sp)
+                                    // Avatar icon
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(CalmBlue.copy(alpha = 0.14f), RoundedCornerShape(8.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("👤", fontSize = 20.sp)
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(pairing.caregiverName, color = LabelColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                                        Text("Connected · reads stress events", color = TextDim, fontSize = 13.sp)
                                     }
                                     TextButton(onClick = { onRemoveCaregiver(pairing.id) }) {
-                                        Text("Remove", color = StatusRed)
+                                        Text("Remove", color = DangerColor, fontWeight = FontWeight.SemiBold)
                                     }
+                                }
+                                if (index < connectedCaregivers.size - 1) {
+                                    HorizontalDivider(color = LabelColor.copy(alpha = 0.05f))
                                 }
                             }
                         }
@@ -158,47 +131,113 @@ fun WearerDashboardScreen(
                 }
             }
 
+            // Pairing Code Generation
+            item {
+                SectionHeader("Add a caregiver")
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GlassCard)
+                ) {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Text("Pairing code", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = LabelColor)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Single-use · expires in 10 minutes. Share it out loud or in person.", color = TextDim, fontSize = 14.sp)
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Render pairing code digits
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            val displayCode = if (pairingCode.isNotEmpty()) pairingCode.padEnd(6, '·') else "······"
+                            displayCode.forEach { char ->
+                                Text(
+                                    text = char.toString(),
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = LabelColor,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = if (pairingCode.isNotEmpty()) {
+                                "Expires in ${timeRemainingSeconds / 60}:${(timeRemainingSeconds % 60).toString().padStart(2, '0')}"
+                            } else {
+                                "No active code"
+                            },
+                            color = TextDim,
+                            fontSize = 13.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Button(
+                            onClick = { onGeneratePairingCode() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = CalmBlue.copy(alpha = 0.1f)),
+                            enabled = connectedCaregivers.size < 2
+                        ) {
+                            Text(
+                                text = if (connectedCaregivers.size >= 2) "Maximum caregivers reached" else "Generate pairing code", 
+                                color = CalmBlue,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Privacy Summary
+            item {
+                SectionHeader("What leaves this phone")
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GlassCard)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        PrivacyRow("📤", "Stress events", "Start, end, activity and your label — synced to your circle", CalmBlue.copy(alpha = 0.14f))
+                        HorizontalDivider(color = LabelColor.copy(alpha = 0.05f))
+                        PrivacyRow("🔒", "Heart data & movement", "Stays on this phone, always", Color.Gray.copy(alpha = 0.14f))
+                        HorizontalDivider(color = LabelColor.copy(alpha = 0.05f))
+                        PrivacyRow("📍", "Location", "Sent once, only when you trigger an SOS", StatusAmber.copy(alpha = 0.14f))
+                    }
+                }
+            }
+
+            // Developer Stubs (Preserved for testing)
             if (isStubAllowed) {
                 item {
-                    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF27272A))) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))) {
                         Column(Modifier.padding(12.dp)) {
-                            Text("Developer Stubs", color = Color.Yellow, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                            Text("Developer Stubs", color = Color.DarkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
                             Text("Continuous Sensor Mock", color = Color.Gray, fontSize = 12.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { onSetMockIntensity(MockIntensity.LOW) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.LOW) Color.Yellow else Color.DarkGray)) {
-                                    Text("Low", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.LOW) Color.Black else Color.White)
+                                Button(onClick = { onSetMockIntensity(MockIntensity.LOW) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.LOW) CalmBlue else Color.LightGray)) {
+                                    Text("Low", fontSize = 12.sp)
                                 }
-                                Button(onClick = { onSetMockIntensity(MockIntensity.MEDIUM) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.MEDIUM) Color.Yellow else Color.DarkGray)) {
-                                    Text("Medium", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.MEDIUM) Color.Black else Color.White)
+                                Button(onClick = { onSetMockIntensity(MockIntensity.MEDIUM) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.MEDIUM) CalmBlue else Color.LightGray)) {
+                                    Text("Medium", fontSize = 12.sp)
                                 }
-                                Button(onClick = { onSetMockIntensity(MockIntensity.HIGH) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.HIGH) Color.Yellow else Color.DarkGray)) {
-                                    Text("High", fontSize = 12.sp, color = if (mockIntensity == MockIntensity.HIGH) Color.Black else Color.White)
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Simulate Activity Override", color = Color.Gray, fontSize = 12.sp)
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { onSetMockActivity(null) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockActivity == null) Color.White else Color.DarkGray)) {
-                                    Text("Auto", fontSize = 12.sp, color = if (mockActivity == null) Color.Black else Color.White)
-                                }
-                                Button(onClick = { onSetMockActivity("STIMMING") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockActivity == "STIMMING") Color.White else Color.DarkGray)) {
-                                    Text("Stimming", fontSize = 12.sp, color = if (mockActivity == "STIMMING") Color.Black else Color.White)
-                                }
-                                Button(onClick = { onSetMockActivity("EXERCISE") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockActivity == "EXERCISE") Color.White else Color.DarkGray)) {
-                                    Text("Exercise", fontSize = 12.sp, color = if (mockActivity == "EXERCISE") Color.Black else Color.White)
+                                Button(onClick = { onSetMockIntensity(MockIntensity.HIGH) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (mockIntensity == MockIntensity.HIGH) CalmBlue else Color.LightGray)) {
+                                    Text("High", fontSize = 12.sp)
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Simulate Watch Tap (Manual Event)", color = Color.Gray, fontSize = 12.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { onSimulateManualEvent("OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                    Text("Overwhelm", fontSize = 12.sp, color = Color.White)
+                                Button(onClick = { onSimulateManualEvent("OVERWHELMED") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)) {
+                                    Text("Overwhelm", fontSize = 12.sp)
                                 }
-                                Button(onClick = { onSimulateManualEvent("SENSORY") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                    Text("Sensory", fontSize = 12.sp, color = Color.White)
-                                }
-                                Button(onClick = { onSimulateManualEvent("SOCIAL") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)) {
-                                    Text("Social", fontSize = 12.sp, color = Color.White)
+                                Button(onClick = { onSimulateManualEvent("SENSORY") }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)) {
+                                    Text("Sensory", fontSize = 12.sp)
                                 }
                             }
                         }
@@ -211,39 +250,26 @@ fun WearerDashboardScreen(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun WearerDashboardScreenPreview() {
-    BiocueTheme {
-        WearerDashboardScreen(
-            userName = "Alex",
-            isStubAllowed = true,
-            mockIntensity = MockIntensity.LOW,
-            mockActivity = null,
-            tier = 2,
-            sosLat = 0.0,
-            sosLng = 0.0,
-            stress = 40,
-            activity = "STATIONARY",
-            journal = emptyList(),
-            journalOffset = 0,
-            reviews = emptyList(),
-            ongoingEventLabel = null,
-            connStatus = ConnectionStatus.CONNECTED,
-            isCalmAudioPlaying = false,
-            onToggleCalmAudio = {},
-            onSetMockIntensity = {},
-            onSetMockActivity = {},
-            onSimulateManualEvent = {},
-            onEndOngoingEvent = {},
-            onResolveReview = { _, _ -> },
-            onChangeJournalDate = {},
-            onOpenProfile = {},
-            pairingCode = "",
-            timeRemainingSeconds = 0,
-            connectedCaregivers = emptyList(),
-            onGeneratePairingCode = {},
-            onRemoveCaregiver = {}
-        )
+fun PrivacyRow(emoji: String, title: String, subtitle: String, bgTint: Color) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(bgTint, RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(emoji, fontSize = 20.sp)
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, color = LabelColor, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text(subtitle, color = TextDim, fontSize = 13.sp)
+        }
     }
 }

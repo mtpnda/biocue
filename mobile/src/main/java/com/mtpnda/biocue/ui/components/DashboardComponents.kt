@@ -28,27 +28,27 @@ fun LabelBtn(icon: String, text: String, color: Color, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = color.copy(alpha = 0.15f),
+            containerColor = color.copy(alpha = 0.12f),
             contentColor = color
         ),
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(10.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
             Text(icon, fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
-            Text(text, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = LabelColor)
         }
     }
 }
 
 @Composable
-fun SectionLabel(text: String) {
+fun SectionHeader(text: String) {
     Text(
-        text = text.uppercase(),
-        fontSize = 11.sp,
+        text = text,
+        fontSize = 17.sp,
         fontWeight = FontWeight.Bold,
-        color = TextDim,
-        letterSpacing = 1.sp,
-        modifier = Modifier.padding(bottom = 10.dp)
+        color = LabelColor,
+        modifier = Modifier.padding(bottom = 12.dp, top = 8.dp)
     )
 }
 
@@ -57,219 +57,291 @@ fun DashboardTopBar(isCaregiver: Boolean, onOpenProfile: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
             .statusBarsPadding(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text("BioCue", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            Text(
-                if (isCaregiver) androidx.compose.ui.res.stringResource(R.string.mode_caregiver)
-                else androidx.compose.ui.res.stringResource(R.string.mode_wearer),
-                color = CalmColor, fontSize = 12.sp, fontWeight = FontWeight.Medium
-            )
+            Text(if (isCaregiver) "BioCue · Caregiver" else "BioCue", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = LabelColor)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Button(
-                onClick = onOpenProfile,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f)),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(GlassCard)
+                    .clickable { onOpenProfile() },
+                contentAlignment = Alignment.Center
             ) {
-                Text("👤", fontSize = 16.sp)
+                Text("⚙️", fontSize = 18.sp)
             }
         }
     }
 }
 
 @Composable
-fun CurrentStateCard(stressLevel: Int, activity: String, connectionStatus: ConnectionStatus, userName: String) {
-    if (connectionStatus != ConnectionStatus.CONNECTED) {
-        val warningText = if (connectionStatus == ConnectionStatus.DISCONNECTED) "Watch is disconnected" else "Watch is off body"
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("⚠️", fontSize = 28.sp, modifier = Modifier.padding(bottom = 8.dp))
-            Text(warningText, color = WarnColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            Text("Unable to monitor ${userName}'s stress levels. Please ensure the watch is worn and connected.", 
-                color = TextDim, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+fun ConnectionBanner(connStatus: ConnectionStatus, onOpenProfile: () -> Unit, backgroundColor: Color) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .statusBarsPadding(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val (icon, color, text) = when (connStatus) {
+                ConnectionStatus.CONNECTED -> Triple("🟢", StatusGreen, "Watch connected")
+                ConnectionStatus.DISCONNECTED -> Triple("🔴", StatusRed, "Watch disconnected")
+                ConnectionStatus.SEARCHING -> Triple("🟡", StatusAmber, "Searching for watch...")
+            }
+            Text(icon, fontSize = 10.sp, modifier = Modifier.padding(end = 6.dp))
+            Text(text, color = color, fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
-        return
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(GlassCard)
+                .clickable { onOpenProfile() },
+            contentAlignment = Alignment.Center
+        ) {
+            Text("⚙️", fontSize = 18.sp)
+        }
     }
+}
+
+@Composable
+fun StatusMeterCard(userName: String, tier: Int, activity: String) {
+    val statusText = when (tier) {
+        0 -> "$userName is calm ✨"
+        1 -> "$userName's stress is rising 📈"
+        else -> "$userName may need support 🚨"
+    }
+    val statusColor = when (tier) {
+        0 -> Color(0xFF1C7A3D) // Dark Green
+        1 -> Color(0xFF9A6A00) // Dark Amber
+        else -> Color(0xFFC81E14) // Dark Red
+    }
+    val fillColor = when (tier) {
+        0 -> StatusGreen
+        1 -> StatusAmber
+        else -> StatusRed
+    }
+    val fillFraction = when (tier) {
+        0 -> 0.18f
+        1 -> 0.55f
+        else -> 0.92f
+    }
+    val chipIcon = if (tier > 0) "🔄" else "🪑"
+    val chipText = if (tier > 0) "Pacing" else activity
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = GlassCard),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(Modifier.padding(18.dp)) {
-            SectionLabel("Current State")
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                Column {
-                    Text("Stress Level", color = TextDim, fontSize = 13.sp)
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(stressLevel.toString(), fontSize = 42.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("/100", fontSize = 14.sp, color = TextDim, modifier = Modifier.padding(start = 4.dp, bottom = 8.dp))
-                    }
-                }
-                val (statusText, statusColor) = when {
-                    stressLevel > 60 -> "High" to DangerColor
-                    stressLevel > 35 -> "Moderate" to WarnColor
-                    else -> "Low" to CalmColor
-                }
-                Text(statusText, color = statusColor, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+            Text(
+                text = statusText,
+                color = statusColor,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            
+            // Meter Track
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .height(14.dp)
+                    .background(Color.Black.copy(alpha = 0.06f), RoundedCornerShape(7.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fillFraction)
+                        .height(14.dp)
+                        .background(fillColor, RoundedCornerShape(7.dp))
+                )
             }
-            Box(modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(Color(0xFF334155))) {
-                val fraction = (stressLevel / 100f).coerceIn(0f, 1f)
-                val barColor = when {
-                    stressLevel > 60 -> DangerColor
-                    stressLevel > 35 -> WarnColor
-                    else -> CalmColor
+            
+            // Activity Chip & Update Time
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(Color.Black.copy(alpha = 0.04f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(chipIcon, fontSize = 13.sp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(chipText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = LabelColor)
                 }
-                Box(modifier = Modifier.fillMaxWidth(fraction).fillMaxHeight().clip(CircleShape).background(barColor))
-            }
-            Row(modifier = Modifier.padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("ACTIVITY:", color = TextDim, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                Text(activity, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 8.dp))
+                Text("Updated just now", fontSize = 13.sp, color = TextDim)
             }
         }
     }
 }
 
 @Composable
-fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeOffset: (Int) -> Unit) {
+fun SosAlertCard(userName: String) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, GlassBorder, RoundedCornerShape(32.dp)),
-        colors = CardDefaults.cardColors(containerColor = GlassSurface),
-        shape = RoundedCornerShape(32.dp)
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = StatusRed.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(Modifier.padding(18.dp)) {
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                SectionLabel("Journal")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    androidx.compose.material3.IconButton(onClick = { onChangeOffset(journalOffset + 1) }, modifier = Modifier.size(24.dp)) {
-                        Text("◀", color = TextDim, fontSize = 12.sp)
-                    }
-                    Text(
-                        when (journalOffset) {
-                            0 -> "Today"
-                            1 -> "Yesterday"
-                            else -> "${journalOffset} days ago"
-                        },
-                        fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    androidx.compose.material3.IconButton(onClick = { onChangeOffset(journalOffset - 1) }, enabled = journalOffset > 0, modifier = Modifier.size(24.dp)) {
-                        Text("▶", color = if (journalOffset > 0) TextDim else Color.Transparent, fontSize = 12.sp)
+            Text("SOS / High Stress Alert", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = StatusRed, modifier = Modifier.padding(bottom = 6.dp))
+            Text("$userName triggered a manual SOS or their stress has been elevated for 5 minutes.", fontSize = 15.sp, color = LabelColor)
+        }
+    }
+}
+
+@Composable
+fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeDate: (Int) -> Unit) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val dateLabel = when (journalOffset) {
+                0 -> "Today"
+                -1 -> "Yesterday"
+                else -> "${-journalOffset} days ago"
+            }
+            SectionHeader("Journal · $dateLabel")
+            
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(modifier = Modifier.clip(CircleShape).background(GlassCard).clickable { onChangeDate(journalOffset - 1) }.padding(8.dp)) {
+                    Text("←", fontSize = 14.sp, color = LabelColor)
+                }
+                if (journalOffset < 0) {
+                    Box(modifier = Modifier.clip(CircleShape).background(GlassCard).clickable { onChangeDate(journalOffset + 1) }.padding(8.dp)) {
+                        Text("→", fontSize = 14.sp, color = LabelColor)
                     }
                 }
             }
+        }
 
-            if (journal.isEmpty()) {
-                Text("No events on this day. All calm ✨", fontSize = 13.sp, color = TextDim, modifier = Modifier.padding(vertical = 12.dp))
-            } else {
-                journal.forEach { entry ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-                        Box(modifier = Modifier.padding(top = 5.dp, end = 12.dp).size(8.dp).clip(CircleShape).background(Color(android.graphics.Color.parseColor(entry.colorHex))))
-                        Column {
-                            Text(entry.time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Text("${entry.place} · ${entry.activity}", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(top = 2.dp))
-                            Row(modifier = Modifier.padding(top = 4.dp)) {
-                                Text(entry.labelIcon, fontSize = 13.sp, modifier = Modifier.padding(end = 4.dp))
-                                Text(entry.labelText, fontSize = 13.sp, color = Color(android.graphics.Color.parseColor(entry.colorHex)))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = GlassCard),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                if (journal.isEmpty()) {
+                    Text("No events on this day. All calm ✨", fontSize = 14.sp, color = TextDim, modifier = Modifier.padding(vertical = 12.dp))
+                } else {
+                    journal.forEachIndexed { index, entry ->
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+                            // Emoji badge
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 12.dp)
+                                    .size(36.dp)
+                                    .background(Color(android.graphics.Color.parseColor(entry.colorHex)).copy(alpha = 0.13f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(entry.labelIcon, fontSize = 16.sp)
                             }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(entry.labelText, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = LabelColor)
+                                Text(
+                                    text = "${entry.time} · ${entry.activity} · ${if(entry.labelText=="Excited") "Manual check-in" else "Auto-detected"}",
+                                    fontSize = 13.sp,
+                                    color = TextDim,
+                                    modifier = Modifier.padding(top = 2.dp)
+                                )
+                            }
+                            Text(entry.time, fontSize = 14.sp, color = TextDim, modifier = Modifier.padding(start = 8.dp, top = 2.dp))
+                        }
+                        if (index < journal.size - 1) {
+                            HorizontalDivider(color = LabelColor.copy(alpha = 0.05f))
                         }
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun PushNotificationPreview(userName: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = DangerColor.copy(alpha = 0.08f)),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            Text("PUSH NOTIFICATION", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DangerColor, modifier = Modifier.padding(bottom = 6.dp))
-            Text("${userName}'s stress has been elevated for 5 minutes. They may need support.", fontSize = 13.sp, color = Color.White)
         }
     }
 }
 
 @Composable
 fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (String, String) -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, GlassBorder, RoundedCornerShape(32.dp)),
-        colors = CardDefaults.cardColors(containerColor = GlassSurface),
-        shape = RoundedCornerShape(32.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                SectionLabel("Pattern Review")
-                if (reviews.isNotEmpty()) {
-                    Box(modifier = Modifier.clip(CircleShape).background(DangerColor).padding(horizontal = 8.dp, vertical = 2.dp)) {
-                        Text(reviews.size.toString(), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+    Column {
+        SectionHeader("Pattern Review")
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = GlassCard),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                if (reviews.isEmpty()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("✨", fontSize = 28.sp, modifier = Modifier.padding(bottom = 6.dp))
+                        Text("All caught up", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1C7A3D))
+                        Text("BioCue is learning ${userName}'s patterns.", fontSize = 14.sp, color = TextDim, modifier = Modifier.padding(top = 4.dp))
                     }
-                }
-            }
-            if (reviews.isEmpty()) {
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("✨", fontSize = 24.sp, modifier = Modifier.padding(bottom = 6.dp))
-                    Text("All caught up", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CalmColor)
-                    Text("BioCue is learning ${userName}'s patterns.", fontSize = 12.sp, color = TextDim, modifier = Modifier.padding(top = 4.dp))
-                }
-            } else {
-                val rev = reviews.first()
-                val isUnlabeled = rev.currentLabel == "NONE"
-                
-                if (isUnlabeled) {
-                    Text("A stress spike was detected but ${userName} didn't label it on the watch.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
                 } else {
-                    val labelFormat = rev.currentLabel.lowercase().replaceFirstChar { it.uppercase() }
-                    Text("${userName} reported feeling ${labelFormat}. Please add environmental context to help BioCue learn.", fontSize = 13.sp, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
-                }
-                
-                Text(rev.time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(bottom = 12.dp))
-                
-                Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color.Black.copy(alpha = 0.2f)).padding(12.dp)) {
-                    Column {
-                        Text("CONTEXT CUES", fontSize = 10.sp, color = TextDim, modifier = Modifier.padding(bottom = 8.dp))
-                        rev.cues.forEach { cue ->
-                            Row(modifier = Modifier.padding(bottom = 4.dp)) {
-                                Text(cue.first, fontSize = 13.sp, modifier = Modifier.padding(end = 8.dp))
-                                Text(cue.second, fontSize = 13.sp, color = Color(0xFFCBD5E1))
+                    val rev = reviews.first()
+                    val isUnlabeled = rev.currentLabel == "NONE"
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(8.dp).background(StatusAmber, CircleShape))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Review needed · ${rev.time}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LabelColor)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    if (isUnlabeled) {
+                        Text("A stress spike was detected but ${userName} didn't label it on the watch.", fontSize = 15.sp, color = LabelColor, modifier = Modifier.padding(bottom = 12.dp))
+                    } else {
+                        val labelFormat = rev.currentLabel.lowercase().replaceFirstChar { it.uppercase() }
+                        Text("${userName} reported feeling ${labelFormat}. Please add environmental context to help BioCue learn.", fontSize = 15.sp, color = LabelColor, modifier = Modifier.padding(bottom = 12.dp))
+                    }
+                    
+                    Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(CanvasB).padding(12.dp)) {
+                        Column {
+                            Text("CONTEXT CUES", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextDim, modifier = Modifier.padding(bottom = 8.dp))
+                            rev.cues.forEach { cue ->
+                                Row(modifier = Modifier.padding(bottom = 4.dp)) {
+                                    Text(cue.first, fontSize = 14.sp, modifier = Modifier.padding(end = 8.dp))
+                                    Text(cue.second, fontSize = 14.sp, color = LabelColor)
+                                }
                             }
                         }
                     }
-                }
-                
-                if (isUnlabeled) {
-                    Text("💡 Ask ${userName} first if you can — they may remember what happened.", fontSize = 12.sp, color = WarnColor, modifier = Modifier.padding(vertical = 14.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val EventTypes = com.mtpnda.biocue.core.domain.model.EventTypes
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_OVERWHELMED), EventTypes.LABEL_OVERWHELMED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_OVERWHELMED)))) { onResolve(rev.eventId, EventTypes.LABEL_OVERWHELMED) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_EXCITED), EventTypes.LABEL_EXCITED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_EXCITED)))) { onResolve(rev.eventId, EventTypes.LABEL_EXCITED) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_ACTIVE), EventTypes.LABEL_ACTIVE, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_ACTIVE)))) { onResolve(rev.eventId, EventTypes.LABEL_ACTIVE) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_NONE), "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, EventTypes.LABEL_NONE) }
-                    }
-                } else {
-                    Text("💡 What was happening around ${userName}?", fontSize = 12.sp, color = CalmColor, modifier = Modifier.padding(vertical = 14.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val EventTypes = com.mtpnda.biocue.core.domain.model.EventTypes
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_LOUD_NOISES), EventTypes.CONTEXT_LOUD_NOISES, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_LOUD_NOISES)))) { onResolve(rev.eventId, EventTypes.CONTEXT_LOUD_NOISES) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_CROWDED), EventTypes.CONTEXT_CROWDED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_CROWDED)))) { onResolve(rev.eventId, EventTypes.CONTEXT_CROWDED) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_DEMAND), EventTypes.CONTEXT_DEMAND, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_DEMAND)))) { onResolve(rev.eventId, EventTypes.CONTEXT_DEMAND) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_ROUTINE), EventTypes.CONTEXT_ROUTINE, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_ROUTINE)))) { onResolve(rev.eventId, EventTypes.CONTEXT_ROUTINE) }
-                        LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_UNKNOWN), EventTypes.CONTEXT_UNKNOWN, TextDim) { onResolve(rev.eventId, EventTypes.CONTEXT_UNKNOWN) }
+                    
+                    if (isUnlabeled) {
+                        Text("💡 Ask ${userName} first if you can — they may remember what happened.", fontSize = 13.sp, color = StatusAmber, modifier = Modifier.padding(vertical = 14.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            val EventTypes = com.mtpnda.biocue.core.domain.model.EventTypes
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_OVERWHELMED), EventTypes.LABEL_OVERWHELMED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_OVERWHELMED)))) { onResolve(rev.eventId, EventTypes.LABEL_OVERWHELMED) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_EXCITED), EventTypes.LABEL_EXCITED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_EXCITED)))) { onResolve(rev.eventId, EventTypes.LABEL_EXCITED) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_ACTIVE), EventTypes.LABEL_ACTIVE, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.LABEL_ACTIVE)))) { onResolve(rev.eventId, EventTypes.LABEL_ACTIVE) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.LABEL_NONE), "Unsure / Wasn't Present", TextDim) { onResolve(rev.eventId, EventTypes.LABEL_NONE) }
+                        }
+                    } else {
+                        Text("💡 What was happening around ${userName}?", fontSize = 13.sp, color = CalmBlue, modifier = Modifier.padding(vertical = 14.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            val EventTypes = com.mtpnda.biocue.core.domain.model.EventTypes
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_LOUD_NOISES), EventTypes.CONTEXT_LOUD_NOISES, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_LOUD_NOISES)))) { onResolve(rev.eventId, EventTypes.CONTEXT_LOUD_NOISES) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_CROWDED), EventTypes.CONTEXT_CROWDED, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_CROWDED)))) { onResolve(rev.eventId, EventTypes.CONTEXT_CROWDED) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_DEMAND), EventTypes.CONTEXT_DEMAND, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_DEMAND)))) { onResolve(rev.eventId, EventTypes.CONTEXT_DEMAND) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_ROUTINE), EventTypes.CONTEXT_ROUTINE, Color(android.graphics.Color.parseColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_ROUTINE)))) { onResolve(rev.eventId, EventTypes.CONTEXT_ROUTINE) }
+                            LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_UNKNOWN), EventTypes.CONTEXT_UNKNOWN, TextDim) { onResolve(rev.eventId, EventTypes.CONTEXT_UNKNOWN) }
+                        }
                     }
                 }
             }
