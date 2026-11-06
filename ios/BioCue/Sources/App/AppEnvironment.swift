@@ -17,7 +17,8 @@ final class AppEnvironment {
     }
 
     static func live() -> AppEnvironment {
-        let cloud = FirebaseCloud()
-        return AppEnvironment(auth: FirebaseAuthService(), profileCloud: cloud, wearerCloud: cloud, caregiverCloud: cloud)
+        let auth = DenoAuthService()
+        let cloud = DenoCloud(auth: auth)
+        return AppEnvironment(auth: auth, profileCloud: cloud, wearerCloud: cloud, caregiverCloud: cloud)
     }
 }

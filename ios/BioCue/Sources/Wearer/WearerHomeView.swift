@@ -15,9 +15,13 @@ struct WearerHomeView: View {
                 TopBar(pill: AnyView(connectionPill), onProfile: onProfile)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("My Circle").font(AppFont.headlineLarge).accessibilityAddTraits(.isHeader)
+                    Text("My Circle")
+                        .font(AppFont.headlineLarge)
+                        .foregroundStyle(Palette.inkPrimary)
+                        .accessibilityAddTraits(.isHeader)
                     Text("Hi \(userName) — you control who can see your day.")
-                        .font(AppFont.bodyLarge).foregroundStyle(Palette.inkSecondary)
+                        .font(AppFont.bodyLarge)
+                        .foregroundStyle(Palette.inkSecondary)
                 }
 
                 WatchLinkCard(state: service.linkState, onConnect: link.beginPairing, onForget: link.forgetWatch)
@@ -72,8 +76,12 @@ struct WearerHomeView: View {
                         HStack(spacing: 12) {
                             EmojiAvatar(emoji: "🤝", size: 44, fill: StatePalette.info.soft, border: StatePalette.info.chip)
                             VStack(alignment: .leading) {
-                                Text(p.caregiverName).font(AppFont.titleMedium)
-                                Text("Wants to join your circle").font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
+                                Text(p.caregiverName)
+                                    .font(AppFont.titleMedium)
+                                    .foregroundStyle(Palette.inkPrimary)
+                                Text("Wants to join your circle")
+                                    .font(AppFont.bodySmall)
+                                    .foregroundStyle(Palette.inkSecondary)
                             }
                         }
                         HStack(spacing: 10) {
@@ -88,12 +96,17 @@ struct WearerHomeView: View {
                     HStack(spacing: 12) {
                         EmojiAvatar(emoji: "👤", size: 44)
                         VStack(alignment: .leading) {
-                            Text(c.caregiverName).font(AppFont.titleMedium)
-                            Text("Connected · reads stress events").font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
+                            Text(c.caregiverName)
+                                .font(AppFont.titleMedium)
+                                .foregroundStyle(Palette.inkPrimary)
+                            Text("Connected · reads stress events")
+                                .font(AppFont.bodySmall)
+                                .foregroundStyle(Palette.inkSecondary)
                         }
                         Spacer()
                         Button("Remove") { Task { await circle.remove(c) } }
-                            .font(AppFont.labelLarge).foregroundStyle(StatePalette.alert.ink)
+                            .font(AppFont.labelLarge)
+                            .foregroundStyle(StatePalette.alert.ink)
                             .frame(minHeight: Metrics.minTouch)
                     }
                     if index < circle.connected.count - 1 { Divider().overlay(Palette.line) }
@@ -110,7 +123,9 @@ struct WearerHomeView: View {
             SectionHeader(text: "Add a caregiver")
             SoftCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Pairing code").font(AppFont.titleMedium)
+                    Text("Pairing code")
+                        .font(AppFont.titleMedium)
+                        .foregroundStyle(Palette.inkPrimary)
                     Text("Single-use · expires in 10 minutes. Share it out loud or in person.")
                         .font(AppFont.bodyMedium).foregroundStyle(Palette.inkSecondary)
                     PairingCodeView(code: circle.pairingCode)
@@ -143,8 +158,12 @@ struct WearerHomeView: View {
         HStack(spacing: 12) {
             EmojiAvatar(emoji: emoji, size: 44, fill: tone.soft, border: tone.chip)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(AppFont.titleMedium)
-                Text(subtitle).font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
+                Text(title)
+                    .font(AppFont.titleMedium)
+                    .foregroundStyle(Palette.inkPrimary)
+                Text(subtitle)
+                    .font(AppFont.bodySmall)
+                    .foregroundStyle(Palette.inkSecondary)
             }
         }
         .padding(.vertical, 8)

@@ -44,6 +44,9 @@ render.experimental.xml
 *.dmg
 *.dmg.sha256
 *.ipa
+.build/
+*/.build/
+**/.build/
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/

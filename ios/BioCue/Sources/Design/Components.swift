@@ -8,13 +8,14 @@ extension View {
         shadow(color: DlsTokens.shadowTint.opacity(0.10), radius: radius, x: 0, y: y)
     }
 
-    /// Full-screen warm background so no screen can fall back to white.
+    /// Full-screen warm background with dark ink text guarantee so no screen can fall back to white.
     func calmBackground() -> some View {
         background(Palette.bg.ignoresSafeArea())
+            .foregroundStyle(Palette.inkPrimary)
     }
 }
 
-/// Parchment card with a gentle warm border.
+/// Parchment card with a gentle warm border and guaranteed dark ink text.
 struct SoftCard<Content: View>: View {
     var container: Color = Palette.card
     var border: Color = Palette.line
@@ -23,6 +24,7 @@ struct SoftCard<Content: View>: View {
 
     var body: some View {
         content()
+            .foregroundStyle(Palette.inkPrimary)
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(container, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
@@ -77,6 +79,24 @@ struct CoralOutlinedPillButton: View {
     let action: () -> Void
     var body: some View {
         OutlinedPillButton(title: title, border: StatePalette.alert.chip, ink: StatePalette.alert.ink, action: action)
+    }
+}
+
+/// Tertiary action button with 48pt tap target and dark secondary ink (never invisible).
+struct GhostButton: View {
+    let title: String
+    var ink: Color = Palette.inkSecondary
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(AppFont.bodySmall)
+                .foregroundStyle(ink)
+                .frame(minHeight: Metrics.minTouch)
+                .contentShape(Rectangle())
+        }
+        .accessibilityAddTraits(.isButton)
     }
 }
 
@@ -200,5 +220,60 @@ struct InlineNotice: View {
             .background(tone.soft, in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).stroke(tone.chip, lineWidth: 1))
             .accessibilityAddTraits(.updatesFrequently)
+    }
+}
+
+/// Numbered step row for instructions and pairing flows.
+struct StepRow: View {
+    let step: Int
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("\(step)")
+                .font(AppFont.labelMedium)
+                .foregroundStyle(Palette.inkPrimary)
+                .frame(width: 24, height: 24)
+                .background(Palette.card, in: Circle())
+                .overlay(Circle().stroke(Palette.line, lineWidth: 1))
+            Text(text)
+                .font(AppFont.bodyMedium)
+                .foregroundStyle(Palette.inkPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+/// Standardized navigational row for settings and disclosure options.
+struct SettingsRow: View {
+    let emoji: String
+    let title: String
+    let subtitle: String?
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                EmojiAvatar(emoji: emoji, size: 44)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(AppFont.titleMedium)
+                        .foregroundStyle(Palette.inkPrimary)
+                    if let sub = subtitle {
+                        Text(sub)
+                            .font(AppFont.bodySmall)
+                            .foregroundStyle(Palette.inkSecondary)
+                    }
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Palette.inkSecondary)
+            }
+            .padding(16)
+            .frame(minHeight: 64)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }

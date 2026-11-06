@@ -152,18 +152,22 @@ private struct ReviewContent: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Circle().fill(StatePalette.rising.chip).frame(width: 8, height: 8)
-                Text("Review needed · \(review.time)").font(AppFont.labelMedium)
+                Text("Review needed · \(review.time)")
+                    .font(AppFont.labelMedium)
+                    .foregroundStyle(Palette.inkPrimary)
             }
             Text(isUnlabeled
                  ? "A stress spike was detected but \(userName) didn't label it on the watch."
                  : "\(userName) reported feeling \(review.currentLabel.lowercased().capitalized). Please add environmental context to help BioCue learn.")
                 .font(AppFont.bodyLarge)
+                .foregroundStyle(Palette.inkPrimary)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("CONTEXT CUES").font(AppFont.labelSmall).foregroundStyle(Palette.inkSecondary)
                 ForEach(Array(review.cues.enumerated()), id: \.offset) { _, cue in
                     HStack(spacing: 8) {
-                        Text(cue.icon); Text(cue.text).font(AppFont.bodyMedium)
+                        Text(cue.icon)
+                        Text(cue.text).font(AppFont.bodyMedium).foregroundStyle(Palette.inkPrimary)
                     }
                     .padding(.horizontal, 12).padding(.vertical, 6)
                     .background(Palette.card, in: Capsule()).overlay(Capsule().stroke(Palette.line, lineWidth: 1))

@@ -13,8 +13,12 @@ struct WatchLinkCard: View {
                 HStack(spacing: 10) {
                     EmojiAvatar(emoji: "⌚", size: 44, fill: palette.soft, border: palette.chip)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(title).font(AppFont.titleMedium)
-                        Text(detail).font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
+                        Text(title)
+                            .font(AppFont.titleMedium)
+                            .foregroundStyle(Palette.inkPrimary)
+                        Text(detail)
+                            .font(AppFont.bodySmall)
+                            .foregroundStyle(Palette.inkSecondary)
                     }
                 }
                 if showSteps { steps }
@@ -65,20 +69,12 @@ struct WatchLinkCard: View {
 
     private var steps: some View {
         VStack(alignment: .leading, spacing: 8) {
-            step(1, "On the watch, open BioCue and tap “I use an iPhone”, then “Pair iPhone”.")
-            step(2, "Here, tap “Connect watch”.")
-            step(3, "Your iPhone and the watch both show a 6-digit number. If they match, accept on both.")
+            StepRow(step: 1, text: "On the watch, open BioCue and tap “I use an iPhone”, then “Pair iPhone”.")
+            StepRow(step: 2, text: "Here, tap “Connect watch”.")
+            StepRow(step: 3, text: "Your iPhone and the watch both show a 6-digit number. If they match, accept on both.")
         }
         .padding(14)
         .background(Palette.surface2, in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
-    }
-
-    private func step(_ n: Int, _ text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Text("\(n)").font(AppFont.labelMedium).frame(width: 22, height: 22)
-                .background(Palette.card, in: Circle()).overlay(Circle().stroke(Palette.line, lineWidth: 1))
-            Text(text).font(AppFont.bodyMedium).foregroundStyle(Palette.inkPrimary)
-        }
     }
 
     @ViewBuilder private var actions: some View {

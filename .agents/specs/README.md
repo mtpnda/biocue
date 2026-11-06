@@ -18,6 +18,8 @@
 | [**`07_MULTI_ACCOUNT.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/07_MULTI_ACCOUNT.md) | **Multi-Account & Security:** 6-digit code pairing (`active_codes`), single-use consumption, `reviews` subcollection, Firestore rules | Authoritative |
 | [**`14_FIREBASE_SETUP.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/14_FIREBASE_SETUP.md) | **Firebase & Firestore Setup:** Console configuration, Firestore rules deployment, auth provider settings | Operational Guide |
 | [**`15_MOCK_SENSOR_EMITTER.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/15_MOCK_SENSOR_EMITTER.md) | **Mock Sensor Emitter System:** Web console, CLI tools, ADB broadcast contracts, scenarios, and test tooling | Authoritative |
+| [**`16_DENO_AUTH_AND_DATA_PLANE.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/16_DENO_AUTH_AND_DATA_PLANE.md) | **Deno Edge Auth & Data Plane:** Replaces Firebase with Deno KV, HS256 JWT, Caregiver Circles, and SSE live streams | Authoritative |
+| [**`17_SOVEREIGN_AUTH_AND_OFFLINE_OAUTH_ENGINEERING.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/17_SOVEREIGN_AUTH_AND_OFFLINE_OAUTH_ENGINEERING.md) | **Sovereign OAuth & Offline State Machine:** Pure Swift PKCE, reversed scheme, offline fallback FSM, and Deno token minting | Authoritative |
 
 ---
 

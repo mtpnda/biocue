@@ -3,13 +3,13 @@
 
   "palette": {
     "oat-050": "#FCFBF8", "oat-075": "#F7F4EE", "oat-100": "#F2F0EA", "oat-200": "#E7E2D9", "oat-300": "#DAD4C8",
-    "ink-900": "#221F1B", "ink-600": "#6F695F", "ink-400": "#9C958A",
-    "char-900": "#2C2823", "cream-100": "#FBF6EC", "shadow-warm": "#2B261E",
-    "sage-300": "#86EFAC", "sage-100": "#DEF7E5", "sage-700": "#2F7D4E",
-    "amber-300": "#FCD34D", "amber-100": "#FEF4D6", "amber-700": "#B4690E",
-    "coral-300": "#FCA5A5", "coral-100": "#FBE3E1", "coral-700": "#C0453C",
-    "sky-300": "#93C5FD", "sky-100": "#DDEAFB", "sky-700": "#3F6CC4",
-    "stone-300": "#D1D5DB", "stone-100": "#EDEEF0", "stone-700": "#5C6068",
+    "ink-900": "#191612", "ink-600": "#3D362C", "ink-400": "#544B3E",
+    "char-900": "#1C1814", "cream-100": "#FBF6EC", "shadow-warm": "#2B261E",
+    "sage-300": "#86EFAC", "sage-100": "#DEF7E5", "sage-700": "#1A6337",
+    "amber-300": "#FCD34D", "amber-100": "#FEF4D6", "amber-700": "#874A00",
+    "coral-300": "#FCA5A5", "coral-100": "#FBE3E1", "coral-700": "#9C2A22",
+    "sky-300": "#93C5FD", "sky-100": "#DDEAFB", "sky-700": "#1B4F9C",
+    "stone-300": "#D1D5DB", "stone-100": "#EDEEF0", "stone-700": "#383C44",
 
     "hc-white": "#FFFFFF", "hc-grey-100": "#F2F2F2", "hc-grey-700": "#4A4A4A", "hc-grey-800": "#333333", "hc-black": "#000000",
     "hc-sage-soft": "#E3F6EA", "hc-sage-ink": "#14532D", "hc-amber-soft": "#FFF3C4", "hc-amber-ink": "#6B3F00",

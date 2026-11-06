@@ -25,6 +25,8 @@ final class LoginViewModel: ObservableObject {
     }
 
     func google() async { await run { try await self.auth.signInWithGoogle() } }
+    func apple() async { await run { try await self.auth.signInWithApple() } }
+    func quickDemo() async { await run { try await self.auth.signInQuickDemo() } }
 
     private func run(_ work: @escaping () async throws -> Void) async {
         isLoading = true; errorMessage = nil
@@ -38,37 +40,37 @@ struct LoginView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 14) {
-                Text("🧠").font(.system(size: 38)).frame(width: 88, height: 88)
+            VStack(spacing: 16) {
+                Text("🧠").font(.system(size: 44)).frame(width: 96, height: 96)
                     .background(Palette.charcoal, in: RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
-                    .softShadow(radius: 5, y: 3).padding(.top, 48).accessibilityHidden(true)
-                Text("BioCue").font(AppFont.displayMedium)
-                Text("Find your center.\nStay connected.").font(AppFont.bodyLarge)
-                    .foregroundStyle(Palette.inkSecondary).multilineTextAlignment(.center).padding(.bottom, 16)
+                    .softShadow(radius: 6, y: 3).padding(.top, 56).accessibilityHidden(true)
+                Text("BioCue")
+                    .font(AppFont.displayMedium)
+                    .foregroundStyle(Palette.inkPrimary)
+                Text("Find your center.\nStay connected.")
+                    .font(AppFont.bodyLarge)
+                    .foregroundStyle(Palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 24)
 
-                if vm.isRegister { CalmTextField(label: "Full name", text: $vm.fullName, contentType: .name, capitalization: .words) }
-                CalmTextField(label: "Email address", text: $vm.email, keyboard: .emailAddress, contentType: .emailAddress)
-                CalmTextField(label: "Password", text: $vm.password, secure: true, contentType: vm.isRegister ? .newPassword : .password)
-
-                PillButton(title: vm.isRegister ? "Create Account" : "Sign In", loading: vm.isLoading) { Task { await vm.submit() } }
-                    .padding(.top, 8)
-
-                HStack {
-                    Rectangle().fill(Palette.line).frame(height: 1)
-                    Text("or").font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
-                    Rectangle().fill(Palette.line).frame(height: 1)
+                PillButton(title: "Continue with Google", loading: vm.isLoading) {
+                    Task { await vm.google() }
                 }
-                OutlinedPillButton(title: "Continue with Google") { Task { await vm.google() } }
 
-                Button(vm.isRegister ? "Already have an account? Sign In" : "Don't have an account? Create one") { vm.isRegister.toggle() }
-                    .font(AppFont.labelLarge).foregroundStyle(Palette.inkPrimary).frame(minHeight: Metrics.minTouch)
+                OutlinedPillButton(title: "Sign in with Apple") {
+                    Task { await vm.apple() }
+                }
+
+                GhostButton(title: "Quick Demo Access") {
+                    Task { await vm.quickDemo() }
+                }
+                .padding(.top, 4)
 
                 if let message = vm.errorMessage { InlineNotice(text: message) }
             }
             .padding(.horizontal, 28)
         }
         .calmBackground()
-        .scrollDismissesKeyboard(.interactively)
     }
 }
 
@@ -78,9 +80,14 @@ struct RoleSelectionView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                Text("How will you use BioCue?").font(AppFont.headlineLarge).multilineTextAlignment(.center)
+                Text("How will you use BioCue?")
+                    .font(AppFont.headlineLarge)
+                    .foregroundStyle(Palette.inkPrimary)
+                    .multilineTextAlignment(.center)
                     .padding(.top, 48).padding(.bottom, 12)
-                Text("This choice is permanent for your account.").font(AppFont.bodyMedium).foregroundStyle(Palette.inkSecondary)
+                Text("This choice is permanent for your account.")
+                    .font(AppFont.bodyMedium)
+                    .foregroundStyle(Palette.inkSecondary)
                 card("🩺", "I wear the watch", "Track my own stress, get gentle support, and choose who can see my day.", .calm, .wearer)
                 card("🤝", "I support someone", "Follow a person's stress events and help label what happened.", .info, .caregiver)
                 if let message = session.roleError { InlineNotice(text: message) }

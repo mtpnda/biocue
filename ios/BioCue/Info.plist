@@ -23,7 +23,8 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+				<string>biocue</string>
+				<string>com.googleusercontent.apps.1006317660514-e5ucehed56l4qdh34r97mg8s1smb05e7</string>
 			</array>
 		</dict>
 	</array>
@@ -31,6 +32,13 @@
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>BioCue uses Bluetooth to receive stress readings from your watch. Readings stay on this phone.</string>
 	<key>UIAppFonts</key>

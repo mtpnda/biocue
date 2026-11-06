@@ -210,6 +210,18 @@ install-android:
 	@echo -e "$(BOLD)$(GREEN)🤖 Installing BioCue Companion APK to connected device/emulator via Fastlane...$(RESET)"
 	$(FASTLANE) android install $(if $(DEVICE),device:"$(DEVICE)",)$(if $(BUILD),build:true,)
 
+install-ios: install-iphone
+
+install-iphone:
+	@echo -e "$(BOLD)$(GREEN)📱 Installing BioCue iOS App to connected iPhone via CoreDevice...$(RESET)"
+	@DEVICE_ID="$$(xcrun devicectl list devices | grep -i "iPhone" | awk '{print $$3}' | head -n 1)"; \
+	if [ -z "$$DEVICE_ID" ]; then DEVICE_ID="DCA09247-FFD8-54B9-A693-7821EE3C5CF9"; fi; \
+	APP_PATH="$(PWD)/build/ios_derived/Build/Products/Debug-iphoneos/BioCue.app"; \
+	echo "Target Device: $$DEVICE_ID"; \
+	xcrun devicectl device install app --device "$$DEVICE_ID" "$$APP_PATH" && \
+	xcrun devicectl device process launch --device "$$DEVICE_ID" com.mtpnda.biocue.ios || \
+	echo -e "$(YELLOW)⚠️ If installation failed, please unlock your iPhone screen or plug it in via USB!$(RESET)"
+
 install-wear:
 	@echo -e "$(BOLD)$(GREEN)⌚ Installing BioCue Wear OS APK to connected watch/emulator via Fastlane...$(RESET)"
 	$(FASTLANE) android install_wear $(if $(DEVICE),device:"$(DEVICE)",)$(if $(BUILD),build:true,)

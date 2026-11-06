@@ -7,12 +7,20 @@ import { renderSupportPage } from "./pages/support.ts";
 import { renderSignInPage } from "./pages/signin.ts";
 import { configRouter } from "./routes/config.ts";
 import { supportRouter } from "./routes/support.ts";
+import { authRouter } from "./routes/auth.ts";
+import { pairingsRouter } from "./routes/pairings.ts";
+import { eventsRouter } from "./routes/events.ts";
 import { resolveLocale } from "./i18n/index.ts";
 
 export const app = new OpenAPIHono();
 
 // Global middleware
 app.use("*", cors());
+
+// Authentication and Sovereign Data Plane Routes
+app.route("/", authRouter);
+app.route("/api/pairings", pairingsRouter);
+app.route("/api/events", eventsRouter);
 
 // Web Pages & Health Check (Multi-Country Localized)
 // First-time visit to / automatically routes to Indonesian site if in ID, or Global site if outside ID.

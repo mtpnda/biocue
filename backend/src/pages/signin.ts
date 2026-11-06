@@ -21,31 +21,21 @@ export function renderSignInPage(requestUrl?: string, headers?: Headers): string
       </p>
     </div>
 
-    <div class="softcard" style="padding:32px 28px;text-align:left;">
-      <div style="margin-bottom:20px;">
-        <label style="display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;color:var(--text-primary);">
-          Account Email
-        </label>
-        <input type="email" placeholder="alex@example.com" class="field" id="portalEmail"/>
-      </div>
+    <div class="softcard" style="padding:32px 28px;text-align:center;">
+      <p style="font-size:14.5px;color:var(--text-secondary);margin-bottom:24px;">
+        Sign in with your verified Google Account to manage Caregiver connections, review reflections, or sync mobile apps.
+      </p>
 
-      <div style="margin-bottom:24px;">
-        <label style="display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;color:var(--text-primary);">
-          Single-Use 6-Digit Pairing PIN
-        </label>
-        <input type="text" placeholder="e.g. 482917" maxlength="6" class="field" style="font-family:var(--font-serif);font-size:18px;letter-spacing:4px;text-align:center;"/>
-        <small style="display:block;margin-top:6px;font-size:12px;color:var(--text-muted);">
-          Generated in your phone Companion App under Caregiver Circle.
-        </small>
-      </div>
-
-      <button type="button" class="pill pill-primary" style="width:100%;justify-content:center;margin-bottom:16px;" onclick="alert('Portal access is linked directly via your paired Android Companion App.')">
-        Connect to Web Portal
-      </button>
+      <a href="/auth/google" class="pill pill-primary" style="display:inline-flex;width:100%;justify-content:center;margin-bottom:16px;text-decoration:none;padding:14px 20px;font-size:15px;">
+        <svg style="width:18px;height:18px;margin-right:10px;fill:currentColor;" viewBox="0 0 24 24">
+          <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/>
+        </svg>
+        Continue with Google
+      </a>
 
       <div style="text-align:center;border-top:1px solid var(--border-subtle);padding-top:16px;margin-top:16px;">
         <p style="font-size:12.5px;color:var(--text-muted);margin:0;">
-          BioCue prioritizes passwordless biometric authentication and local device pairing for privacy.
+          BioCue never accesses or stores your passwords. Pure sovereign token exchange powered by Deno Edge.
         </p>
       </div>
     </div>

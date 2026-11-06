@@ -15,7 +15,9 @@ struct CaregiverHomeView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     HStack(spacing: 12) {
-                        Text("BioCue").font(AppFont.titleLarge)
+                        Text("BioCue")
+                            .font(AppFont.titleLarge)
+                            .foregroundStyle(Palette.inkPrimary)
                         StatusPill(text: "Caregiver", palette: .neutral, showDot: false)
                     }
                     Spacer()
@@ -48,13 +50,22 @@ struct CaregiverPairingView: View {
                 EmojiAvatar(emoji: "🔗", size: 80).padding(.top, 24)
 
                 if case .connected(let pairing) = vm.pairingState {
-                    Text("Connected to Wearer").font(AppFont.headlineSmall)
-                    SoftCard { Text(pairing.wearerName.isEmpty ? "Unknown Wearer" : pairing.wearerName)
-                        .font(AppFont.titleLarge).frame(maxWidth: .infinity) }
+                    Text("Connected to Wearer")
+                        .font(AppFont.headlineSmall)
+                        .foregroundStyle(Palette.inkPrimary)
+                    SoftCard {
+                        Text(pairing.wearerName.isEmpty ? "Unknown Wearer" : pairing.wearerName)
+                            .font(AppFont.titleLarge)
+                            .foregroundStyle(Palette.inkPrimary)
+                            .frame(maxWidth: .infinity)
+                    }
                     if let onDone = onDone { PillButton(title: "Continue", action: onDone) }
                     CoralOutlinedPillButton(title: "Unlink from Wearer") { Task { await vm.unlink() } }
                 } else {
-                    Text("Join a circle").font(AppFont.headlineLarge).multilineTextAlignment(.center)
+                    Text("Join a circle")
+                        .font(AppFont.headlineLarge)
+                        .foregroundStyle(Palette.inkPrimary)
+                        .multilineTextAlignment(.center)
                     Text("Ask the wearer to open BioCue and show you their 6-digit pairing code.")
                         .font(AppFont.bodyLarge).foregroundStyle(Palette.inkSecondary).multilineTextAlignment(.center)
                     CalmTextField(label: "6-digit code", text: $code, keyboard: .numberPad, contentType: .oneTimeCode)
@@ -88,7 +99,9 @@ struct AccessRevokedView: View {
         VStack(spacing: 24) {
             Spacer()
             EmojiAvatar(emoji: "🔒", size: 88, fill: StatePalette.rising.soft, border: StatePalette.rising.chip)
-            Text("Access removed").font(AppFont.headlineSmall)
+            Text("Access removed")
+                .font(AppFont.headlineSmall)
+                .foregroundStyle(Palette.inkPrimary)
             Text("The wearer ended this connection. You will no longer see their updates.")
                 .font(AppFont.bodyLarge).foregroundStyle(Palette.inkSecondary).multilineTextAlignment(.center)
             Spacer()

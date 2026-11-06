@@ -21,23 +21,21 @@
 		46AC1BB113FD19FA06AFAACF /* WearerHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */; };
 		4CFB797DACCEF5689084DD2F /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F917730B82ABD491AF4F3344 /* AuthService.swift */; };
 		4E043FB39C49D51086C91267 /* TestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D8A75C8AE2BFB80910B4F0 /* TestDoubles.swift */; };
-		607AEF576284D83B731D8AFA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B1B6269445BE60D36B8E9ACA /* FirebaseFirestore */; };
 		6093F48816C623AE62F0C8FD /* WearerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4266D84FF5B299A28EE45BC6 /* WearerServiceTests.swift */; };
-		67A07246C9E97E43D32E4B61 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 9CF1210F5D55700EC8DEB853 /* GoogleSignIn */; };
 		7147A4E48BEB4050D656CC0F /* WearerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB440D4926926E039251DE2 /* WearerService.swift */; };
 		765F0FA547F51F3C1C12050D /* AlertNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90567D5B3BF562CECD43C412 /* AlertNotifier.swift */; };
-		7FD5E3A7C75CE10D17B40034 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9DE32A9F3D5EE4A5D8489FD9 /* FirebaseAuth */; };
 		86C8759EE1596068B05CDBB8 /* WearerRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D8B58C453154B80FD4B36 /* WearerRoot.swift */; };
 		8ECC5AF9B28340CC4EBD60F0 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D6C95F796EC2262F29CA0DB /* TimeFormat.swift */; };
 		9CB121921C71ADDD517395FB /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 753742648E3A4EA7F8D4C580 /* Theme.swift */; };
 		9E18607EAF8E215A4DBF7AA9 /* BioCueCore in Frameworks */ = {isa = PBXBuildFile; productRef = 708ED427455C3E5E0D5B15E5 /* BioCueCore */; };
+		9E6BEC33A05134BA79D43D32 /* GoogleOAuthPKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5735D77DFF6AFECDC94089 /* GoogleOAuthPKCE.swift */; };
 		A0D2890237E4173E8C58A687 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65674A9359DE4FD283507A6E /* ProfileView.swift */; };
 		A8DD6B488628EAD712098075 /* CloudModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8832B3BBE2FE9EF33BD54AD /* CloudModels.swift */; };
-		A8F46771646939B1133DF369 /* FirebaseCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C86FC03C1E34BD0FF4EFC8 /* FirebaseCloud.swift */; };
 		AE61B6E32E600045A2C20DA0 /* WatchLinkCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12C1D0AD4AE6408BC0202E0B /* WatchLinkCard.swift */; };
 		B708BD341F629C7CF603FC5C /* SharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1104A62CB7CC7B61EF8EE1 /* SharedViews.swift */; };
 		D7AE4686C87F80DAA0BBB1D6 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579A5AFF843529F86397BEB7 /* AppEnvironment.swift */; };
 		DE74DDBA3F2EFC1A8B5CE46F /* WearerViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73068EF4817CE811B7729756 /* WearerViewModels.swift */; };
+		E54687D76EDD50D8F8068138 /* DenoCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF256C463C1EB1E5AB54F83 /* DenoCloud.swift */; };
 		EE76C9C469DCCB3D63DE2681 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56C21D2C827A01A3441E07A /* Components.swift */; };
 		FA05CC82B4A8382EAFDA00BB /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E298413812BE6E5BA19201 /* SessionStore.swift */; };
 		FDB78BDD48FEF3B2656FC1ED /* CaregiverScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22814FCA3EFC8098CC5C327B /* CaregiverScreens.swift */; };
@@ -65,13 +63,13 @@
 		4266D84FF5B299A28EE45BC6 /* WearerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerServiceTests.swift; sourceTree = "<group>"; };
 		471A6131B38F2976B7FDA781 /* LocalStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStores.swift; sourceTree = "<group>"; };
 		4C4FA0626820E3855EA6A4CA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		4FF256C463C1EB1E5AB54F83 /* DenoCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DenoCloud.swift; sourceTree = "<group>"; };
 		579A5AFF843529F86397BEB7 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		63F9ADA03E90FF59AF2BFB06 /* DlsTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DlsTokens.swift; sourceTree = "<group>"; };
 		65674A9359DE4FD283507A6E /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		70FFB6147AF734A6B87C7124 /* BioCue.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BioCue.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		73068EF4817CE811B7729756 /* WearerViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerViewModels.swift; sourceTree = "<group>"; };
 		753742648E3A4EA7F8D4C580 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		75C86FC03C1E34BD0FF4EFC8 /* FirebaseCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseCloud.swift; sourceTree = "<group>"; };
 		8CEEDBDD61FB9DAB668DD2EA /* Newsreader.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Newsreader.ttf; sourceTree = "<group>"; };
 		90567D5B3BF562CECD43C412 /* AlertNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertNotifier.swift; sourceTree = "<group>"; };
 		9CDB32DF3E3F3BAEDBE8FC7A /* BioCueApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BioCueApp.swift; sourceTree = "<group>"; };
@@ -81,6 +79,7 @@
 		B9057A3DE3F8C580E422CE23 /* WatchLinkCentral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLinkCentral.swift; sourceTree = "<group>"; };
 		B9498E3C804C5EFD69437919 /* AuthScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthScreens.swift; sourceTree = "<group>"; };
 		BAB440D4926926E039251DE2 /* WearerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerService.swift; sourceTree = "<group>"; };
+		BB5735D77DFF6AFECDC94089 /* GoogleOAuthPKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleOAuthPKCE.swift; sourceTree = "<group>"; };
 		C83EFC48D548DA5EBA6B7BA0 /* BioCueCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BioCueCore; path = Packages/BioCueCore; sourceTree = SOURCE_ROOT; };
 		CF1FD2B0D39DBCEF6575CAE5 /* BioCueTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BioCueTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE17731FC0271A0FAC6F70CF /* AtkinsonHyperlegibleNext.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = AtkinsonHyperlegibleNext.ttf; sourceTree = "<group>"; };
@@ -94,9 +93,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				26B904BCA3618B1B795C9543 /* BioCueCore in Frameworks */,
-				7FD5E3A7C75CE10D17B40034 /* FirebaseAuth in Frameworks */,
-				607AEF576284D83B731D8AFA /* FirebaseFirestore in Frameworks */,
-				67A07246C9E97E43D32E4B61 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,7 +191,8 @@
 			children = (
 				F917730B82ABD491AF4F3344 /* AuthService.swift */,
 				F8832B3BBE2FE9EF33BD54AD /* CloudModels.swift */,
-				75C86FC03C1E34BD0FF4EFC8 /* FirebaseCloud.swift */,
+				4FF256C463C1EB1E5AB54F83 /* DenoCloud.swift */,
+				BB5735D77DFF6AFECDC94089 /* GoogleOAuthPKCE.swift */,
 				65674A9359DE4FD283507A6E /* ProfileView.swift */,
 				36E298413812BE6E5BA19201 /* SessionStore.swift */,
 				0A1104A62CB7CC7B61EF8EE1 /* SharedViews.swift */,
@@ -271,9 +268,6 @@
 			name = BioCue;
 			packageProductDependencies = (
 				D6AE4C7818CCF234E4FD9D2F /* BioCueCore */,
-				9DE32A9F3D5EE4A5D8489FD9 /* FirebaseAuth */,
-				B1B6269445BE60D36B8E9ACA /* FirebaseFirestore */,
-				9CF1210F5D55700EC8DEB853 /* GoogleSignIn */,
 			);
 			productName = BioCue;
 			productReference = 70FFB6147AF734A6B87C7124 /* BioCue.app */;
@@ -324,8 +318,6 @@
 			mainGroup = 396150EACD9EB7698E38AA37;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				F662A044E9487F0822FE5C16 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				34131FD4747A2E8137D5042F /* XCLocalSwiftPackageReference "Packages/BioCueCore" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -375,8 +367,9 @@
 				043BF72BC9B5668BD3E76F36 /* CaregiverViewModel.swift in Sources */,
 				A8DD6B488628EAD712098075 /* CloudModels.swift in Sources */,
 				EE76C9C469DCCB3D63DE2681 /* Components.swift in Sources */,
+				E54687D76EDD50D8F8068138 /* DenoCloud.swift in Sources */,
 				125DB9F711D300DE8DE85F64 /* DlsTokens.swift in Sources */,
-				A8F46771646939B1133DF369 /* FirebaseCloud.swift in Sources */,
+				9E6BEC33A05134BA79D43D32 /* GoogleOAuthPKCE.swift in Sources */,
 				1F2D7E85EA364CAB136B1EEC /* LocalStores.swift in Sources */,
 				A0D2890237E4173E8C58A687 /* ProfileView.swift in Sources */,
 				06E0B45A19B699CC49BE1671 /* RootView.swift in Sources */,
@@ -450,7 +443,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				GOOGLE_REVERSED_CLIENT_ID = REPLACE_WITH_REVERSED_CLIENT_ID;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -549,7 +541,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				GOOGLE_REVERSED_CLIENT_ID = REPLACE_WITH_REVERSED_CLIENT_ID;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -636,44 +627,10 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.0.0;
-			};
-		};
-		F662A044E9487F0822FE5C16 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		708ED427455C3E5E0D5B15E5 /* BioCueCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = BioCueCore;
-		};
-		9CF1210F5D55700EC8DEB853 /* GoogleSignIn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F662A044E9487F0822FE5C16 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignIn;
-		};
-		9DE32A9F3D5EE4A5D8489FD9 /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		B1B6269445BE60D36B8E9ACA /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
 		};
 		D6AE4C7818CCF234E4FD9D2F /* BioCueCore */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -14,8 +14,13 @@ struct ProfileView: View {
             HStack(spacing: 12) {
                 CircleIconButton(systemName: "chevron.left", label: "Back", action: onClose)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Profile").font(AppFont.headlineSmall).accessibilityAddTraits(.isHeader)
-                    Text("Your account").font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
+                    Text("Profile")
+                        .font(AppFont.headlineSmall)
+                        .foregroundStyle(Palette.inkPrimary)
+                        .accessibilityAddTraits(.isHeader)
+                    Text("Your account")
+                        .font(AppFont.bodySmall)
+                        .foregroundStyle(Palette.inkSecondary)
                 }
                 Spacer()
             }
@@ -27,7 +32,9 @@ struct ProfileView: View {
                         Text(String(userName.trimmingCharacters(in: .whitespaces).prefix(1)).uppercased().nonEmpty("?"))
                             .font(AppFont.serif(38)).foregroundStyle(Palette.onCharcoal)
                             .frame(width: 88, height: 88).background(Palette.charcoal, in: Circle()).softShadow(radius: 5, y: 3)
-                        Text(userName).font(AppFont.titleLarge)
+                        Text(userName)
+                            .font(AppFont.titleLarge)
+                            .foregroundStyle(Palette.inkPrimary)
                         StatusPill(text: "Role: \(roleLabel)", palette: .neutral, showDot: false)
                     }
                     .padding(.top, 8)
@@ -37,18 +44,12 @@ struct ProfileView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             SectionHeader(text: "Settings")
                             SoftCard(padding: 0) {
-                                Button(action: manageConnections) {
-                                    HStack(spacing: 14) {
-                                        EmojiAvatar(emoji: "🔗", size: 44)
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text("Manage Connections").font(AppFont.titleMedium).foregroundStyle(Palette.inkPrimary)
-                                            Text("Pair with a wearer").font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right").foregroundStyle(Palette.inkSecondary)
-                                    }
-                                    .padding(16).frame(minHeight: 72)
-                                }
+                                SettingsRow(
+                                    emoji: "🔗",
+                                    title: "Manage Connections",
+                                    subtitle: "Pair with a wearer",
+                                    action: manageConnections
+                                )
                             }
                         }
                     }

@@ -11,32 +11,32 @@ export const GLOBAL_STYLES = `
     --surface-raised: #F7F4EE;
     --border-subtle: #E7E2D9;
     --border-strong: #DAD4C8;
-    --text-primary: #221F1B;
-    --text-secondary: #6F695F;
-    --text-muted: #9C958A;
-    --action-primary: #2C2823;
+    --text-primary: #191612;
+    --text-secondary: #3D362C;
+    --text-muted: #544B3E;
+    --action-primary: #1C1814;
     --action-onPrimary: #FBF6EC;
     --shadow-tint: #2B261E;
     
     --state-calm-chip: #86EFAC;
     --state-calm-soft: #DEF7E5;
-    --state-calm-ink: #2F7D4E;
+    --state-calm-ink: #1A6337;
     
     --state-rising-chip: #FCD34D;
     --state-rising-soft: #FEF4D6;
-    --state-rising-ink: #B4690E;
+    --state-rising-ink: #874A00;
     
     --state-alert-chip: #FCA5A5;
     --state-alert-soft: #FBE3E1;
-    --state-alert-ink: #C0453C; /* Warm Coral, never alarming red! */
+    --state-alert-ink: #9C2A22; /* Warm Coral, never alarming red! */
     
     --state-info-chip: #93C5FD;
     --state-info-soft: #DDEAFB;
-    --state-info-ink: #3F6CC4;
+    --state-info-ink: #1B4F9C;
     
     --state-neutral-chip: #D1D5DB;
     --state-neutral-soft: #EDEEF0;
-    --state-neutral-ink: #5C6068;
+    --state-neutral-ink: #383C44;
 
     --radius-sm: 12px;
     --radius-md: 16px;
