@@ -58,6 +58,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mtpnda.biocue.ios
+        DEVELOPMENT_TEAM: 3T5F877TAB
+        CODE_SIGN_STYLE: Automatic
 
   BioCueTests:
     type: bundle.unit-test

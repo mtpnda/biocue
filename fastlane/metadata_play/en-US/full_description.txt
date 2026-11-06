@@ -20,5 +20,11 @@ DATA PRIVACY & SECURITY
 • No Data Selling: We do not sell your personal or wellness data to advertisers or third-party data brokers.
 • Transparent Controls: You remain in complete control of your caregiver pairing and data retention at all times.
 
+OFFICIAL LINKS & SUPPORT
+• Official Website: https://biocue.matapandastudio.deno.net
+• Privacy Policy: https://biocue.matapandastudio.deno.net/privacy
+• Help & Support: https://biocue.matapandastudio.deno.net/support
+• Terms of Service: https://biocue.matapandastudio.deno.net/terms
+
 REQUIREMENTS
 • BioCue requires both an Android smartphone (Android 10+) and a compatible Wear OS smartwatch (Wear OS 3.0+) for full companion syncing.

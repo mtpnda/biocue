@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -67,6 +68,8 @@ fun ProfileScreen(
     onManageConnections: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val uriHandler = LocalUriHandler.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -248,6 +251,66 @@ fun ProfileScreen(
                                     Text("Understood", color = PrimaryCharcoal)
                                 }
                             }
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 74.dp),
+                        color = LineBorder
+                    )
+
+                    SettingsRow(
+                        emoji = "🌍",
+                        title = "Official Website",
+                        subtitle = "biocue.matapandastudio.deno.net",
+                        onClick = {
+                            uriHandler.openUri("https://biocue.matapandastudio.deno.net")
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = InkSecondary
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 74.dp),
+                        color = LineBorder
+                    )
+
+                    SettingsRow(
+                        emoji = "🛡️",
+                        title = "Privacy Policy & Terms",
+                        subtitle = "Data protection & terms of service",
+                        onClick = {
+                            uriHandler.openUri("https://biocue.matapandastudio.deno.net/privacy")
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = InkSecondary
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 74.dp),
+                        color = LineBorder
+                    )
+
+                    SettingsRow(
+                        emoji = "💬",
+                        title = "Help & Support",
+                        subtitle = "Guides, FAQ & caregiver resources",
+                        onClick = {
+                            uriHandler.openUri("https://biocue.matapandastudio.deno.net/support")
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = InkSecondary
                         )
                     }
                 }

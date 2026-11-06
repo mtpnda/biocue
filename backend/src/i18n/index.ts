@@ -66,9 +66,9 @@ export function getDictionary(locale: Locale): Dictionary {
 
 export function renderLocaleSwitcher(currentLocale: Locale): string {
   const options = [
-    { code: "en", label: "🌐 Global (USD $)", href: "/en" },
-    { code: "en-id", label: "🇮🇩 Indonesia (Rp / EN)", href: "/en-id" },
-    { code: "id-id", label: "🇮🇩 Bahasa Indonesia (Rp)", href: "/id-id" },
+    { code: "en", label: "🌐 English (Global)", href: "/en" },
+    { code: "en-id", label: "🇮🇩 English (Indonesia)", href: "/en-id" },
+    { code: "id-id", label: "🇮🇩 Bahasa Indonesia", href: "/id-id" },
   ];
 
   const current = options.find((o) => o.code === currentLocale) || options[0];

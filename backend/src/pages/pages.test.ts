@@ -25,8 +25,12 @@ Deno.test("GET /en renders Home page with valid HTML and DLS tokens", async () =
   assertEquals(html.includes("BioCue"), true);
   assertEquals(html.includes("Sensory Overload Protection"), true);
   assertEquals(html.includes("data-theme="), true);
-  // Ensure NO pricing is present
-  assertEquals(html.toLowerCase().includes("$4.99"), false);
+  // Ensure NO pricing, currency, or payment terms are present
+  assertEquals(html.includes("$"), false);
+  assertEquals(html.toLowerCase().includes("usd"), false);
+  assertEquals(html.toLowerCase().includes("idr"), false);
+  assertEquals(html.toLowerCase().includes("rp "), false);
+  assertEquals(html.toLowerCase().includes("payment"), false);
   assertEquals(html.toLowerCase().includes("monthly subscription"), false);
 });
 

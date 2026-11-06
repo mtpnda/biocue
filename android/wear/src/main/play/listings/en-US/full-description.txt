@@ -12,6 +12,12 @@ IMPORTANT MEDICAL & HEALTH DISCLAIMER:
 • This Wear OS app is designed strictly for general fitness, wellness, habit awareness, and stress tracking. It is NOT intended to diagnose, treat, cure, or prevent any illness, disease, or medical condition.
 • Always consult a doctor or qualified healthcare professional regarding any medical questions or symptoms. Never disregard professional medical advice because of information provided by this app.
 
+OFFICIAL LINKS & SUPPORT:
+• Official Website: https://biocue.matapandastudio.deno.net
+• Privacy Policy: https://biocue.matapandastudio.deno.net/privacy
+• Help & Support: https://biocue.matapandastudio.deno.net/support
+• Terms of Service: https://biocue.matapandastudio.deno.net/terms
+
 REQUIREMENTS:
 • Wear OS 3.0 or higher.
 • Companion Android phone recommended for Circle management and detailed history analytics.

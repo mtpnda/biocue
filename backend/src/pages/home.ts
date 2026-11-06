@@ -581,10 +581,10 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
                 <td>Unilateral surveillance; no wearer say</td>
               </tr>
               <tr>
-                <td><strong>License &amp; Cost</strong></td>
+                <td><strong>Software &amp; Access</strong></td>
                 <td class="comp-highlight">100% Free &amp; Open Source</td>
-                <td>Hardware lock-in ($299+)</td>
-                <td>Expensive recurring fee paywalls</td>
+                <td>Proprietary hardware lock-in</td>
+                <td>Commercial paywall restrictions</td>
               </tr>
             </tbody>
           </table>
