@@ -781,9 +781,31 @@ platform :android do
     end
   end
 
-  desc "Upload Google Play Store metadata (listings, descriptions, graphics)"
+  desc "Upload Google Play Store metadata (listings, descriptions, graphics) via Fastlane Supply"
   lane :upload_metadata do
-    runner.execute(:release_playstore_listing, :android)
+    UI.header("🤖 Android: Uploading Store Metadata via Fastlane Supply")
+    play_json = ENV["SUPPLY_JSON_KEY"] || Dir[
+      File.join(root_dir, "play-account.json"),
+      File.join(root_dir, "android/play-account.json"),
+      File.join(root_dir, ".secrets/android/play-account.json"),
+      File.expand_path("~/.secrets/android/play-account.json")
+    ].find { |f| File.exist?(f) }
+
+    supply_dir = File.join(root_dir, "fastlane/metadata_play")
+    sync_tool = File.join(root_dir, "misc/tools/sync_play_metadata.py")
+    sh("python3 '#{sync_tool}'") if File.exist?(sync_tool)
+
+    upload_to_play_store(
+      package_name:           ENV["ANDROID_PACKAGE_NAME"] || "com.mtpnda.biocue",
+      json_key:               play_json,
+      metadata_path:          supply_dir,
+      track:                  "internal",
+      skip_upload_apk:        true,
+      skip_upload_aab:        true,
+      skip_upload_changelogs: true,
+      sync_image_upload:      false
+    )
+    UI.success("🎉 Store metadata & graphics uploaded via Fastlane Supply!")
   end
 
   desc "Install BioCue Companion APK onto connected Android device or emulator"

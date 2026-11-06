@@ -169,7 +169,7 @@ release-playstore-internal:
 
 release-playstore-listing:
 	@echo -e "$(BOLD)$(GREEN)🤖 Updating Google Play Store Listing (text & graphics)...$(RESET)"
-	$(FASTLANE) android release_playstore_listing
+	$(FASTLANE) android upload_metadata
 
 metadata: release-playstore-listing
 

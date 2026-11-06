@@ -226,7 +226,7 @@ Publish Store Listing (text descriptions & graphics) only
 [bundle exec] fastlane android upload_metadata
 ```
 
-Upload Google Play Store metadata (listings, descriptions, graphics)
+Upload Google Play Store metadata (listings, descriptions, graphics) via Fastlane Supply
 
 ### android install
 
