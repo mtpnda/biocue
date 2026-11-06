@@ -1,0 +1,10 @@
+# fastlane/Appfile
+# Universal multiplatform application identifiers and developer teams
+
+app_identifier([ENV["IOS_BUNDLE_ID"], ENV["MAC_BUNDLE_ID"]].compact)
+apple_id(ENV["APPLE_ID"]) if ENV["APPLE_ID"]
+team_id(ENV["DEVELOPMENT_TEAM"]) if ENV["DEVELOPMENT_TEAM"]
+itc_team_id(ENV["ITC_TEAM_ID"]) if ENV["ITC_TEAM_ID"]
+
+package_name(ENV["ANDROID_PACKAGE_NAME"]) if ENV["ANDROID_PACKAGE_NAME"]
+json_key_file(ENV["SUPPLY_JSON_KEY"]) if ENV["SUPPLY_JSON_KEY"]

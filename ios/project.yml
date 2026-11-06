@@ -1,0 +1,80 @@
+# Generate the Xcode project:   brew install xcodegen && xcodegen generate && open BioCue.xcodeproj
+# Needs Xcode 15+. Add your own GoogleService-Info.plist to BioCue/Resources/ (see README.md).
+name: BioCue
+options:
+  bundleIdPrefix: com.mtpnda
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+packages:
+  BioCueCore:
+    path: Packages/BioCueCore
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 11.0.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 8.0.0
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # From GoogleService-Info.plist -> REVERSED_CLIENT_ID (used as the Google sign-in URL scheme)
+    GOOGLE_REVERSED_CLIENT_ID: "REPLACE_WITH_REVERSED_CLIENT_ID"
+
+targets:
+  BioCue:
+    type: application
+    platform: iOS
+    sources:
+      - path: BioCue/Sources
+      - path: BioCue/Resources
+    dependencies:
+      - package: BioCueCore
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: GoogleSignIn
+        product: GoogleSignIn
+    info:
+      path: BioCue/Info.plist
+      properties:
+        CFBundleDisplayName: BioCue
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        ITSAppUsesNonExemptEncryption: false
+        # Keeps the Bluetooth link to the watch alive, and lets iOS relaunch the app to deliver data.
+        UIBackgroundModes: [bluetooth-central]
+        NSBluetoothAlwaysUsageDescription: "BioCue uses Bluetooth to receive stress readings from your watch. Readings stay on this phone."
+        UIAppFonts: [Newsreader.ttf, AtkinsonHyperlegibleNext.ttf]
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: ["$(GOOGLE_REVERSED_CLIENT_ID)"]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mtpnda.biocue.ios
+
+  BioCueTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: BioCueTests
+    dependencies:
+      - target: BioCue
+      - package: BioCueCore
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/BioCue.app/BioCue"
+
+schemes:
+  BioCue:
+    build:
+      targets: { BioCue: all, BioCueTests: [test] }
+    test:
+      targets: [BioCueTests]

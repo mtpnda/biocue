@@ -1,47 +1,60 @@
 # ----------------------------------------------------------------------
-# OFFICIAL GITHUB ANDROID .GITIGNORE STANDARD
-# https://raw.githubusercontent.com/github/gitignore/main/Android.gitignore
+# Android & Gradle
 # ----------------------------------------------------------------------
-
-# Gradle files
 .gradle/
+*/.gradle/
 build/
-
-# Local configuration file (sdk path, etc)
-local.properties
-
-# Log/OS Files
-*.log
-.DS_Store
-
-# Android Studio generated files and folders
+*/build/
 captures/
 .externalNativeBuild/
 .cxx/
-*.aab
-*.apk
 output-metadata.json
+*.apk
+*.aar
+*.aab
 
-# IntelliJ
-*.iml
+# Local configuration file (sdk path, keystore paths)
+local.properties
+
+# Keystore & Signing Secrets
+*.jks
+*.keystore
+.password
+play-account.json
+*-account.json
+google-services.json
+
+# Logs, Dumps & macOS Artifacts
+*.log
+*.hprof
+.DS_Store
+*.swp
+.artifacts/
+.artifacts
+
+# IDE & Editor Configuration
 .idea/
+*.iml
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
+.kotlin/
 
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
+# Release Automation Artifacts
+*.dmg
+*.dmg.sha256
+*.ipa
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
 
 # ----------------------------------------------------------------------
-# BIOCUE CUSTOM SECRETS & AI AGENT RULES
+# Scratch / Temporary & AI Auxiliary Boundary
+# Follows the unified auxiliary repository standard (mac-to-ipad-mirroring-protocol)
 # ----------------------------------------------------------------------
-.password
-play-account.json
-.agents/scratch/
+misc/
+scratch/
+benchmarks/results/
+.telegram-uploads/
+*.zip
+__pycache__/

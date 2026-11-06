@@ -1,126 +1,74 @@
-# AGENTS.md — Agent Skills for Android
+# BioCue — Agentic Operating & Architecture Guide
+> **Repository:** `BioCue` (Wear OS + Android Companion for Habit & Bio-Signal Cueing)  
+> **Central Agent Plugin:** [/Users/valdiearsanur/.gemini/config/plugins/central-agents/](file:///Users/valdiearsanur/.gemini/config/plugins/central-agents/) (12 Specialized Agents, Centralized Verified Skills)  
+> **Release Standard:** [custom-release-manager](file:///Users/valdiearsanur/.gemini/config/plugins/central-agents/skills/custom-release-manager/SKILL.md)
 
-## Skill-First Execution Model
+---
 
-When working on an Android project with agent skills installed, **always check for a matching skill before implementing directly**. Skills provide battle-tested workflows that prevent common mistakes.
+## 1. Zero-Waste Repository Boundary & Centralized Agent Protocol
 
-## Structured Lifecycle
+1. **Zero-Waste Repository Boundary (No Local `.agents/skills`)**:
+   - This project repository strictly forbids storing local skill definitions inside `.agents/skills`.
+   - All agent capabilities, playbooks, and specialized tools are centralized in the global plugin:
+     **`central-agents`** (`/Users/valdiearsanur/.gemini/config/plugins/central-agents`).
+   - All agents and developers must draw from the centralized catalog in `central-agents`.
 
-Work follows a five-phase lifecycle. Each phase has dedicated skills:
+2. **Unified Release Automation Facade**:
+   - The single-pane controller for all releases, local webhost deployments, and Google Play Store uploads is the root `Makefile` and `fastlane/Fastfile`.
+   - Ad-hoc release scripts (e.g. `build_release.sh`) are strictly prohibited and deprecated.
+   - All release workflows are managed by `@release-manager` using `custom-release-manager`.
 
-```
-DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP
-```
+---
 
-| Phase      | Skills                                                                                                                                                                                                                  | Purpose                                            |
-|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
-| **DEFINE** | `interview-me`, `idea-refine`, `spec-driven-development`, `context-engineering`                                                                                                                                                                                            | Sharpen ideas, write specs, set up AI context      |
-| **PLAN**   | `planning-and-task-breakdown`, `android-architecture`                                                                                                                                                                                                                     | Break work into tasks, make architecture decisions |
-| **BUILD**  | `incremental-implementation`, `test-driven-development`, `android-ui-engineering`, `android-data-persistence`, `android-background-work`, `api-and-interface-design`, `source-driven-development`, `doubt-driven-development`, `code-simplification`, `documentation-and-adrs` | Implement incrementally with TDD                   |
-| **VERIFY** | `android-device-testing`, `android-e2e-verification`, `android-accessibility`, `debugging-and-error-recovery`, `performance-optimization`                                                                                                                                 | Test, debug, and validate                          |
-| **REVIEW** | `code-review-and-quality`, `security-and-hardening`                                                                                                                                                                                                                       | Review quality and security                        |
-| **SHIP**   | `ci-cd-and-automation`, `git-workflow-and-versioning`, `shipping-and-launch`, `observability-and-instrumentation`, `deprecation-and-migration`                                                                                                                            | Automate, version, observe, and release            |
+## 2. Master Intent-to-Agent Navigation Matrix
 
-## Skill Directory Structure
+| Developer Intent / Task in BioCue | Target Agent | Primary Central Skills Paired | Target Subsystem / File Scope |
+| :--- | :--- | :--- | :--- |
+| **Android / Wear OS UI, Jetpack Compose, Sensors, Health Services** | `@mobile-dev` | `android-architecture`, `android-ui-engineering`, `android-background-work`, `mobile-automation` | `mobile/`, `wear/`, `core-detection/` |
+| **Automated Testing, Robolectric, Compose Test Rules, Quality Gates** | `@qa-engineer` | `test-driven-development`, `tdd`, `android-device-testing`, `code-review-and-quality` | `mobile/src/test/`, `wear/src/test/`, `tests/` |
+| **Play Store Publishing, Fastlane, GPP, Keystore Signing, Webhost Ingestion** | `@release-manager` | `custom-release-manager`, `reusable-fastlane`, `shipping-and-launch` | `Makefile`, `fastlane/`, `play-account.json`, `mobile/src/main/play/`, `wear/src/main/play/` |
+| **Firebase / Cloud Sync, Firestore Rules, Data Modeling** | `@backend-dev` | `api-and-interface-design`, `security-and-hardening`, `clean-code-principles` | `firestore.rules`, `firebase.json`, `functions/` |
+| **Feature Specs, PRDs, Multi-Agent Swarm Orchestration** | `@product-architect`| `interview-me`, `spec-driven-development`, `pstack`, `planning-and-task-breakdown` | `specs/` |
 
-Skills live in `skills/{skill-name}/SKILL.md`:
+---
 
-```
-skills/
-├── interview-me/SKILL.md
-├── idea-refine/SKILL.md
-├── spec-driven-development/SKILL.md
-├── planning-and-task-breakdown/SKILL.md
-├── android-architecture/SKILL.md
-├── android-ui-engineering/SKILL.md
-├── android-data-persistence/SKILL.md
-├── android-background-work/SKILL.md
-├── android-accessibility/SKILL.md
-├── android-device-testing/SKILL.md
-├── android-e2e-verification/SKILL.md
-├── test-driven-development/SKILL.md
-├── incremental-implementation/SKILL.md
-├── code-review-and-quality/SKILL.md
-├── debugging-and-error-recovery/SKILL.md
-├── doubt-driven-development/SKILL.md
-├── api-and-interface-design/SKILL.md
-├── performance-optimization/SKILL.md
-├── security-and-hardening/SKILL.md
-├── observability-and-instrumentation/SKILL.md
-├── ci-cd-and-automation/SKILL.md
-├── deprecation-and-migration/SKILL.md
-├── git-workflow-and-versioning/SKILL.md
-├── shipping-and-launch/SKILL.md
-├── code-simplification/SKILL.md
-├── context-engineering/SKILL.md
-├── documentation-and-adrs/SKILL.md
-├── source-driven-development/SKILL.md
-└── using-agent-skills/SKILL.md
-```
+## 3. Google Play Store & Multiplatform Release Protocol
 
-## SKILL.md Anatomy
+BioCue adheres to the standardized `custom-release-manager` protocol:
 
-Each skill follows this structure:
+1. **Single-Pane Command Controller (`Makefile`)**:
+   - `make release-local`: Compiles release bundles (`:mobile:bundleRelease`, `:wear:bundleRelease`) and synchronizes them to the local MacBook Air Webhost.
+   - `make release-playstore`: Builds, signs, and uploads release bundles and store listings to the Google Play Store via Gradle Play Publisher (`./gradlew publishBundle publishListing`).
+   - `make release-playstore-internal`: Uploads release bundles to Google Play Internal Testing track.
+   - `make release-playstore-listing`: Synchronizes store text and graphical assets (`./gradlew publishListing`) without triggering a code build.
+   - `make install-android`: Installs Companion APK directly to connected Android phone/tablet/emulator.
+   - `make install-wear`: Installs Wear OS APK directly to connected smartwatch/emulator.
+   - `make test-release`: Runs the automated release verification test suite (`tests/test_release_automation.py`).
+   - `make test-reviewer`: Runs the deep sequential UI reviewer automation suite (`tests/test_playstore_reviewer.py`).
 
-1. **Overview** — what and why
-2. **When to Use** — trigger conditions and exclusions
-3. **Core Process** — numbered steps with Kotlin code examples
-4. **Common Rationalizations** — excuses agents use to skip steps + rebuttals
-5. **Red Flags** — observable violations during review
-6. **Verification** — exit checklist requiring tangible evidence
+2. **Store Listing as Code (`mobile/src/main/play/` & `wear/src/main/play/`)**:
+   - `listings/en-US/title.txt`: App title (max 30 characters).
+   - `listings/en-US/short-description.txt`: App summary (max 80 characters).
+   - `listings/en-US/full-description.txt`: Full description (max 4000 characters).
+   - `listings/en-US/graphics/`: Icons, feature graphics, and phone/tablet/wear screenshots.
+   - `release-notes/en-US/default.txt`: Release changelog for current build.
 
-Target: each SKILL.md stays under 500 lines.
+3. **Authentication & Signing**:
+   - `play-account.json`: Google Cloud Service Account credentials (strictly gitignored).
+   - `biocue-release-key.jks`: Release signing keystore with credentials mapped in `local.properties` (gitignored).
 
-## Agent Personas
+---
 
-Four reusable agent personas in `agents/`:
+## 4. Engineering & Workspace Governance Rules
 
-| Agent                 | Role                                                                                  | Use When                                     |
-|-----------------------|---------------------------------------------------------------------------------------|----------------------------------------------|
-| `spec-enforcer.md`    | Product Manager and Doc Enforcer                                                      | Updating/clarifying specs before writing code|
-| `code-reviewer.md`    | Five-axis code review (Correctness, Readability, Architecture, Security, Performance) | Reviewing PRs or self-reviewing              |
-| `test-engineer.md`    | Test design, coverage analysis, quality evaluation                                    | Designing test suites, finding coverage gaps |
-| `security-auditor.md` | OWASP Mobile Top 10, vulnerability assessment                                         | Security review before release               |
+1. **Zero Root Litter Rule (`misc/`)**:
+   - Never write temporary test scripts, scratch files, throwaway patches, or exploratory notes to the repository root.
+   - All auxiliary and non-production files must be routed into the gitignored `misc/` container (`misc/scratch/`, `misc/tasks/`, `misc/notes/`, `misc/export/`).
 
-## Orchestration: Personas and Skills
+2. **Spec-First Architecture (`.agents/specs/`)**:
+   - The `.agents/specs/` directory is the single source of truth for all requirements, ML thresholds, and UI state models.
+   - Any architectural changes or new feature requirements must be documented in `.agents/specs/` before implementation begins.
 
-Three composable layers, each with a distinct job:
-
-- **Skills** (`skills/<name>/SKILL.md`) — workflows with steps and exit criteria. The *how*. Mandatory steps when an intent matches.
-- **Personas** (`agents/<role>.md`) — roles with a perspective and an output format. The *who*. See [docs/agent-personas.md](docs/agent-personas.md) for the full catalogue and orchestration rules.
-- **Slash Commands** — user-facing entry points (e.g. `/spec`, `/build`, `/ship`) that compose skills and personas.
-
-**Composition rule:** The user — or a slash command acting on their behalf — is the orchestrator. Personas do not invoke other personas. A persona may invoke skills.
-
-The endorsed multi-persona pattern is **parallel fan-out with a merge step** — used during shipping to run `code-reviewer`, `security-auditor`, and `test-engineer` concurrently on the same diff and synthesize their reports into a single go/no-go decision.
-
-## Command Mappings
-
-Instructions map to development phases:
-
-| Phase               | Skills Used                                                                       |
-|---------------------|-----------------------------------------------------------------------------------|
-| Specification       | `interview-me` (when vague) + `spec-driven-development`                           |
-| Planning            | `planning-and-task-breakdown`                                                     |
-| Building            | `incremental-implementation` + `test-driven-development`                          |
-| Testing             | `test-driven-development` + `android-device-testing` + `android-e2e-verification` |
-| Reviewing           | `code-review-and-quality` + `security-and-hardening` + `performance-optimization` |
-| Code Simplification | `code-simplification` + `code-review-and-quality`                                 |
-| Shipping            | `shipping-and-launch` + `observability-and-instrumentation`                       |
-
-## Reference Checklists
-
-Detailed checklists in `references/`:
-
-- `testing-patterns.md` — JUnit5, MockK, Espresso, Compose tests, MockWebServer
-- `security-checklist.md` — OWASP Mobile, Network Security Config, cert pinning, secrets
-- `performance-checklist.md` — Android Vitals, Baseline Profiles, Macrobenchmark, APK size
-- `accessibility-checklist.md` — TalkBack, Accessibility Scanner, touch targets, contrast
-
-## Core Principles
-
-1. **Skills are workflows, not suggestions** — follow steps in order, never skip verification
-2. **Anti-rationalizations are real** — check the "Common Rationalizations" table before skipping steps
-3. **Evidence over assertions** — "it looks right" is not verification
-4. **Assumption surfacing** — state assumptions explicitly before implementing
-5. **Scope discipline** — only modify what's requested
+3. **Wear OS Modern Platform Rule**:
+   - Never use `useLibrary("wear-sdk")` in Wear OS `build.gradle.kts`. Modern Wear OS uses standard Jetpack Compose for Wear OS and `androidx.health.services.client`.
+   - Wearable Data Layer dependencies must be scoped properly with `<uses-library android:name="com.google.android.wearable" android:required="false" />` in `AndroidManifest.xml`.

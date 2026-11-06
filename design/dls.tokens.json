@@ -1,0 +1,111 @@
+{
+  "meta": { "name": "BioCue Design Language System", "version": "1.0.0", "note": "The ONLY place a colour, size, radius, shadow, motion value or font name is written down. Everything else is generated from this file by tools/gen_dls.py." },
+
+  "palette": {
+    "oat-050": "#FCFBF8", "oat-075": "#F7F4EE", "oat-100": "#F2F0EA", "oat-200": "#E7E2D9", "oat-300": "#DAD4C8",
+    "ink-900": "#221F1B", "ink-600": "#6F695F", "ink-400": "#9C958A",
+    "char-900": "#2C2823", "cream-100": "#FBF6EC", "shadow-warm": "#2B261E",
+    "sage-300": "#86EFAC", "sage-100": "#DEF7E5", "sage-700": "#2F7D4E",
+    "amber-300": "#FCD34D", "amber-100": "#FEF4D6", "amber-700": "#B4690E",
+    "coral-300": "#FCA5A5", "coral-100": "#FBE3E1", "coral-700": "#C0453C",
+    "sky-300": "#93C5FD", "sky-100": "#DDEAFB", "sky-700": "#3F6CC4",
+    "stone-300": "#D1D5DB", "stone-100": "#EDEEF0", "stone-700": "#5C6068",
+
+    "hc-white": "#FFFFFF", "hc-grey-100": "#F2F2F2", "hc-grey-700": "#4A4A4A", "hc-grey-800": "#333333", "hc-black": "#000000",
+    "hc-sage-soft": "#E3F6EA", "hc-sage-ink": "#14532D", "hc-amber-soft": "#FFF3C4", "hc-amber-ink": "#6B3F00",
+    "hc-coral-soft": "#FFE2DE", "hc-coral-ink": "#8A1F17", "hc-sky-soft": "#DCE9FF", "hc-sky-ink": "#1A3A8F", "hc-stone-ink": "#2B2E33"
+  },
+
+  "themes": {
+    "calm": {
+      "surface.bg": "{palette.oat-100}", "surface.card": "{palette.oat-050}", "surface.raised": "{palette.oat-075}",
+      "border.subtle": "{palette.oat-200}", "border.strong": "{palette.oat-300}",
+      "text.primary": "{palette.ink-900}", "text.secondary": "{palette.ink-600}", "text.muted": "{palette.ink-400}",
+      "action.primary": "{palette.char-900}", "action.onPrimary": "{palette.cream-100}", "shadow.tint": "{palette.shadow-warm}",
+      "state.calm.chip": "{palette.sage-300}", "state.calm.soft": "{palette.sage-100}", "state.calm.ink": "{palette.sage-700}",
+      "state.rising.chip": "{palette.amber-300}", "state.rising.soft": "{palette.amber-100}", "state.rising.ink": "{palette.amber-700}",
+      "state.alert.chip": "{palette.coral-300}", "state.alert.soft": "{palette.coral-100}", "state.alert.ink": "{palette.coral-700}",
+      "state.info.chip": "{palette.sky-300}", "state.info.soft": "{palette.sky-100}", "state.info.ink": "{palette.sky-700}",
+      "state.neutral.chip": "{palette.stone-300}", "state.neutral.soft": "{palette.stone-100}", "state.neutral.ink": "{palette.stone-700}"
+    },
+    "high-contrast": {
+      "surface.bg": "{palette.hc-white}", "surface.card": "{palette.hc-white}", "surface.raised": "{palette.hc-grey-100}",
+      "border.subtle": "{palette.hc-grey-700}", "border.strong": "{palette.hc-black}",
+      "text.primary": "{palette.hc-black}", "text.secondary": "{palette.hc-grey-800}", "text.muted": "{palette.hc-grey-700}",
+      "action.primary": "{palette.hc-black}", "action.onPrimary": "{palette.hc-white}", "shadow.tint": "{palette.hc-black}",
+      "state.calm.chip": "{palette.sage-300}", "state.calm.soft": "{palette.hc-sage-soft}", "state.calm.ink": "{palette.hc-sage-ink}",
+      "state.rising.chip": "{palette.amber-300}", "state.rising.soft": "{palette.hc-amber-soft}", "state.rising.ink": "{palette.hc-amber-ink}",
+      "state.alert.chip": "{palette.coral-300}", "state.alert.soft": "{palette.hc-coral-soft}", "state.alert.ink": "{palette.hc-coral-ink}",
+      "state.info.chip": "{palette.sky-300}", "state.info.soft": "{palette.hc-sky-soft}", "state.info.ink": "{palette.hc-sky-ink}",
+      "state.neutral.chip": "{palette.stone-300}", "state.neutral.soft": "{palette.stone-100}", "state.neutral.ink": "{palette.hc-stone-ink}"
+    }
+  },
+
+  "scales": {
+    "radius": { "sm": 12, "md": 16, "card": 20, "lg": 22, "xl": 28, "pill": 999 },
+    "space": { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 20, "xxl": 24, "section": 28 },
+    "size": { "touchTarget": 48, "buttonHeight": 52, "iconButtonVisual": 40, "avatar": 44, "meterHeight": 12 },
+    "motion": { "fast": 150, "base": 250, "meter": 400, "easing": "cubic-bezier(0.2, 0.7, 0.3, 1)" },
+    "shadow": { "card": { "blur": 4, "y": 2, "opacity": 0.10 }, "raised": { "blur": 5, "y": 3, "opacity": 0.10 } },
+    "font": { "serif": "Newsreader", "sans": "Atkinson Hyperlegible Next" }
+  },
+
+  "typography": {
+    "displayMedium":  { "family": "serif", "size": 34, "weight": 500, "line": 40 },
+    "headlineLarge":  { "family": "serif", "size": 28, "weight": 500, "line": 34 },
+    "headlineSmall":  { "family": "serif", "size": 23, "weight": 500, "line": 29 },
+    "titleLarge":     { "family": "serif", "size": 22, "weight": 500, "line": 28 },
+    "titleMedium":    { "family": "sans",  "size": 17, "weight": 700, "line": 24 },
+    "bodyLarge":      { "family": "sans",  "size": 15, "weight": 400, "line": 22 },
+    "bodyMedium":     { "family": "sans",  "size": 14, "weight": 400, "line": 20 },
+    "bodySmall":      { "family": "sans",  "size": 13, "weight": 600, "line": 18 },
+    "labelLarge":     { "family": "sans",  "size": 15.5, "weight": 700, "line": 20 },
+    "labelMedium":    { "family": "sans",  "size": 13, "weight": 700, "line": 18 },
+    "labelSmall":     { "family": "sans",  "size": 11.5, "weight": 700, "line": 16, "tracking": 0.5 }
+  },
+
+  "contrast": [
+    { "fg": "text.primary",   "bg": "surface.bg",     "min": 4.5, "severity": "error", "use": "body text" },
+    { "fg": "text.primary",   "bg": "surface.card",   "min": 4.5, "severity": "error", "use": "body text on cards" },
+    { "fg": "text.primary",   "bg": "surface.raised", "min": 4.5, "severity": "error", "use": "text on chips and inputs" },
+    { "fg": "text.secondary", "bg": "surface.bg",     "min": 4.5, "severity": "error", "use": "supporting text" },
+    { "fg": "text.secondary", "bg": "surface.card",   "min": 4.5, "severity": "error", "use": "supporting text on cards" },
+    { "fg": "action.onPrimary", "bg": "action.primary", "min": 4.5, "severity": "error", "use": "primary button label" },
+    { "fg": "text.primary", "bg": "state.calm.soft",    "min": 4.5, "severity": "error", "use": "text on a calm pill" },
+    { "fg": "text.primary", "bg": "state.rising.soft",  "min": 4.5, "severity": "error", "use": "text on a rising pill" },
+    { "fg": "text.primary", "bg": "state.alert.soft",   "min": 4.5, "severity": "error", "use": "text on a support pill" },
+    { "fg": "text.primary", "bg": "state.info.soft",    "min": 4.5, "severity": "error", "use": "text on an info pill" },
+    { "fg": "text.primary", "bg": "state.neutral.soft", "min": 4.5, "severity": "error", "use": "text on a neutral pill" },
+    { "fg": "state.calm.ink",    "bg": "state.calm.soft",    "min": 3.0, "severity": "error", "use": "LARGE text / titles only" },
+    { "fg": "state.rising.ink",  "bg": "state.rising.soft",  "min": 3.0, "severity": "error", "use": "LARGE text / titles only" },
+    { "fg": "state.alert.ink",   "bg": "state.alert.soft",   "min": 3.0, "severity": "error", "use": "LARGE text / titles only" },
+    { "fg": "state.info.ink",    "bg": "state.info.soft",    "min": 3.0, "severity": "error", "use": "LARGE text / titles only" },
+    { "fg": "state.neutral.ink", "bg": "state.neutral.soft", "min": 3.0, "severity": "error", "use": "LARGE text / titles only" },
+    { "fg": "text.muted", "bg": "surface.card", "min": 3.0, "severity": "warn", "use": "decorative captions only — never essential information" }
+  ],
+
+  "icons": {
+    "grid": 24,
+    "strokeWidth": 2,
+    "strokeCap": "round",
+    "strokeJoin": "round",
+    "catalog": [
+      { "id": "calm", "replaces": "🌿", "category": "biometric", "label": "Calm Equilibrium Sprout", "token": "state.calm.ink" },
+      { "id": "overwhelmed", "replaces": "🌩️", "category": "biometric", "label": "Sensory Surge Cloud", "token": "state.alert.ink" },
+      { "id": "excited", "replaces": "✨", "category": "biometric", "label": "Joyful Sparkle Star", "token": "state.rising.ink" },
+      { "id": "active", "replaces": "🏃", "category": "biometric", "label": "Kinetic Bio-Pulse Wave", "token": "state.info.ink" },
+      { "id": "brain", "replaces": "🧠", "category": "biometric", "label": "BioCue Neural Crest", "token": "action.primary" },
+      { "id": "loud-noises", "replaces": "🔊", "category": "context", "label": "Acoustic Overload Horn", "token": "state.alert.ink" },
+      { "id": "crowded", "replaces": "👥", "category": "context", "label": "Social Density Overlap", "token": "state.rising.ink" },
+      { "id": "task-demand", "replaces": "📋", "category": "context", "label": "Executive Task Clipboard", "token": "state.info.ink" },
+      { "id": "routine-change", "replaces": "🔄", "category": "context", "label": "Transition Orbital Cycle", "token": "state.info.ink" },
+      { "id": "unknown-context", "replaces": "🤷", "category": "context", "label": "Uncertainty Query Disc", "token": "state.neutral.ink" },
+      { "id": "caregiver", "replaces": "👤", "category": "network", "label": "Circle Member Silhouette", "token": "text.primary" },
+      { "id": "soothing-audio", "replaces": "🌿/🔊", "category": "network", "label": "Botanical Audio Resonance", "token": "state.calm.ink" },
+      { "id": "privacy-lock", "replaces": "🔒", "category": "network", "label": "On-Device Privacy Lock", "token": "text.primary" },
+      { "id": "sos-location", "replaces": "📍", "category": "network", "label": "Emergency Pulse Beacon", "token": "state.alert.ink" },
+      { "id": "pairing-link", "replaces": "🔗", "category": "network", "label": "Interlocked Mutual Rings", "token": "action.primary" },
+      { "id": "telemetry-sync", "replaces": "📤", "category": "network", "label": "Local Telemetry Export", "token": "state.info.ink" }
+    ]
+  }
+}

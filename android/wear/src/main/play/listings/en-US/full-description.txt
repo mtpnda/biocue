@@ -1,0 +1,17 @@
+BioCue for Wear OS delivers gentle haptic cues and emotion check-ins directly on your wrist to build habit awareness, stress resilience, and everyday mindfulness.
+
+FEATURES:
+• Gentle Haptic Cueing: Subtle, non-intrusive wrist vibrations that guide attention without drawing unwanted social attention.
+• One-Tap Emotion Logging: Log emotional states instantly from your watch Tile or watch face complication.
+• Standalone & Companion Modes: Works independently for continuous sensing and syncs with your companion Android device when connected.
+• Efficient Sensor Integration: Powered by Wear OS Health Services for efficient passive data collection with minimal battery impact.
+• Emergency Signal Routing: Quick access to send distress or status updates to your private Circle.
+
+IMPORTANT MEDICAL & HEALTH DISCLAIMER:
+• BioCue is NOT a certified medical device and is not regulated or approved as medical diagnostic or therapeutic software.
+• This Wear OS app is designed strictly for general fitness, wellness, habit awareness, and stress tracking. It is NOT intended to diagnose, treat, cure, or prevent any illness, disease, or medical condition.
+• Always consult a doctor or qualified healthcare professional regarding any medical questions or symptoms. Never disregard professional medical advice because of information provided by this app.
+
+REQUIREMENTS:
+• Wear OS 3.0 or higher.
+• Companion Android phone recommended for Circle management and detailed history analytics.

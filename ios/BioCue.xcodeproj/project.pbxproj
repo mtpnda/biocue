@@ -1,0 +1,677 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		043BF72BC9B5668BD3E76F36 /* CaregiverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0703562DA45085C70A2C6F94 /* CaregiverViewModel.swift */; };
+		05F791EC9FB0599344E7218B /* WatchLinkCentral.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9057A3DE3F8C580E422CE23 /* WatchLinkCentral.swift */; };
+		06E0B45A19B699CC49BE1671 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4FA0626820E3855EA6A4CA /* RootView.swift */; };
+		125DB9F711D300DE8DE85F64 /* DlsTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F9ADA03E90FF59AF2BFB06 /* DlsTokens.swift */; };
+		154C6283CFA900EFAE026E12 /* BioCueApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDB32DF3E3F3BAEDBE8FC7A /* BioCueApp.swift */; };
+		1F2D7E85EA364CAB136B1EEC /* LocalStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471A6131B38F2976B7FDA781 /* LocalStores.swift */; };
+		23A2D252AA4FB59868B77EF4 /* AuthScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9498E3C804C5EFD69437919 /* AuthScreens.swift */; };
+		26B904BCA3618B1B795C9543 /* BioCueCore in Frameworks */ = {isa = PBXBuildFile; productRef = D6AE4C7818CCF234E4FD9D2F /* BioCueCore */; };
+		2D9952EF94BB93FA1202955C /* CaregiverRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EE4DC4A83A6C5C2ED4BBEC1 /* CaregiverRoot.swift */; };
+		36C21ECCF7BEA3B7EC1F07D0 /* AtkinsonHyperlegibleNext.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EE17731FC0271A0FAC6F70CF /* AtkinsonHyperlegibleNext.ttf */; };
+		3AC04E5F00B9F4F3892CE4D4 /* Newsreader.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CEEDBDD61FB9DAB668DD2EA /* Newsreader.ttf */; };
+		46AC1BB113FD19FA06AFAACF /* WearerHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */; };
+		4CFB797DACCEF5689084DD2F /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F917730B82ABD491AF4F3344 /* AuthService.swift */; };
+		4E043FB39C49D51086C91267 /* TestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D8A75C8AE2BFB80910B4F0 /* TestDoubles.swift */; };
+		607AEF576284D83B731D8AFA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B1B6269445BE60D36B8E9ACA /* FirebaseFirestore */; };
+		6093F48816C623AE62F0C8FD /* WearerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4266D84FF5B299A28EE45BC6 /* WearerServiceTests.swift */; };
+		67A07246C9E97E43D32E4B61 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 9CF1210F5D55700EC8DEB853 /* GoogleSignIn */; };
+		7147A4E48BEB4050D656CC0F /* WearerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB440D4926926E039251DE2 /* WearerService.swift */; };
+		765F0FA547F51F3C1C12050D /* AlertNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90567D5B3BF562CECD43C412 /* AlertNotifier.swift */; };
+		7FD5E3A7C75CE10D17B40034 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9DE32A9F3D5EE4A5D8489FD9 /* FirebaseAuth */; };
+		86C8759EE1596068B05CDBB8 /* WearerRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D8B58C453154B80FD4B36 /* WearerRoot.swift */; };
+		8ECC5AF9B28340CC4EBD60F0 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D6C95F796EC2262F29CA0DB /* TimeFormat.swift */; };
+		9CB121921C71ADDD517395FB /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 753742648E3A4EA7F8D4C580 /* Theme.swift */; };
+		9E18607EAF8E215A4DBF7AA9 /* BioCueCore in Frameworks */ = {isa = PBXBuildFile; productRef = 708ED427455C3E5E0D5B15E5 /* BioCueCore */; };
+		A0D2890237E4173E8C58A687 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65674A9359DE4FD283507A6E /* ProfileView.swift */; };
+		A8DD6B488628EAD712098075 /* CloudModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8832B3BBE2FE9EF33BD54AD /* CloudModels.swift */; };
+		A8F46771646939B1133DF369 /* FirebaseCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C86FC03C1E34BD0FF4EFC8 /* FirebaseCloud.swift */; };
+		AE61B6E32E600045A2C20DA0 /* WatchLinkCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12C1D0AD4AE6408BC0202E0B /* WatchLinkCard.swift */; };
+		B708BD341F629C7CF603FC5C /* SharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1104A62CB7CC7B61EF8EE1 /* SharedViews.swift */; };
+		D7AE4686C87F80DAA0BBB1D6 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579A5AFF843529F86397BEB7 /* AppEnvironment.swift */; };
+		DE74DDBA3F2EFC1A8B5CE46F /* WearerViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73068EF4817CE811B7729756 /* WearerViewModels.swift */; };
+		EE76C9C469DCCB3D63DE2681 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56C21D2C827A01A3441E07A /* Components.swift */; };
+		FA05CC82B4A8382EAFDA00BB /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E298413812BE6E5BA19201 /* SessionStore.swift */; };
+		FDB78BDD48FEF3B2656FC1ED /* CaregiverScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22814FCA3EFC8098CC5C327B /* CaregiverScreens.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A97D9F8F4A1F90C82794E02A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0E46404D78B1CCF3D989C108 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1486A88DB5AB1D90365F3DA5;
+			remoteInfo = BioCue;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0703562DA45085C70A2C6F94 /* CaregiverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaregiverViewModel.swift; sourceTree = "<group>"; };
+		0A1104A62CB7CC7B61EF8EE1 /* SharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedViews.swift; sourceTree = "<group>"; };
+		12C1D0AD4AE6408BC0202E0B /* WatchLinkCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLinkCard.swift; sourceTree = "<group>"; };
+		22814FCA3EFC8098CC5C327B /* CaregiverScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaregiverScreens.swift; sourceTree = "<group>"; };
+		2EE4DC4A83A6C5C2ED4BBEC1 /* CaregiverRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaregiverRoot.swift; sourceTree = "<group>"; };
+		36E298413812BE6E5BA19201 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerHomeView.swift; sourceTree = "<group>"; };
+		3B7D8B58C453154B80FD4B36 /* WearerRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerRoot.swift; sourceTree = "<group>"; };
+		4266D84FF5B299A28EE45BC6 /* WearerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerServiceTests.swift; sourceTree = "<group>"; };
+		471A6131B38F2976B7FDA781 /* LocalStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStores.swift; sourceTree = "<group>"; };
+		4C4FA0626820E3855EA6A4CA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		579A5AFF843529F86397BEB7 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		63F9ADA03E90FF59AF2BFB06 /* DlsTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DlsTokens.swift; sourceTree = "<group>"; };
+		65674A9359DE4FD283507A6E /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		70FFB6147AF734A6B87C7124 /* BioCue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BioCue.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		73068EF4817CE811B7729756 /* WearerViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerViewModels.swift; sourceTree = "<group>"; };
+		753742648E3A4EA7F8D4C580 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		75C86FC03C1E34BD0FF4EFC8 /* FirebaseCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseCloud.swift; sourceTree = "<group>"; };
+		8CEEDBDD61FB9DAB668DD2EA /* Newsreader.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Newsreader.ttf; sourceTree = "<group>"; };
+		90567D5B3BF562CECD43C412 /* AlertNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertNotifier.swift; sourceTree = "<group>"; };
+		9CDB32DF3E3F3BAEDBE8FC7A /* BioCueApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BioCueApp.swift; sourceTree = "<group>"; };
+		9D6C95F796EC2262F29CA0DB /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
+		A56C21D2C827A01A3441E07A /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		B5D8A75C8AE2BFB80910B4F0 /* TestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDoubles.swift; sourceTree = "<group>"; };
+		B9057A3DE3F8C580E422CE23 /* WatchLinkCentral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLinkCentral.swift; sourceTree = "<group>"; };
+		B9498E3C804C5EFD69437919 /* AuthScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthScreens.swift; sourceTree = "<group>"; };
+		BAB440D4926926E039251DE2 /* WearerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerService.swift; sourceTree = "<group>"; };
+		C83EFC48D548DA5EBA6B7BA0 /* BioCueCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BioCueCore; path = Packages/BioCueCore; sourceTree = SOURCE_ROOT; };
+		CF1FD2B0D39DBCEF6575CAE5 /* BioCueTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BioCueTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE17731FC0271A0FAC6F70CF /* AtkinsonHyperlegibleNext.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = AtkinsonHyperlegibleNext.ttf; sourceTree = "<group>"; };
+		F8832B3BBE2FE9EF33BD54AD /* CloudModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudModels.swift; sourceTree = "<group>"; };
+		F917730B82ABD491AF4F3344 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5A5F46A067008F492FBA91D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26B904BCA3618B1B795C9543 /* BioCueCore in Frameworks */,
+				7FD5E3A7C75CE10D17B40034 /* FirebaseAuth in Frameworks */,
+				607AEF576284D83B731D8AFA /* FirebaseFirestore in Frameworks */,
+				67A07246C9E97E43D32E4B61 /* GoogleSignIn in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		673E389AEFA856201998F695 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E18607EAF8E215A4DBF7AA9 /* BioCueCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		050F5E9187EAC9D8CA9CA4EF /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				A56C21D2C827A01A3441E07A /* Components.swift */,
+				63F9ADA03E90FF59AF2BFB06 /* DlsTokens.swift */,
+				753742648E3A4EA7F8D4C580 /* Theme.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		0E243F8FFDE92E329B641B39 /* Caregiver */ = {
+			isa = PBXGroup;
+			children = (
+				2EE4DC4A83A6C5C2ED4BBEC1 /* CaregiverRoot.swift */,
+				22814FCA3EFC8098CC5C327B /* CaregiverScreens.swift */,
+				0703562DA45085C70A2C6F94 /* CaregiverViewModel.swift */,
+			);
+			path = Caregiver;
+			sourceTree = "<group>";
+		};
+		12876DDCF14C21BF758654E8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				70FFB6147AF734A6B87C7124 /* BioCue.app */,
+				CF1FD2B0D39DBCEF6575CAE5 /* BioCueTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1B13186D5CFA83563927EB2F /* BioCue */ = {
+			isa = PBXGroup;
+			children = (
+				64047F63F3A9C8F8AD470277 /* Resources */,
+				BC03ECD5E7ADDB4B92BDBBEA /* Sources */,
+			);
+			path = BioCue;
+			sourceTree = "<group>";
+		};
+		348A2AB0C7A99EDCD09345E0 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				C83EFC48D548DA5EBA6B7BA0 /* BioCueCore */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		396150EACD9EB7698E38AA37 = {
+			isa = PBXGroup;
+			children = (
+				1B13186D5CFA83563927EB2F /* BioCue */,
+				D2DC267AF50D9FCC3EB96275 /* BioCueTests */,
+				348A2AB0C7A99EDCD09345E0 /* Packages */,
+				12876DDCF14C21BF758654E8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		62E8346FE8C14C06D0BFC10A /* Wearer */ = {
+			isa = PBXGroup;
+			children = (
+				90567D5B3BF562CECD43C412 /* AlertNotifier.swift */,
+				471A6131B38F2976B7FDA781 /* LocalStores.swift */,
+				12C1D0AD4AE6408BC0202E0B /* WatchLinkCard.swift */,
+				B9057A3DE3F8C580E422CE23 /* WatchLinkCentral.swift */,
+				3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */,
+				3B7D8B58C453154B80FD4B36 /* WearerRoot.swift */,
+				BAB440D4926926E039251DE2 /* WearerService.swift */,
+				73068EF4817CE811B7729756 /* WearerViewModels.swift */,
+			);
+			path = Wearer;
+			sourceTree = "<group>";
+		};
+		64047F63F3A9C8F8AD470277 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B9C4540461A5CBCB1D99C232 /* Fonts */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		6EC77AF2C13BA72F13A507A9 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				F917730B82ABD491AF4F3344 /* AuthService.swift */,
+				F8832B3BBE2FE9EF33BD54AD /* CloudModels.swift */,
+				75C86FC03C1E34BD0FF4EFC8 /* FirebaseCloud.swift */,
+				65674A9359DE4FD283507A6E /* ProfileView.swift */,
+				36E298413812BE6E5BA19201 /* SessionStore.swift */,
+				0A1104A62CB7CC7B61EF8EE1 /* SharedViews.swift */,
+				9D6C95F796EC2262F29CA0DB /* TimeFormat.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		B9C4540461A5CBCB1D99C232 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				EE17731FC0271A0FAC6F70CF /* AtkinsonHyperlegibleNext.ttf */,
+				8CEEDBDD61FB9DAB668DD2EA /* Newsreader.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		BC03ECD5E7ADDB4B92BDBBEA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				CCEEFA454B089EA4A5B7A1AF /* App */,
+				D394CD46F6FD4BDE62AA361D /* Auth */,
+				0E243F8FFDE92E329B641B39 /* Caregiver */,
+				050F5E9187EAC9D8CA9CA4EF /* Design */,
+				6EC77AF2C13BA72F13A507A9 /* Shared */,
+				62E8346FE8C14C06D0BFC10A /* Wearer */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		CCEEFA454B089EA4A5B7A1AF /* App */ = {
+			isa = PBXGroup;
+			children = (
+				579A5AFF843529F86397BEB7 /* AppEnvironment.swift */,
+				9CDB32DF3E3F3BAEDBE8FC7A /* BioCueApp.swift */,
+				4C4FA0626820E3855EA6A4CA /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D2DC267AF50D9FCC3EB96275 /* BioCueTests */ = {
+			isa = PBXGroup;
+			children = (
+				B5D8A75C8AE2BFB80910B4F0 /* TestDoubles.swift */,
+				4266D84FF5B299A28EE45BC6 /* WearerServiceTests.swift */,
+			);
+			path = BioCueTests;
+			sourceTree = "<group>";
+		};
+		D394CD46F6FD4BDE62AA361D /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				B9498E3C804C5EFD69437919 /* AuthScreens.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1486A88DB5AB1D90365F3DA5 /* BioCue */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2F2E50A37E1D9D6E246FE516 /* Build configuration list for PBXNativeTarget "BioCue" */;
+			buildPhases = (
+				F3F2A23ADEFBC6B23531F642 /* Sources */,
+				77F152309B334C18D51AED46 /* Resources */,
+				5A5F46A067008F492FBA91D7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BioCue;
+			packageProductDependencies = (
+				D6AE4C7818CCF234E4FD9D2F /* BioCueCore */,
+				9DE32A9F3D5EE4A5D8489FD9 /* FirebaseAuth */,
+				B1B6269445BE60D36B8E9ACA /* FirebaseFirestore */,
+				9CF1210F5D55700EC8DEB853 /* GoogleSignIn */,
+			);
+			productName = BioCue;
+			productReference = 70FFB6147AF734A6B87C7124 /* BioCue.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EC2C1EFF62DB2329F50EC7CA /* BioCueTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 59C44D3412423157F953845B /* Build configuration list for PBXNativeTarget "BioCueTests" */;
+			buildPhases = (
+				3E6EE1394B78A057B3035D52 /* Sources */,
+				673E389AEFA856201998F695 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C4E33D348C6E99229C7ADAAB /* PBXTargetDependency */,
+			);
+			name = BioCueTests;
+			packageProductDependencies = (
+				708ED427455C3E5E0D5B15E5 /* BioCueCore */,
+			);
+			productName = BioCueTests;
+			productReference = CF1FD2B0D39DBCEF6575CAE5 /* BioCueTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0E46404D78B1CCF3D989C108 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = 4C4E10B626A0FA6D45083D69 /* Build configuration list for PBXProject "BioCue" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 396150EACD9EB7698E38AA37;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				F662A044E9487F0822FE5C16 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				34131FD4747A2E8137D5042F /* XCLocalSwiftPackageReference "Packages/BioCueCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 12876DDCF14C21BF758654E8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1486A88DB5AB1D90365F3DA5 /* BioCue */,
+				EC2C1EFF62DB2329F50EC7CA /* BioCueTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		77F152309B334C18D51AED46 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36C21ECCF7BEA3B7EC1F07D0 /* AtkinsonHyperlegibleNext.ttf in Resources */,
+				3AC04E5F00B9F4F3892CE4D4 /* Newsreader.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3E6EE1394B78A057B3035D52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E043FB39C49D51086C91267 /* TestDoubles.swift in Sources */,
+				6093F48816C623AE62F0C8FD /* WearerServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3F2A23ADEFBC6B23531F642 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				765F0FA547F51F3C1C12050D /* AlertNotifier.swift in Sources */,
+				D7AE4686C87F80DAA0BBB1D6 /* AppEnvironment.swift in Sources */,
+				23A2D252AA4FB59868B77EF4 /* AuthScreens.swift in Sources */,
+				4CFB797DACCEF5689084DD2F /* AuthService.swift in Sources */,
+				154C6283CFA900EFAE026E12 /* BioCueApp.swift in Sources */,
+				2D9952EF94BB93FA1202955C /* CaregiverRoot.swift in Sources */,
+				FDB78BDD48FEF3B2656FC1ED /* CaregiverScreens.swift in Sources */,
+				043BF72BC9B5668BD3E76F36 /* CaregiverViewModel.swift in Sources */,
+				A8DD6B488628EAD712098075 /* CloudModels.swift in Sources */,
+				EE76C9C469DCCB3D63DE2681 /* Components.swift in Sources */,
+				125DB9F711D300DE8DE85F64 /* DlsTokens.swift in Sources */,
+				A8F46771646939B1133DF369 /* FirebaseCloud.swift in Sources */,
+				1F2D7E85EA364CAB136B1EEC /* LocalStores.swift in Sources */,
+				A0D2890237E4173E8C58A687 /* ProfileView.swift in Sources */,
+				06E0B45A19B699CC49BE1671 /* RootView.swift in Sources */,
+				FA05CC82B4A8382EAFDA00BB /* SessionStore.swift in Sources */,
+				B708BD341F629C7CF603FC5C /* SharedViews.swift in Sources */,
+				9CB121921C71ADDD517395FB /* Theme.swift in Sources */,
+				8ECC5AF9B28340CC4EBD60F0 /* TimeFormat.swift in Sources */,
+				AE61B6E32E600045A2C20DA0 /* WatchLinkCard.swift in Sources */,
+				05F791EC9FB0599344E7218B /* WatchLinkCentral.swift in Sources */,
+				46AC1BB113FD19FA06AFAACF /* WearerHomeView.swift in Sources */,
+				86C8759EE1596068B05CDBB8 /* WearerRoot.swift in Sources */,
+				7147A4E48BEB4050D656CC0F /* WearerService.swift in Sources */,
+				DE74DDBA3F2EFC1A8B5CE46F /* WearerViewModels.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C4E33D348C6E99229C7ADAAB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1486A88DB5AB1D90365F3DA5 /* BioCue */;
+			targetProxy = A97D9F8F4A1F90C82794E02A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		24D198B1CEC114F1F02756BA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = REPLACE_WITH_REVERSED_CLIENT_ID;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		61FB171DBD07CE023AA66EC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 3T5F877TAB;
+				INFOPLIST_FILE = BioCue/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mtpnda.biocue.ios;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6573F92ED58E08660EEFD6F9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mtpnda.BioCueTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BioCue.app/BioCue";
+			};
+			name = Debug;
+		};
+		CDF3AEA4B54B006CC14A83F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = REPLACE_WITH_REVERSED_CLIENT_ID;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		E324175DEC39035148E057CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mtpnda.BioCueTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BioCue.app/BioCue";
+			};
+			name = Release;
+		};
+		F543C7FDCD7B816A95DE766F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 3T5F877TAB;
+				INFOPLIST_FILE = BioCue/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mtpnda.biocue.ios;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2F2E50A37E1D9D6E246FE516 /* Build configuration list for PBXNativeTarget "BioCue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F543C7FDCD7B816A95DE766F /* Debug */,
+				61FB171DBD07CE023AA66EC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4C4E10B626A0FA6D45083D69 /* Build configuration list for PBXProject "BioCue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDF3AEA4B54B006CC14A83F2 /* Debug */,
+				24D198B1CEC114F1F02756BA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		59C44D3412423157F953845B /* Build configuration list for PBXNativeTarget "BioCueTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6573F92ED58E08660EEFD6F9 /* Debug */,
+				E324175DEC39035148E057CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		34131FD4747A2E8137D5042F /* XCLocalSwiftPackageReference "Packages/BioCueCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/BioCueCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+		F662A044E9487F0822FE5C16 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		708ED427455C3E5E0D5B15E5 /* BioCueCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BioCueCore;
+		};
+		9CF1210F5D55700EC8DEB853 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F662A044E9487F0822FE5C16 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		9DE32A9F3D5EE4A5D8489FD9 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		B1B6269445BE60D36B8E9ACA /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54C6CBE407EA9A782C529082 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		D6AE4C7818CCF234E4FD9D2F /* BioCueCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BioCueCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 0E46404D78B1CCF3D989C108 /* Project object */;
+}

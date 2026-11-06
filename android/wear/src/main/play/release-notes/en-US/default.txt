@@ -1,0 +1,1 @@
+v0.1.12: Direct Open Settings navigation for Wear OS sensor and location permissions with auto-resume on return.

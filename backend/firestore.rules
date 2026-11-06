@@ -1,0 +1,116 @@
+rules_version = '2';
+
+// Server-side enforcement of docs/spec/07_MULTI_ACCOUNT.md (as amended) and the role matrix in docs/spec/09.
+// The client enforces roles for UX; THESE RULES are what actually stops a modified client.
+// NOTE: written against the spec, NOT yet executed (needs the Firebase emulator): run firestore-rules-tests first.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isUser(uid) { return signedIn() && request.auth.uid == uid; }
+    function userDoc(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function pairingPath(id) { return /databases/$(database)/documents/pairings/$(id); }
+    function hasRole(uid, role) { return exists(userDoc(uid)) && get(userDoc(uid)).data.role == role; }
+    function approvedPairing(wearerUid, caregiverUid) {
+      return exists(pairingPath(wearerUid + "_" + caregiverUid)) &&
+        get(pairingPath(wearerUid + "_" + caregiverUid)).data.status == "APPROVED";
+    }
+    function onlyChanges(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    // ---- Profiles -----------------------------------------------------------------------------------------------
+    // 07: a role is chosen once and never changes. `get` (by uid) is allowed to any signed-in user because a caregiver
+    // must read a wearer's profile after looking a code up; `list` is NOT, so nobody can enumerate users or live codes.
+    match /users/{userId} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if isUser(userId) && request.resource.data.role in ["WEARER", "CAREGIVER"];
+      allow update: if isUser(userId)
+        && request.resource.data.role == resource.data.role
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["pairingCode", "pairingCodeExpiresAt"])
+            || resource.data.role == "WEARER");
+      allow delete: if false;
+    }
+
+    // ---- Push: device tokens (docs/spec/12). Only the owner writes/reads their own; the Cloud Function reads them via admin ----
+    match /users/{userId}/devices/{installId} {
+      allow read, delete: if isUser(userId);
+      allow create, update: if isUser(userId)
+        && request.resource.data.keys().hasOnly(["token", "platform", "updatedAt"])
+        && request.resource.data.token is string
+        && request.resource.data.platform in ["android", "ios"]
+        && request.resource.data.updatedAt is int;
+    }
+
+    // ---- Pairing codes (direct lookup only) -------------------------------------------------------------------------
+    // The wearer's app deletes a code as soon as the first request arrives (single-use), so delete is the wearer's.
+    match /active_codes/{codeId} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if signedIn()
+        && request.resource.data.wearerUid == request.auth.uid
+        && hasRole(request.auth.uid, "WEARER")
+        && (resource == null
+            || resource.data.wearerUid == request.auth.uid
+            || resource.data.expiresAt < request.time.toMillis());
+      allow delete: if signedIn() && resource.data.wearerUid == request.auth.uid;
+    }
+
+    // ---- Pairings ------------------------------------------------------------------------------------------------------
+    match /pairings/{pairingId} {
+      allow read: if signedIn() && (
+        resource.data.wearerUid == request.auth.uid || resource.data.caregiverUid == request.auth.uid
+      );
+      // Only a CAREGIVER profile may request, for a real WEARER, as itself, always PENDING.
+      allow create: if signedIn()
+        && request.resource.data.caregiverUid == request.auth.uid
+        && pairingId == request.resource.data.wearerUid + "_" + request.auth.uid
+        && request.resource.data.status == "PENDING"
+        && hasRole(request.auth.uid, "CAREGIVER")
+        && hasRole(request.resource.data.wearerUid, "WEARER");
+      allow update: if
+        // the wearer decides: approve, or remove (status + removedAt only)
+        (isUser(resource.data.wearerUid) && onlyChanges(["status", "removedAt"]))
+        // a caregiver may LEAVE: set their own pairing to REMOVED
+        || (isUser(resource.data.caregiverUid) && onlyChanges(["status", "removedAt"])
+            && request.resource.data.status == "REMOVED")
+        // a removed caregiver may ask again on the SAME document (07: re-pairing); the wearer must approve again
+        || (isUser(resource.data.caregiverUid)
+            && resource.data.status == "REMOVED"
+            && request.resource.data.status == "PENDING"
+            && onlyChanges(["status", "removedAt", "createdAt", "caregiverName"])
+            && hasRole(request.auth.uid, "CAREGIVER")
+            && hasRole(resource.data.wearerUid, "WEARER"));
+      // 07: "On Deny the document is deleted"
+      allow delete: if isUser(resource.data.wearerUid);
+    }
+
+    // ---- Caregiver reviews (07: pairing-scoped; never written onto the wearer's event) ---------------------------------
+    match /pairings/{pairingId}/reviews/{eventId} {
+      allow read: if signedIn() && (
+        get(pairingPath(pairingId)).data.wearerUid == request.auth.uid ||
+        get(pairingPath(pairingId)).data.caregiverUid == request.auth.uid
+      );
+      allow create, update: if signedIn()
+        && get(pairingPath(pairingId)).data.caregiverUid == request.auth.uid
+        && get(pairingPath(pairingId)).data.status == "APPROVED"
+        && request.resource.data.keys().hasOnly(["label", "isResolved", "updatedAt"])
+        && request.resource.data.label is string
+        && request.resource.data.isResolved is bool
+        && request.resource.data.updatedAt is int;
+      allow delete: if signedIn() && get(pairingPath(pairingId)).data.wearerUid == request.auth.uid;
+    }
+
+    // ---- Wearer data ---------------------------------------------------------------------------------------------------
+    match /wearerData/{wearerUid}/events/{eventId} {
+      // The wearer, or a caregiver of an APPROVED pairing. Caregivers never write here (they use `reviews`).
+      allow read: if isUser(wearerUid)
+        || (signedIn() && hasRole(request.auth.uid, "CAREGIVER") && approvedPairing(wearerUid, request.auth.uid));
+      allow create, update, delete: if isUser(wearerUid) && hasRole(wearerUid, "WEARER");
+    }
+    // Push log (who was already notified for an event): written ONLY by the Cloud Function (admin bypasses rules).
+    match /wearerData/{wearerUid}/pushLog/{eventId} { allow read, write: if false; }
+    // Anything else under wearerData is denied by default.
+  }
+}

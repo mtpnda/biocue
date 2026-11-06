@@ -1,8 +1,0 @@
-- `[x]` Refactor Package Name
-- `[x]` Fix Build Issues
-- `[/]` AVD Optimization
-    - `[ ]` Delete unused Tablet AVDs (Nexus 7, Pixel C)
-    - `[ ]` Setup ADB pairing bridge
-- `[ ]` Verification
-    - `[ ]` Run unit tests
-    - `[ ]` Verify pairing in Wear OS app

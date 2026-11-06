@@ -1,0 +1,23 @@
+{
+  "tasks": {
+    "dev": "deno run --watch --unstable-kv -A src/main.ts",
+    "start": "deno run --unstable-kv -A src/main.ts",
+    "test": "deno test --unstable-kv -A src/"
+  },
+  "test": {
+    "include": ["src/"]
+  },
+  "exclude": [
+    "functions",
+    "firestore-rules-tests"
+  ],
+  "imports": {
+    "hono": "npm:hono@^4.4.0",
+    "@hono/zod-openapi": "npm:@hono/zod-openapi@^0.14.0",
+    "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.4.0",
+    "zod": "npm:zod@^3.23.8"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}
