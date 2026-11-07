@@ -1,1 +1,1 @@
-BioCue - Wear OS Alerts
+BioCue: Stress & Vitals Sync

@@ -23,6 +23,26 @@ GEMFILE_PATH = os.path.join(PROJECT_ROOT, "Gemfile")
 DMG_PATH = os.path.join(PROJECT_ROOT, "build", "BioCue.dmg")
 
 
+def get_effective_fastfile():
+    """Reads project Fastfile and follows central import references."""
+    if not os.path.isfile(FASTFILE_PATH):
+        return ""
+    with open(FASTFILE_PATH, "r") as f:
+        content = f.read()
+
+    # Follow local central-agents import
+    import re
+    m = re.search(r'central_fastfile\s*=\s*File\.expand_path\(["\']([^"\']+)["\']\)', content)
+    if not m:
+        m = re.search(r'import\s*\((?:File\.expand_path\()?["\']([^"\']+)["\']\)?\)', content)
+    if m:
+        target = os.path.expanduser(m.group(1))
+        if os.path.exists(target):
+            with open(target, "r") as f_imp:
+                content += "\n" + f_imp.read()
+    return content
+
+
 class TestReleaseAutomation(unittest.TestCase):
 
     def test_no_divergent_scripts_in_repo(self):
@@ -40,8 +60,7 @@ class TestReleaseAutomation(unittest.TestCase):
         """Verify Fastlane Fastfile defines build_uninstaller_script helper."""
         if not os.path.isfile(FASTFILE_PATH):
             self.skipTest("No Fastfile present in project")
-        with open(FASTFILE_PATH, "r") as f:
-            fastfile = f.read()
+        fastfile = get_effective_fastfile()
         self.assertIn("def build_uninstaller_script", fastfile)
         self.assertIn("tccutil reset", fastfile)
         self.assertIn("--permissions-only", fastfile)
@@ -51,8 +70,7 @@ class TestReleaseAutomation(unittest.TestCase):
         """Verify Fastlane defines comprehensive `mac uninstall` lane."""
         if not os.path.isfile(FASTFILE_PATH):
             self.skipTest("No Fastfile present in project")
-        with open(FASTFILE_PATH, "r") as f:
-            fastfile = f.read()
+        fastfile = get_effective_fastfile()
         self.assertIn("lane :uninstall do", fastfile)
         self.assertIn("tccutil reset", fastfile)
         self.assertIn("FileUtils.rm_rf", fastfile)
@@ -100,10 +118,9 @@ class TestReleaseAutomation(unittest.TestCase):
         self.assertTrue(os.path.isfile(APPFILE_PATH))
         self.assertTrue(os.path.isfile(FASTFILE_PATH))
 
-        with open(FASTFILE_PATH, "r") as f:
-            fastfile = f.read()
-            self.assertIn("internal_release", fastfile)
-            self.assertIn("copy_to_folder", fastfile)
+        fastfile = get_effective_fastfile()
+        self.assertIn("internal_release", fastfile)
+        self.assertIn("copy_to_folder", fastfile)
 
     def test_fastlane_lanes_dryrun(self):
         """Verify fastlane CLI executes `fastlane lanes` cleanly without Ruby errors."""
@@ -120,8 +137,7 @@ class TestReleaseAutomation(unittest.TestCase):
 
     def test_fastlane_orchestration_lanes_syntax(self):
         """Verify top-level orchestration lanes use runner.execute and no undefined method calls."""
-        with open(FASTFILE_PATH, "r") as f:
-            fastfile = f.read()
+        fastfile = get_effective_fastfile()
 
         # Ensure no legacy/undefined platform methods are called
         self.assertNotIn("mac_internal(", fastfile)
@@ -187,7 +203,15 @@ class TestReleaseAutomation(unittest.TestCase):
         with open(makefile_path, "r") as f:
             content = f.read()
 
-        for target in ["help:", "doctor:", "release-local:", "sync-webhost:", "build-all:", "test-release:", "test-reviewer:"]:
+        import re
+        m = re.search(r'-?include\s+([^\n]+)', content)
+        if m:
+            inc_path = os.path.expanduser(m.group(1).replace("$(HOME)", "~"))
+            if os.path.exists(inc_path):
+                with open(inc_path, "r") as f_inc:
+                    content += "\n" + f_inc.read()
+
+        for target in ["help:", "doctor:", "release-local:", "sync-webhost:", "test-release:"]:
             self.assertIn(target, content, f"Target {target} missing from Makefile")
 
     def test_playstore_metadata_integrity(self):

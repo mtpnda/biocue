@@ -1,23 +1,30 @@
-BioCue for Wear OS delivers gentle haptic cues and emotion check-ins directly on your wrist to build habit awareness, stress resilience, and everyday mindfulness.
+BioCue is an ambient wellness and habit-cueing companion designed to seamlessly bridge the gap between smartwatch vitals and caregiver support. Built with neuro-inclusive design principles, BioCue provides a zero-anxiety tracking experience for the wearer while delivering rich, real-time wellness insights to a trusted caregiver or family circle.
 
-FEATURES:
-• Gentle Haptic Cueing: Subtle, non-intrusive wrist vibrations that guide attention without drawing unwanted social attention.
-• One-Tap Emotion Logging: Log emotional states instantly from your watch Tile or watch face complication.
-• Standalone & Companion Modes: Works independently for continuous sensing and syncs with your companion Android device when connected.
-• Efficient Sensor Integration: Powered by Wear OS Health Services for efficient passive data collection with minimal battery impact.
-• Emergency Signal Routing: Quick access to send distress or status updates to your private Circle.
+Using Wear OS sensor integration, BioCue monitors continuous wellness data directly from your smartwatch and instantly syncs it to a clear, calming dashboard on your companion phone.
 
-IMPORTANT MEDICAL & HEALTH DISCLAIMER:
-• BioCue is NOT a certified medical device and is not regulated or approved as medical diagnostic or therapeutic software.
-• This Wear OS app is designed strictly for general fitness, wellness, habit awareness, and stress tracking. It is NOT intended to diagnose, treat, cure, or prevent any illness, disease, or medical condition.
-• Always consult a doctor or qualified healthcare professional regarding any medical questions or symptoms. Never disregard professional medical advice because of information provided by this app.
+KEY FEATURES
+• Zero-Anxiety Watch Interface: A calming, ambient smartwatch design that operates quietly in the background without overwhelming the wearer with clinical numbers.
+• Caregiver Dashboard: A clear mobile interface displaying real-time heart rate trends and activity levels.
+• The Fusion Score: An intelligent wellness index that synthesizes biometric vitals to highlight rising stress patterns, enabling wearers and caregivers to practice timely grounding and awareness routines.
+• Real-Time Sync: Powered by a high-speed data layer, ensuring the caregiver's dashboard updates immediately when wellness vitals change.
+• Retrospective Labeling: Review historical events and track baseline calibrations over time to identify daily stress triggers and habit patterns.
+• Private Circle Sharing: Invite trusted family members or caregivers to your private circle via secure pairing codes.
 
-OFFICIAL LINKS & SUPPORT:
+IMPORTANT MEDICAL & HEALTH DISCLAIMER
+• Not a Medical Device: BioCue is NOT a medical device, is not approved or certified by any medical regulatory authority (such as the US FDA or EU CE MDR), and is not clinical software.
+• For General Wellness Only: BioCue is intended solely for general health, fitness, habit awareness, relaxation, and stress management. It does NOT diagnose, treat, cure, mitigate, or prevent any disease, illness, psychological disorder, or medical condition.
+• Not a Substitute for Professional Advice: BioCue should never replace professional medical diagnosis, clinical judgment, or medical care. Always seek the advice of a physician or qualified healthcare provider with any questions regarding health conditions, symptoms, or interventions. If you experience severe distress or a medical emergency, contact emergency medical services immediately.
+
+DATA PRIVACY & SECURITY
+• Private by Design: Raw biometric and motion data stays protected and is only shared with caregivers you explicitly authorize.
+• No Data Selling: We do not sell your personal or wellness data to advertisers or third-party data brokers.
+• Transparent Controls: You remain in complete control of your caregiver pairing and data retention at all times.
+
+OFFICIAL LINKS & SUPPORT
 • Official Website: https://biocue.matapandastudio.deno.net
 • Privacy Policy: https://biocue.matapandastudio.deno.net/privacy
 • Help & Support: https://biocue.matapandastudio.deno.net/support
 • Terms of Service: https://biocue.matapandastudio.deno.net/terms
 
-REQUIREMENTS:
-• Wear OS 3.0 or higher.
-• Companion Android phone recommended for Circle management and detailed history analytics.
+REQUIREMENTS
+• BioCue requires both an Android smartphone (Android 10+) and a compatible Wear OS smartwatch (Wear OS 3.0+) for full companion syncing.
