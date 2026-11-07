@@ -25,7 +25,7 @@ YELLOW:= \033[33m
 RED   := \033[31m
 RESET := \033[0m
 
-.PHONY: help doctor clean build-all build-mac build-ios build-android build-mobile build-wear build-mock \
+.PHONY: help doctor setup-secrets clean build-all build-mac build-ios build-android build-mobile build-wear build-mock \
         release-local release-mac-local release-ios-local release-android-local release-wear-local sync-webhost \
         release-github release-mac-github release-android-github \
         release-appstore release-mac-appstore release-ios-appstore release-testflight \
@@ -89,18 +89,47 @@ help:
 	@echo ""
 	@echo -e "$(BOLD)🔍 7. ENVIRONMENT & UTILITIES$(RESET)"
 	@echo -e "  $(GREEN)make doctor$(RESET)                 Verify required build tools & environment"
+	@echo -e "  $(GREEN)make setup-secrets$(RESET)          Link ~/.secrets into project for local builds"
 	@echo -e "  $(GREEN)make clean$(RESET)                  Clean build caches and generated artifacts"
 	@echo ""
 
 # ------------------------------------------------------------------------------
-# 1. Environment Health Check
+# 1. Environment Health Check & Secrets Setup
 # ------------------------------------------------------------------------------
 doctor:
-	@echo -e "$(BOLD)$(CYAN)🔍 Checking BioCue Release Toolchain...$(RESET)"
+	@echo -e "$(BOLD)$(CYAN)🔍 Checking BioCue Release Toolchain & Secrets...$(RESET)"
 	@command -v bundle >/dev/null 2>&1 && echo -e "  ✓ Bundler:     $$(bundle --version)" || echo -e "  $(RED)✗ Bundler not found$(RESET)"
-	@command -v fastlane >/dev/null 2>&1 && echo -e "  ✓ Fastlane:    $$(fastlane --version | head -n 1)" || echo -e "  $(RED)✗ Fastlane not found$(RESET)"
+	@command -v fastlane >/dev/null 2>&1 && echo -e "  ✓ Fastlane:    Installed" || echo -e "  $(RED)✗ Fastlane not found$(RESET)"
 	@command -v xcodebuild >/dev/null 2>&1 && echo -e "  ✓ Xcode:       $$(xcodebuild -version | head -n 1)" || echo -e "  $(YELLOW)⚠ Xcode not found (needed for Apple platforms)$(RESET)"
 	@test -d "$(WEBHOST_DIR)" && echo -e "  ✓ Webhost Dir: $(WEBHOST_DIR) exists" || echo -e "  $(YELLOW)⚠ Webhost directory $(WEBHOST_DIR) does not exist$(RESET)"
+	@test -f "$$HOME/.secrets/android/biocue-release-key.jks" && echo -e "  ✓ Release Key: $$HOME/.secrets/android/biocue-release-key.jks found" || echo -e "  $(YELLOW)⚠ Release Key missing in ~/.secrets/android/biocue-release-key.jks$(RESET)"
+	@test -f "$$HOME/.secrets/android/play-account.json" && echo -e "  ✓ Play Acct:   $$HOME/.secrets/android/play-account.json found" || echo -e "  $(YELLOW)⚠ Play credentials missing in ~/.secrets/android/play-account.json$(RESET)"
+	@test -f "$$HOME/.secrets/android/biocue/google-services.json" && echo -e "  ✓ Firebase:    $$HOME/.secrets/android/biocue/google-services.json found" || echo -e "  $(YELLOW)⚠ Firebase config missing in ~/.secrets/android/biocue/google-services.json$(RESET)"
+	@test -f "$$HOME/.android/debug.keystore" && echo -e "  ✓ Debug Key:   $$HOME/.android/debug.keystore found" || echo -e "  $(YELLOW)⚠ Local debug keystore missing at ~/.android/debug.keystore$(RESET)"
+	@echo ""
+
+setup-secrets:
+	@echo -e "$(BOLD)$(CYAN)🔐 Linking Global Secrets into Project Directory...$(RESET)"
+	@mkdir -p android/mobile
+	@if [ -f "$$HOME/.secrets/android/biocue/google-services.json" ]; then \
+		ln -sf "$$HOME/.secrets/android/biocue/google-services.json" android/mobile/google-services.json; \
+		echo -e "  ✓ Linked android/mobile/google-services.json -> ~/.secrets/android/biocue/google-services.json"; \
+	else \
+		echo -e "  $(RED)✗ ~/.secrets/android/biocue/google-services.json not found!$(RESET)"; \
+	fi
+	@if [ -f "$$HOME/.secrets/android/play-account.json" ]; then \
+		ln -sf "$$HOME/.secrets/android/play-account.json" android/play-account.json; \
+		echo -e "  ✓ Linked android/play-account.json -> ~/.secrets/android/play-account.json"; \
+	else \
+		echo -e "  $(RED)✗ ~/.secrets/android/play-account.json not found!$(RESET)"; \
+	fi
+	@if [ -f "$$HOME/.secrets/android/biocue-release-key.jks" ]; then \
+		ln -sf "$$HOME/.secrets/android/biocue-release-key.jks" android/biocue-release-key.jks; \
+		echo -e "  ✓ Linked android/biocue-release-key.jks -> ~/.secrets/android/biocue-release-key.jks"; \
+	else \
+		echo -e "  $(RED)✗ ~/.secrets/android/biocue-release-key.jks not found!$(RESET)"; \
+	fi
+	@echo -e "$(BOLD)$(GREEN)Done! Project is ready to build on this machine.$(RESET)"
 	@echo ""
 
 # ------------------------------------------------------------------------------

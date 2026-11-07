@@ -146,3 +146,45 @@ Authoritative system architecture, data contracts, and design tokens are documen
 - [**`04_USER_INTERFACE.md`**](file:///.agents/specs/04_USER_INTERFACE.md): Liquid Glass UX guidelines & Anchor screen.
 - [**`13_DESIGN_LANGUAGE_SYSTEM.md`**](file:///.agents/specs/13_DESIGN_LANGUAGE_SYSTEM.md): Tokens for Android Compose, iOS SwiftUI, and Web.
 - [**`15_MOCK_SENSOR_EMITTER.md`**](file:///.agents/specs/15_MOCK_SENSOR_EMITTER.md): Comprehensive mock emitter data contracts, broadcast intents, and architecture.
+
+---
+
+## 7. Multi-Machine Setup & Centralized Secrets
+
+BioCue strictly follows a **zero-secrets-in-repo** standard. Private keys, signing certificates, and cloud service account credentials are stored in your user profile under `~/.secrets/` so this repository can be cloned and worked on across multiple machines (e.g. Home Mac and Work Mac) without committing or scattering sensitive credentials.
+
+### 7.1. Global Secrets Hierarchy (`~/.secrets/`)
+
+All keys reside globally on your machine:
+```
+~/.secrets/
+├── android/
+│   ├── biocue-release-key.jks        # BioCue release upload key
+│   ├── play-account.json             # Google Play Console publishing credentials
+│   └── biocue/
+│       └── google-services.json      # Firebase configuration for biocueapp
+└── apple/                            # App Store Connect & developer certs
+```
+
+### 7.2. Syncing to a New Machine (e.g., Work Mac)
+
+When onboarding a second machine:
+
+1. **Copy your global folders once** from your primary machine (via AirDrop, secure USB, or local network):
+   * `~/.secrets/` (production signing keys & service accounts)
+   * `~/.android/debug.keystore` (shares the same debug SHA-1/SHA-256 for Firebase Google Sign-In)
+   * `~/.gemini/` (Antigravity agents and central skill plugins)
+
+2. **Clone the repository:**
+   ```bash
+   git clone git@github.com:mtpnda/biocue.git ~/Workspace/biocue
+   cd ~/Workspace/biocue
+   ```
+
+3. **Link secrets & verify toolchain:**
+   ```bash
+   make setup-secrets
+   make doctor
+   ```
+
+`make setup-secrets` creates symlinks from `~/.secrets/` directly into the project directory, and `make doctor` verifies that all build tools and credentials are in place. You can now build, test, and release seamlessly on both machines.

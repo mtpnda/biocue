@@ -7,7 +7,7 @@ To prevent version collisions in the Play Store, the `versionCode` is configured
 
 ## Google Play Automation
 The project uses **Fastlane Supply (`upload_to_play_store`)** orchestrated via `fastlane/Fastfile` and the top-level `Makefile`, matching the `mac-to-ipad-mirroring-protocol` release standard.
-- **Service Account:** Authenticated via `android/play-account.json`.
+- **Service Account:** Authenticated via `~/.secrets/android/play-account.json` (auto-resolved by Gradle or linked via `make setup-secrets`).
 - **Primary Commands:**
   - `make release-playstore-internal`: Builds release AABs and uploads Mobile to `internal` and Wear OS to `wear:internal`.
   - `make release-playstore`: Releases Mobile to `production` (with configurable staged rollout `ROLLOUT=0.10`) and Wear OS to `wear:production`.
@@ -26,7 +26,7 @@ The project uses **Fastlane Supply (`upload_to_play_store`)** orchestrated via `
 ## Keystore & Key Rotation Protocol
 
 BioCue uses **Google Play App Signing**, which splits signing into two distinct keys:
-1. **Upload Key (`biocue-release-key.jks`)**: Used locally by Fastlane / Gradle to sign `.aab` bundles uploaded to Google Play.
+1. **Upload Key (`biocue-release-key.jks`)**: Stored in `~/.secrets/android/biocue-release-key.jks`. Used locally by Fastlane / Gradle to sign `.aab` bundles uploaded to Google Play.
 2. **App Signing Key**: Held securely in Google Cloud KMS by Google Play to sign final `.apk` binaries delivered to user devices.
 
 ### 1. Rotating the Upload Key (Local Keystore)

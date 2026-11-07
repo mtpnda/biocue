@@ -43,6 +43,8 @@ BioCue adheres to the standardized `custom-release-manager` protocol:
    - `make release-playstore-listing`: Synchronizes store text and graphical assets (`./gradlew publishListing`) without triggering a code build.
    - `make install-android`: Installs Companion APK directly to connected Android phone/tablet/emulator.
    - `make install-wear`: Installs Wear OS APK directly to connected smartwatch/emulator.
+   - `make setup-secrets`: Links credentials from `~/.secrets/` into the project for multi-machine parity.
+   - `make doctor`: Verifies build toolchain, connected webhost, and global credentials.
    - `make test-release`: Runs the automated release verification test suite (`tests/test_release_automation.py`).
    - `make test-reviewer`: Runs the deep sequential UI reviewer automation suite (`tests/test_playstore_reviewer.py`).
 
@@ -53,9 +55,14 @@ BioCue adheres to the standardized `custom-release-manager` protocol:
    - `listings/en-US/graphics/`: Icons, feature graphics, and phone/tablet/wear screenshots.
    - `release-notes/en-US/default.txt`: Release changelog for current build.
 
-3. **Authentication & Signing**:
-   - `play-account.json`: Google Cloud Service Account credentials (strictly gitignored).
-   - `biocue-release-key.jks`: Release signing keystore with credentials mapped in `local.properties` (gitignored).
+3. **Authentication, Centralized Secrets & Signing**:
+   - **Zero Secrets in Repository:** Real private keys, service account JSON files, and keystores are **never** stored inside the project folder.
+   - **Global Secrets Storage (`~/.secrets/`):**
+     - `~/.secrets/android/biocue-release-key.jks`: BioCue production upload key.
+     - `~/.secrets/android/play-account.json`: Google Play Console publishing credentials.
+     - `~/.secrets/android/biocue/google-services.json`: Firebase client config.
+   - **Multi-Machine Linking:** Run `make setup-secrets` on any cloned machine to symlink global credentials into place. Gradle also directly checks `~/.secrets/android/` automatically.
+   - `local.properties`: Contains SDK path and local keystore properties (strictly gitignored).
 
 ---
 

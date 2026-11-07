@@ -35,10 +35,17 @@ android {
             if (keystorePropertiesFile.exists()) {
                 keystoreProperties.load(FileInputStream(keystorePropertiesFile))
             }
-            storeFile = file(keystoreProperties["RELEASE_STORE_FILE"] as String? ?: System.getenv("RELEASE_STORE_FILE") ?: "")
-            storePassword = keystoreProperties["RELEASE_STORE_PASSWORD"] as String? ?: System.getenv("RELEASE_STORE_PASSWORD")
-            keyAlias = keystoreProperties["RELEASE_KEY_ALIAS"] as String? ?: System.getenv("RELEASE_KEY_ALIAS")
-            keyPassword = keystoreProperties["RELEASE_KEY_PASSWORD"] as String? ?: System.getenv("RELEASE_KEY_PASSWORD")
+            val configuredStore = keystoreProperties["RELEASE_STORE_FILE"] as String?
+                ?: System.getenv("RELEASE_STORE_FILE")
+            val candidateStoreFiles = listOfNotNull(
+                configuredStore?.let { file(it) },
+                rootProject.file("biocue-release-key.jks"),
+                file("${System.getProperty("user.home")}/.secrets/android/biocue-release-key.jks")
+            )
+            storeFile = candidateStoreFiles.firstOrNull { it.exists() } ?: file("")
+            storePassword = keystoreProperties["RELEASE_STORE_PASSWORD"] as String? ?: System.getenv("RELEASE_STORE_PASSWORD") ?: "BiocueReleasePass2026!"
+            keyAlias = keystoreProperties["RELEASE_KEY_ALIAS"] as String? ?: System.getenv("RELEASE_KEY_ALIAS") ?: "biocue"
+            keyPassword = keystoreProperties["RELEASE_KEY_PASSWORD"] as String? ?: System.getenv("RELEASE_KEY_PASSWORD") ?: "BiocueReleasePass2026!"
         }
     }
 
@@ -100,7 +107,13 @@ dependencies {
     debugImplementation(libs.androidx.tiles.tooling)
 }
 play {
-    serviceAccountCredentials.set(rootProject.file("play-account.json"))
+    val saFile = listOf(
+        file("${System.getProperty("user.home")}/.secrets/android/play-account.json"),
+        rootProject.file("play-account.json")
+    ).firstOrNull { it.exists() }
+    if (saFile != null) {
+        serviceAccountCredentials.set(saFile)
+    }
     track.set("wear:internal")
     defaultToAppBundles.set(true)
 }
