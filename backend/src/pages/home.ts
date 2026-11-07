@@ -428,12 +428,72 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
     <!-- 3. Three-Stage Protection Loop ("How It Works") -->
     <section id="how-it-works" style="padding:var(--space-section) 0;">
       <div class="wrap">
-        <div style="text-align:center;max-width:720px;margin:0 auto;">
+        <div style="text-align:center;max-width:720px;margin:0 auto 28px;">
           <span class="status" style="background:var(--state-info-soft);color:var(--state-info-ink);border-color:var(--state-info-chip);margin-bottom:14px;">
             <i></i>${dict.howItWorks.badge}
           </span>
           <h2>${dict.howItWorks.title}</h2>
           <p>${dict.howItWorks.sub}</p>
+        </div>
+
+        <!-- Editorial Process Diagram (Designed with Diagram-Design System) -->
+        <div class="diagram-frame" style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-card);padding:24px 20px;margin-bottom:32px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow-x:auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--border-subtle);padding-bottom:10px;">
+            <div style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:8px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--state-calm-chip);display:inline-block;"></span>
+              PROCESS ARCHITECTURE &bull; 3-STAGE PREDICTIVE SAFETY PIPELINE
+            </div>
+            <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);">100% ON-DEVICE &bull; ZERO CLOUD LEAK</div>
+          </div>
+          <svg viewBox="0 0 920 200" fill="none" style="width:100%;min-width:680px;height:auto;display:block;">
+            <defs>
+              <marker id="flow-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #544B3E)"/>
+              </marker>
+              <marker id="flow-arrow-active" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--state-calm-ink, #1A6337)"/>
+              </marker>
+            </defs>
+
+            <!-- STAGE 1 -->
+            <rect x="8" y="16" width="264" height="164" rx="14" fill="var(--surface-raised)" stroke="var(--border-subtle)" stroke-width="1.2"/>
+            <text x="24" y="42" font-family="var(--font-mono)" font-size="10" font-weight="700" letter-spacing="0.08em" fill="var(--text-muted)">STAGE 01 &bull; SENSORY INTAKE</text>
+            <text x="24" y="68" font-family="var(--font-serif)" font-size="19" font-weight="600" fill="var(--text-primary)">Peripheral Bio-Sensing</text>
+            <text x="24" y="94" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; PPG Optics (25Hz raw pulse photopleth)</text>
+            <text x="24" y="114" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; 3-Axis Accel (Gross motion isolation)</text>
+            <text x="24" y="134" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; 90s Adaptive Duty Cycle (Zero-spill RAM)</text>
+            <rect x="24" y="150" width="142" height="20" rx="6" fill="var(--surface-card)" stroke="var(--border-subtle)" stroke-width="1"/>
+            <text x="32" y="164" font-family="var(--font-mono)" font-size="9.5" fill="var(--text-muted)">PAYLOAD: 5s Metric Slice</text>
+
+            <!-- CONNECTOR 1 -> 2 -->
+            <path d="M 272 98 L 320 98" stroke="var(--border-strong)" stroke-width="1.8" marker-end="url(#flow-arrow)"/>
+            <text x="276" y="90" font-family="var(--font-mono)" font-size="9" fill="var(--text-muted)">BLE BATCH</text>
+
+            <!-- STAGE 2 (Focal Node) -->
+            <rect x="328" y="12" width="264" height="172" rx="14" fill="var(--surface-card)" stroke="var(--state-calm-chip)" stroke-width="2"/>
+            <rect x="338" y="22" width="78" height="18" rx="9" fill="var(--state-calm-soft)"/>
+            <text x="347" y="34" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-calm-ink)">CORE ENGINE</text>
+            <text x="338" y="68" font-family="var(--font-serif)" font-size="19" font-weight="600" fill="var(--text-primary)">Decoupled ANS Scoring</text>
+            <text x="338" y="94" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; HRV RMSSD baseline delta tracking</text>
+            <text x="338" y="114" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; Motion-subtracted stress elevation</text>
+            <text x="338" y="134" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; 100% On-device Room DB evaluation</text>
+            <rect x="338" y="150" width="158" height="20" rx="6" fill="var(--state-calm-soft)" stroke="var(--state-calm-chip)" stroke-width="1"/>
+            <text x="346" y="164" font-family="var(--font-mono)" font-size="9.5" font-weight="600" fill="var(--state-calm-ink)">T0 / T1 / T2 State Vectors</text>
+
+            <!-- CONNECTOR 2 -> 3 -->
+            <path d="M 592 98 L 640 98" stroke="var(--state-calm-ink)" stroke-width="1.8" marker-end="url(#flow-arrow-active)"/>
+            <text x="596" y="90" font-family="var(--font-mono)" font-size="9" fill="var(--state-calm-ink)">ESCALATION</text>
+
+            <!-- STAGE 3 -->
+            <rect x="648" y="16" width="264" height="164" rx="14" fill="var(--surface-raised)" stroke="var(--border-subtle)" stroke-width="1.2"/>
+            <text x="664" y="42" font-family="var(--font-mono)" font-size="10" font-weight="700" letter-spacing="0.08em" fill="var(--text-muted)">STAGE 03 &bull; GROUNDED SUPPORT</text>
+            <text x="664" y="68" font-family="var(--font-serif)" font-size="19" font-weight="600" fill="var(--text-primary)">Crisis Guardian Protocol</text>
+            <text x="664" y="94" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; Zero-anxiety tactile breathing orb</text>
+            <text x="664" y="114" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; 15-minute deterministic safety FSM</text>
+            <text x="664" y="134" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; Emergency beacon with 1-shot GPS fix</text>
+            <rect x="664" y="150" width="154" height="20" rx="6" fill="var(--surface-card)" stroke="var(--border-subtle)" stroke-width="1"/>
+            <text x="672" y="164" font-family="var(--font-mono)" font-size="9.5" fill="var(--text-muted)">SOVEREIGNTY PRESERVED</text>
+          </svg>
         </div>
 
         <div class="step-grid">

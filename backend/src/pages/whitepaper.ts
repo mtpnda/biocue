@@ -175,21 +175,65 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             <div style="font-weight:700;color:var(--text-primary);margin-bottom:6px;">4. Zero-Spill In-Memory Rollup</div>
             <p style="font-size:13.5px;margin:0;">Watch metrics are cached purely in RAM with hourly compact summaries, preventing flash write endurance degradation and NAND power draw.</p>
           </div>
-        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface);border:1px solid var(--border-strong);overflow-x:auto;">
-          <h4 style="font-size:14px;color:var(--text-primary);margin-bottom:16px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
-            Figure 3.1 — Adaptive Sensor Duty-Cycling State Machine
-          </h4>
-          <pre class="mermaid" style="display:flex;justify-content:center;background:transparent;border:none;margin:0;">
-flowchart LR
-  subgraph Calm["Tier 0: Calm Baseline"]
-    A["PPG Active Sampling (30s)"] -->|"Update Rolling EMA Profile"| B["PPG Sleep (90s, 0mA)"]
-    B -->|"90s Timer Expired"| A
-  end
-  B -->|"Motion Spike (Accel > 0.5G)"| C["Instant PPG Wake (0s Delay)"]
-  A -->|"Stress Elevated (Tier 1/2)"| D["Continuous PPG Telemetry"]
-  C --> D
-  D -->|"Recovery to Tier 0 (< 50%)"| A
-          </pre>
+        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-card);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow-x:auto;">
+          <div style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">
+            FIGURE 3.1 &bull; ADAPTIVE SENSOR DUTY-CYCLING STATE MACHINE
+          </div>
+          <svg viewBox="0 0 860 220" fill="none" style="width:100%;min-width:640px;height:auto;display:block;">
+            <defs>
+              <marker id="wp-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #544B3E)"/>
+              </marker>
+              <marker id="wp-arrow-coral" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--state-alert-ink, #9C2A22)"/>
+              </marker>
+            </defs>
+
+            <!-- Subgraph: Calm Baseline Loop -->
+            <rect x="12" y="16" width="460" height="188" rx="14" fill="var(--surface-raised)" stroke="var(--border-subtle)" stroke-dasharray="4 4" stroke-width="1.2"/>
+            <text x="28" y="38" font-family="var(--font-mono)" font-size="10.5" font-weight="700" fill="var(--state-calm-ink)">TIER 0 &bull; RESTING CALM BASELINE (90s DUTY CYCLE)</text>
+
+            <!-- State A: PPG Active Sampling -->
+            <rect x="28" y="54" width="190" height="80" rx="10" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="42" y="78" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">STATE A &bull; 25Hz RAW PPG</text>
+            <text x="42" y="100" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--text-primary)">Active Sampling (30s)</text>
+            <text x="42" y="120" font-family="var(--font-sans)" font-size="11" fill="var(--text-secondary)">Update Rolling EMA profile</text>
+
+            <!-- State B: PPG Sleep -->
+            <rect x="264" y="54" width="190" height="80" rx="10" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="278" y="78" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">STATE B &bull; 0mA ULTRA-LOW</text>
+            <text x="278" y="100" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--text-primary)">Sensor Sleep (90s)</text>
+            <text x="278" y="120" font-family="var(--font-sans)" font-size="11" fill="var(--text-secondary)">Optics powered down</text>
+
+            <!-- Cycle Arrows A <-> B -->
+            <path d="M 218 84 L 258 84" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#wp-arrow)"/>
+            <text x="224" y="76" font-family="var(--font-mono)" font-size="8.5" fill="var(--text-muted)">30s DONE</text>
+            <path d="M 264 104 L 224 104" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#wp-arrow)"/>
+            <text x="222" y="122" font-family="var(--font-mono)" font-size="8.5" fill="var(--text-muted)">TIMER WAKE</text>
+
+            <!-- State C: Instant Wake on Motion -->
+            <rect x="264" y="146" width="190" height="44" rx="8" fill="var(--state-info-soft)" stroke="var(--state-info-chip)" stroke-width="1"/>
+            <text x="276" y="164" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-info-ink)">INTERRUPT &bull; ACCEL > 0.5G</text>
+            <text x="276" y="180" font-family="var(--font-sans)" font-size="11.5" font-weight="600" fill="var(--state-info-ink)">Instant Wake (0s Delay)</text>
+
+            <!-- State D: Continuous Telemetry (Tier 1/2) -->
+            <rect x="540" y="50" width="300" height="140" rx="14" fill="var(--surface-card)" stroke="var(--state-alert-chip)" stroke-width="1.8"/>
+            <rect x="556" y="64" width="112" height="18" rx="9" fill="var(--state-alert-soft)"/>
+            <text x="564" y="76" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-alert-ink)">TIER 1 / 2 ELEVATION</text>
+            <text x="556" y="106" font-family="var(--font-serif)" font-size="18" font-weight="600" fill="var(--text-primary)">Continuous Telemetry</text>
+            <text x="556" y="128" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; 100% Active PPG Optical sampling</text>
+            <text x="556" y="146" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; High-precision HRV RMSSD delta tracking</text>
+            <text x="556" y="164" font-family="var(--font-sans)" font-size="12" fill="var(--text-secondary)">&bull; Guardian state machine engagement</text>
+
+            <!-- Connectors to D -->
+            <path d="M 454 84 L 532 84" stroke="var(--state-alert-ink)" stroke-width="1.5" marker-end="url(#wp-arrow-coral)"/>
+            <text x="460" y="76" font-family="var(--font-mono)" font-size="8.5" fill="var(--state-alert-ink)">STRESS > T1</text>
+            <path d="M 454 168 L 532 168" stroke="var(--state-alert-ink)" stroke-width="1.5" marker-end="url(#wp-arrow-coral)"/>
+            <text x="462" y="162" font-family="var(--font-mono)" font-size="8.5" fill="var(--state-alert-ink)">MOTION ENGAGE</text>
+            <!-- Recovery Arrow -->
+            <path d="M 690 50 C 690 10, 120 10, 120 48" stroke="var(--state-calm-ink)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#wp-arrow)"/>
+            <text x="340" y="22" font-family="var(--font-mono)" font-size="9" font-weight="600" fill="var(--state-calm-ink)">RECOVERY: STRESS &lt; 50% BASELINE &bull; RETURN TO TIER 0</text>
+          </svg>
         </div>
       </section>
 
@@ -205,30 +249,96 @@ flowchart LR
           The <strong>BioCue Guardian Protocol</strong> is governed by a mathematically provable, deterministic finite state machine (FSM):
         </p>
 
-        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface);border:1px solid var(--border-strong);overflow-x:auto;">
-          <h4 style="font-size:14px;color:var(--text-primary);margin-bottom:16px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
-            Figure 4.1 — Deterministic Crisis Guardian Finite State Machine (FSM)
-          </h4>
-          <pre class="mermaid" style="display:flex;justify-content:center;background:transparent;border:none;margin:0;">
-stateDiagram-v2
-  [*] --> Phase1: Tier 1/2 Spike or Manual Tap
-  state "Phase 1: Silent Presence (0 to 3m)" as Phase1
-  state "Phase 2: Somatic Co-Regulation (3 to 7m)" as Phase2
-  state "Phase 3: Safety Check (7 to 12m)" as Phase3
-  state "Phase 4: Prolonged Distress (12 to 15m)" as Phase4
-  state "30s Audible/Tactile Grace Alarm (15m)" as Grace
-  state "Crisis Broadcast Dispatched" as Crisis
-  state "Resolved / Calm Grounded" as Resolved
+        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-card);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow-x:auto;">
+          <div style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">
+            FIGURE 4.1 &bull; DETERMINISTIC CRISIS GUARDIAN FINITE STATE MACHINE (FSM)
+          </div>
+          <svg viewBox="0 0 940 280" fill="none" style="width:100%;min-width:740px;height:auto;display:block;">
+            <defs>
+              <marker id="fsm-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #544B3E)"/>
+              </marker>
+              <marker id="fsm-arrow-calm" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--state-calm-ink, #1A6337)"/>
+              </marker>
+              <marker id="fsm-arrow-coral" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--state-alert-ink, #9C2A22)"/>
+              </marker>
+            </defs>
 
-  Phase1 --> Phase2: T = 3m (Validation & Zero Demands)
-  Phase2 --> Phase3: T = 7m (Haptic Breathing Pacer)
-  Phase3 --> Resolved: Wearer confirms safe
-  Phase3 --> Phase4: Unresponsive & T = 12m
-  Phase4 --> Grace: HR > Baseline + 20 & T = 15m
-  Grace --> Resolved: Cancelled by Wearer
-  Grace --> Crisis: Countdown Expired (T = 15m30s)
-  Crisis --> [*]: Circle Alerted with Single GPS Fix
-          </pre>
+            <!-- Phase 1 -->
+            <rect x="12" y="90" width="155" height="95" rx="10" fill="var(--surface-raised)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="22" y="110" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">PHASE 1 &bull; 0 to 3m</text>
+            <text x="22" y="130" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--text-primary)">Silent Presence</text>
+            <text x="22" y="148" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">Zero intrusive prompts</text>
+            <text x="22" y="164" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">Respects shutdown</text>
+
+            <!-- Arrow 1 -> 2 -->
+            <path d="M 167 137 L 197 137" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#fsm-arrow)"/>
+            <text x="170" y="130" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)">T=3m</text>
+
+            <!-- Phase 2 -->
+            <rect x="203" y="90" width="155" height="95" rx="10" fill="var(--surface-raised)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="213" y="110" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">PHASE 2 &bull; 3 to 7m</text>
+            <text x="213" y="130" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--text-primary)">Somatic Anchor</text>
+            <text x="213" y="148" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">Haptic breathing pacer</text>
+            <text x="213" y="164" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">0.1 Hz resonant wave</text>
+
+            <!-- Arrow 2 -> 3 -->
+            <path d="M 358 137 L 388 137" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#fsm-arrow)"/>
+            <text x="361" y="130" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)">T=7m</text>
+
+            <!-- Phase 3 -->
+            <rect x="394" y="90" width="155" height="95" rx="10" fill="var(--surface-raised)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="404" y="110" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">PHASE 3 &bull; 7 to 12m</text>
+            <text x="404" y="130" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--text-primary)">Safety Check</text>
+            <text x="404" y="148" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">1-touch safety query</text>
+            <text x="404" y="164" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">Zero question fatigue</text>
+
+            <!-- Branch from Phase 3: Wearer Confirms Safe -->
+            <path d="M 471 90 L 471 45 L 750 45" stroke="var(--state-calm-ink)" stroke-width="1.5" marker-end="url(#fsm-arrow-calm)"/>
+            <text x="480" y="38" font-family="var(--font-mono)" font-size="8.5" font-weight="600" fill="var(--state-calm-ink)">CONFIRMED SAFE &bull; RESOLVED</text>
+
+            <!-- Arrow 3 -> 4 -->
+            <path d="M 549 137 L 579 137" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#fsm-arrow)"/>
+            <text x="552" y="130" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)">T=12m</text>
+
+            <!-- Phase 4 -->
+            <rect x="585" y="90" width="155" height="95" rx="10" fill="var(--surface-raised)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="595" y="110" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">PHASE 4 &bull; 12 to 15m</text>
+            <text x="595" y="130" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--text-primary)">Prolonged Distress</text>
+            <text x="595" y="148" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">HR > baseline + 20</text>
+            <text x="595" y="164" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-secondary)">Unresponsive wearer</text>
+
+            <!-- Arrow 4 -> Grace -->
+            <path d="M 740 137 L 770 137" stroke="var(--state-alert-ink)" stroke-width="1.5" marker-end="url(#fsm-arrow-coral)"/>
+            <text x="742" y="130" font-family="var(--font-mono)" font-size="8" fill="var(--state-alert-ink)">T=15m</text>
+
+            <!-- Grace Alarm -->
+            <rect x="776" y="90" width="150" height="95" rx="10" fill="var(--state-alert-soft)" stroke="var(--state-alert-chip)" stroke-width="1.8"/>
+            <text x="786" y="110" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-alert-ink)">GRACE PERIOD &bull; 30s</text>
+            <text x="786" y="130" font-family="var(--font-sans)" font-size="13" font-weight="700" fill="var(--state-alert-ink)">Cancelable Alarm</text>
+            <text x="786" y="148" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-primary)">Audible + haptic tone</text>
+            <text x="786" y="164" font-family="var(--font-sans)" font-size="10.5" fill="var(--text-primary)">Wearer override ready</text>
+
+            <!-- Terminals: Resolved vs Crisis -->
+            <!-- Resolved -->
+            <rect x="756" y="20" width="170" height="44" rx="8" fill="var(--state-calm-soft)" stroke="var(--state-calm-chip)" stroke-width="1.2"/>
+            <text x="770" y="38" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-calm-ink)">TERMINAL STATE A</text>
+            <text x="770" y="54" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--state-calm-ink)">&bull; Equilibrium Restored</text>
+
+            <!-- Branch from Grace: Cancelled by wearer -->
+            <path d="M 851 90 L 851 68" stroke="var(--state-calm-ink)" stroke-width="1.5" marker-end="url(#fsm-arrow-calm)"/>
+
+            <!-- Crisis Broadcast -->
+            <rect x="756" y="216" width="170" height="52" rx="8" fill="var(--surface-card)" stroke="var(--state-alert-ink)" stroke-width="2"/>
+            <text x="770" y="234" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-alert-ink)">TERMINAL STATE B (T=15m30s)</text>
+            <text x="770" y="250" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--text-primary)">&bull; Crisis Broadcast</text>
+            <text x="770" y="262" font-family="var(--font-sans)" font-size="10" fill="var(--text-secondary)">Circle Alerted (1-Shot GPS Fix)</text>
+
+            <!-- Branch from Grace: Expired -->
+            <path d="M 851 185 L 851 210" stroke="var(--state-alert-ink)" stroke-width="1.8" marker-end="url(#fsm-arrow-coral)"/>
+          </svg>
         </div>
       </section>
 
@@ -241,29 +351,84 @@ stateDiagram-v2
           While crisis escalation remains 100% deterministic, cognitive reframing, bedtime sensory co-regulation, and longitudinal pattern mining require deep linguistic synthesis.
         </p>
 
-        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface);border:1px solid var(--border-strong);overflow-x:auto;">
-          <h4 style="font-size:14px;color:var(--text-primary);margin-bottom:16px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
-            Figure 5.1 — 4-Tier Hybrid Intelligence &amp; On-Chip Hardware Boundary
-          </h4>
-          <pre class="mermaid" style="display:flex;justify-content:center;background:transparent;border:none;margin:0;">
-flowchart TD
-  subgraph Watch["Smartwatch (Wear OS) — Strict Zero-LLM Boundary"]
-    Sensors["PPG Optics & 3-Axis Accel"] --> Windows["5s Window Feature Extraction"]
-    Windows --> Scoring["On-Device Scoring (Formula 2.4)"]
-    Scoring --> WatchUI["Zero-Anxiety Sensory UI"]
-  end
+        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-card);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow-x:auto;">
+          <div style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">
+            FIGURE 5.1 &bull; 4-TIER HYBRID INTELLIGENCE &amp; ON-CHIP HARDWARE BOUNDARY
+          </div>
+          <svg viewBox="0 0 920 300" fill="none" style="width:100%;min-width:720px;height:auto;display:block;">
+            <defs>
+              <marker id="hw-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--text-muted, #544B3E)"/>
+              </marker>
+              <marker id="hw-arrow-active" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--state-calm-ink, #1A6337)"/>
+              </marker>
+            </defs>
 
-  Scoring -->|"Tier 1/2 Escalation"| Guardian["Deterministic Crisis Guardian (FSM)"]
-  Scoring -.->|"BLE Batch Sync"| Phone["Mobile Companion App"]
+            <!-- Scope Left: Smartwatch (Wear OS) Zero-LLM Boundary -->
+            <rect x="12" y="16" width="360" height="268" rx="14" fill="var(--surface-raised)" stroke="var(--border-subtle)" stroke-width="1.2"/>
+            <text x="28" y="38" font-family="var(--font-mono)" font-size="10" font-weight="700" fill="var(--text-muted)">SMARTWATCH (WEAR OS) &bull; ZERO-LLM BOUNDARY</text>
 
-  subgraph Companion["Phone Hardware Governor & NPU Matrix"]
-    Phone --> Gov{"Hardware Resource Governor"}
-    Gov -->|"Battery > 20% & Thermal Normal"| SLM["On-Chip SLM (Gemma 2B INT4)"]
-    Gov -->|"Low Battery (< 20%) or Severe Heat"| Fallback["Zero-Power Regex/Semantic NLP"]
-    SLM --> Insights["Cognitive Reframing & Pattern Synthesis"]
-    Fallback --> Insights
-  end
-          </pre>
+            <rect x="28" y="52" width="328" height="44" rx="8" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1"/>
+            <text x="40" y="72" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--text-primary)">PPG Optics &amp; 3-Axis Accel</text>
+            <text x="40" y="86" font-family="var(--font-mono)" font-size="9.5" fill="var(--text-secondary)">25Hz Raw Microamp Sensing &bull; Health Services API</text>
+
+            <path d="M 192 96 L 192 110" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#hw-arrow)"/>
+
+            <rect x="28" y="114" width="328" height="44" rx="8" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1"/>
+            <text x="40" y="134" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--text-primary)">5s Window Feature Extraction</text>
+            <text x="40" y="148" font-family="var(--font-mono)" font-size="9.5" fill="var(--text-secondary)">HRV RMSSD, SDNN, pNN50 &bull; Motion Variance</text>
+
+            <path d="M 192 158 L 192 172" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#hw-arrow)"/>
+
+            <rect x="28" y="176" width="328" height="44" rx="8" fill="var(--state-calm-soft)" stroke="var(--state-calm-chip)" stroke-width="1.2"/>
+            <text x="40" y="196" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--state-calm-ink)">Formula 2.4 Decoupled ANS Scoring</text>
+            <text x="40" y="210" font-family="var(--font-mono)" font-size="9.5" fill="var(--state-calm-ink)">Stress Delta = (HR_t - Baseline) / HRV_norm &bull; Sub-10ms</text>
+
+            <path d="M 192 220 L 192 234" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#hw-arrow)"/>
+
+            <rect x="28" y="238" width="328" height="36" rx="8" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1"/>
+            <text x="40" y="260" font-family="var(--font-sans)" font-size="11.5" font-weight="600" fill="var(--text-primary)">Zero-Anxiety Sensory UI &bull; Gentle Haptics</text>
+
+            <!-- BLE Batch Arrow -->
+            <path d="M 372 198 L 442 198" stroke="var(--state-calm-ink)" stroke-width="1.8" marker-end="url(#hw-arrow-active)"/>
+            <text x="380" y="190" font-family="var(--font-mono)" font-size="8.5" font-weight="700" fill="var(--state-calm-ink)">BLE SYNC</text>
+
+            <!-- Scope Right: Mobile Companion & NPU Governor -->
+            <rect x="448" y="16" width="460" height="268" rx="14" fill="var(--surface-raised)" stroke="var(--border-subtle)" stroke-width="1.2"/>
+            <text x="464" y="38" font-family="var(--font-mono)" font-size="10" font-weight="700" fill="var(--text-muted)">MOBILE COMPANION &bull; HARDWARE GOVERNOR &amp; NPU MATRIX</text>
+
+            <!-- Governor Node -->
+            <rect x="464" y="52" width="428" height="48" rx="8" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1.2"/>
+            <text x="480" y="72" font-family="var(--font-sans)" font-size="12.5" font-weight="700" fill="var(--text-primary)">Hardware Resource Governor</text>
+            <text x="480" y="88" font-family="var(--font-mono)" font-size="9.5" fill="var(--text-secondary)">Thermal headroom, battery level &bull; Dynamic compute routing</text>
+
+            <!-- Path A: SLM -->
+            <path d="M 570 100 L 570 126" stroke="var(--state-calm-ink)" stroke-width="1.5" marker-end="url(#hw-arrow-active)"/>
+            <text x="574" y="116" font-family="var(--font-mono)" font-size="8.5" fill="var(--state-calm-ink)">BATT > 20% &bull; NOMINAL</text>
+
+            <rect x="464" y="130" width="210" height="74" rx="8" fill="var(--state-calm-soft)" stroke="var(--state-calm-chip)" stroke-width="1.5"/>
+            <text x="476" y="150" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--state-calm-ink)">ON-CHIP SLM &bull; QUALCOMM NPU</text>
+            <text x="476" y="168" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--text-primary)">Gemma 2B INT4</text>
+            <text x="476" y="186" font-family="var(--font-sans)" font-size="10" fill="var(--text-secondary)">Contextual reframing &bull; 0.8s inference</text>
+
+            <!-- Path B: Low Power Regex/NLP -->
+            <path d="M 780 100 L 780 126" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#hw-arrow)"/>
+            <text x="784" y="116" font-family="var(--font-mono)" font-size="8.5" fill="var(--text-muted)">LOW BATT / THERMAL</text>
+
+            <rect x="686" y="130" width="206" height="74" rx="8" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1"/>
+            <text x="698" y="150" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--text-muted)">ZERO-POWER FALLBACK</text>
+            <text x="698" y="168" font-family="var(--font-sans)" font-size="12" font-weight="700" fill="var(--text-primary)">Deterministic Rule NLP</text>
+            <text x="698" y="186" font-family="var(--font-sans)" font-size="10" fill="var(--text-secondary)">Flat-mapping &bull; 0% NPU load</text>
+
+            <!-- Converge to Insights -->
+            <path d="M 570 204 L 570 226 L 675 226" stroke="var(--state-calm-ink)" stroke-width="1.5"/>
+            <path d="M 780 204 L 780 226 L 675 226" stroke="var(--border-strong)" stroke-width="1.5"/>
+            <path d="M 675 226 L 675 242" stroke="var(--border-strong)" stroke-width="1.5" marker-end="url(#hw-arrow)"/>
+
+            <rect x="464" y="246" width="428" height="34" rx="8" fill="var(--surface-card)" stroke="var(--border-strong)" stroke-width="1"/>
+            <text x="480" y="268" font-family="var(--font-sans)" font-size="11.5" font-weight="600" fill="var(--text-primary)">Daily Journal Flat-Mapping &bull; Longitudinal Sensor Insights</text>
+          </svg>
         </div>
 
         <h3 style="font-size:18px;color:var(--text-primary);margin-top:20px;margin-bottom:10px;">5.1 The Watch Boundary: Strict Zero-LLM Invariant</h3>
@@ -389,16 +554,6 @@ flowchart TD
           });
         }
       "></script>
-
-      <!-- Mermaid Architecture & State Diagram Engine -->
-      <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({
-          startOnLoad: true,
-          theme: document.documentElement.getAttribute('data-theme') === 'high-contrast' ? 'dark' : 'neutral',
-          fontFamily: 'Atkinson Hyperlegible, -apple-system, BlinkMacSystemFont, sans-serif'
-        });
-      </script>
     `
   });
 }
