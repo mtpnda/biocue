@@ -5,6 +5,7 @@ import { renderPrivacyPage } from "./pages/privacy.ts";
 import { renderTermsPage } from "./pages/terms.ts";
 import { renderSupportPage } from "./pages/support.ts";
 import { renderSignInPage } from "./pages/signin.ts";
+import { renderWhitepaperPage } from "./pages/whitepaper.ts";
 import { configRouter } from "./routes/config.ts";
 import { supportRouter } from "./routes/support.ts";
 import { authRouter } from "./routes/auth.ts";
@@ -57,6 +58,12 @@ app.get("/faq", (c) => {
 });
 
 // Legal & Support pages
+app.get("/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
+app.get("/whitepaper/", (c) => c.redirect("/whitepaper"));
+app.get("/en/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
+app.get("/en-id/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
+app.get("/id-id/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
+
 app.get("/privacy", (c) => c.html(renderPrivacyPage(c.req.url, c.req.raw.headers)));
 app.get("/privacy-policy", (c) => c.redirect("/privacy"));
 app.get("/terms", (c) => c.html(renderTermsPage(c.req.url, c.req.raw.headers)));

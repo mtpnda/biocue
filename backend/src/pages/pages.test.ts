@@ -34,6 +34,17 @@ Deno.test("GET /en renders Home page with valid HTML and DLS tokens", async () =
   assertEquals(html.toLowerCase().includes("monthly subscription"), false);
 });
 
+Deno.test("GET /whitepaper renders Technical Whitepaper with mathematical formulations and NPU architecture", async () => {
+  const res = await app.request("/whitepaper");
+  assertEquals(res.status, 200);
+  const html = await res.text();
+  assertEquals(html.includes("BioCue: An On-Device, Autonomic-Decoupled Hybrid Intelligence Architecture"), true);
+  assertEquals(html.includes("Formula 2.1"), true);
+  assertEquals(html.includes("Formula 2.4"), true);
+  assertEquals(html.includes("Gemma 2B"), true);
+  assertEquals(html.includes("HardwareResourceGovernor"), true);
+});
+
 Deno.test("GET /privacy renders Privacy Policy with sovereign clauses", async () => {
   const res = await app.request("/privacy");
   assertEquals(res.status, 200);

@@ -31,6 +31,7 @@ export function renderHeader(opts: HeaderOptions = {}): string {
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="${targetPrefix}#features" class="nav-link">${dict.nav.features}</a>
         <a href="${targetPrefix}#how-it-works" class="nav-link">${dict.nav.howItWorks}</a>
+        <a href="/whitepaper" class="nav-link ${opts.activeTab === 'whitepaper' ? 'active' : ''}">Whitepaper</a>
         <a href="${targetPrefix}#simulator" class="nav-link">${dict.nav.simulator}</a>
         <a href="${targetPrefix}#faq" class="nav-link">${dict.nav.faq}</a>
         <a href="/support" class="nav-link ${opts.activeTab === 'support' ? 'active' : ''}">${dict.nav.support}</a>
@@ -91,6 +92,7 @@ export function renderHeader(opts: HeaderOptions = {}): string {
   <div id="mobileNavDrawer" class="mobile-drawer" role="dialog" aria-label="Mobile Navigation">
     <a href="${targetPrefix}#features" class="mobile-nav-link" onclick="document.getElementById('mobileNavDrawer').classList.remove('open');">${dict.nav.features}</a>
     <a href="${targetPrefix}#how-it-works" class="mobile-nav-link" onclick="document.getElementById('mobileNavDrawer').classList.remove('open');">${dict.nav.howItWorks}</a>
+    <a href="/whitepaper" class="mobile-nav-link" onclick="document.getElementById('mobileNavDrawer').classList.remove('open');">Whitepaper</a>
     <a href="${targetPrefix}#simulator" class="mobile-nav-link" onclick="document.getElementById('mobileNavDrawer').classList.remove('open');">${dict.nav.simulator}</a>
     <a href="${targetPrefix}#faq" class="mobile-nav-link" onclick="document.getElementById('mobileNavDrawer').classList.remove('open');">${dict.nav.faq}</a>
     <a href="/support" class="mobile-nav-link" onclick="document.getElementById('mobileNavDrawer').classList.remove('open');">${dict.nav.support}</a>

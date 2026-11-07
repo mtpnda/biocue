@@ -34,6 +34,7 @@ export function renderFooter(opts: FooterOptions = {}): string {
             <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;font-size:14.5px;">
               <li><a href="${prefix}#features">Features</a></li>
               <li><a href="${prefix}#how-it-works">How It Works</a></li>
+              <li><a href="/whitepaper" style="font-weight:600;color:var(--text-primary);">Technical Whitepaper</a></li>
               <li><a href="${prefix}#simulator">Sensory Simulator</a></li>
               <li><a href="${prefix}#faq">FAQ</a></li>
               <li><a href="${prefix}#download">Download Release</a></li>
