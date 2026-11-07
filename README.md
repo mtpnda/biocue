@@ -64,6 +64,20 @@ To grant all required runtime permissions (`BODY_SENSORS`, `ACTIVITY_RECOGNITION
 make mock-cli ARGS="--grant-permissions"
 ```
 
+### 3.3. Physical Watch Connection via Bluetooth Proxy (Zero Hassle)
+
+To avoid dynamic Wi-Fi IP and port changes, you can route debugging through your connected Android phone over Bluetooth on a **permanent, fixed port (`127.0.0.1:4444`)**:
+
+1. **On your Watch:**
+   - Go to **Settings** &rarr; **Developer Options** &rarr; Turn on **ADB Debugging** & **Debug over Bluetooth**.
+2. **On your Phone:**
+   - In the companion app (Pixel Watch or Galaxy Wearable) &rarr; **Settings** &rarr; Developer Options &rarr; Turn on **Debugging over Bluetooth**.
+3. **On your Mac (with phone connected via USB or wireless):**
+   ```bash
+   make connect-watch-bt
+   ```
+   Your watch will immediately appear in `adb devices` as `127.0.0.1:4444 device`. When done, run `make disconnect-watch-bt`.
+
 ---
 
 ## 4. Developer Mock Sensor Simulation

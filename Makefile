@@ -25,7 +25,7 @@ YELLOW:= \033[33m
 RED   := \033[31m
 RESET := \033[0m
 
-.PHONY: help doctor setup-secrets clean build-all build-mac build-ios build-android build-mobile build-wear build-mock \
+.PHONY: help doctor setup-secrets connect-watch-bt disconnect-watch-bt clean build-all build-mac build-ios build-android build-mobile build-wear build-mock \
         release-local release-mac-local release-ios-local release-android-local release-wear-local sync-webhost \
         release-github release-mac-github release-android-github \
         release-appstore release-mac-appstore release-ios-appstore release-testflight \
@@ -72,6 +72,8 @@ help:
 	@echo -e "  $(GREEN)make build-mock$(RESET)             Build Sensor Mock Emitter dev APK"
 	@echo -e "  $(GREEN)make install-android$(RESET)        Install Companion APK directly to connected Android phone/tablet/emulator"
 	@echo -e "  $(GREEN)make install-wear$(RESET)           Install Wear OS APK directly to connected smartwatch/emulator"
+	@echo -e "  $(GREEN)make connect-watch-bt$(RESET)       Forward & connect to Wear OS watch via Phone Bluetooth proxy (127.0.0.1:4444)"
+	@echo -e "  $(GREEN)make disconnect-watch-bt$(RESET)    Disconnect watch Bluetooth proxy"
 	@echo -e "  $(GREEN)make install-mock$(RESET)           Install Sensor Mock Emitter dev APK to connected device/emulator"
 	@echo -e "  $(GREEN)make mock-web$(RESET)               Start Web GUI Console on http://localhost:8080"
 	@echo -e "  $(GREEN)make mock-cli ARGS=\"...\"$(RESET)       Run Mock CLI command (e.g. ARGS=\"--scenario overwhelmed\")"
@@ -254,6 +256,19 @@ install-iphone:
 install-wear:
 	@echo -e "$(BOLD)$(GREEN)⌚ Installing BioCue Wear OS APK to connected watch/emulator via Fastlane...$(RESET)"
 	$(FASTLANE) android install_wear $(if $(DEVICE),device:"$(DEVICE)",)$(if $(BUILD),build:true,)
+
+connect-watch-bt:
+	@echo -e "$(BOLD)$(CYAN)⌚ Setting up Wear OS Bluetooth Proxy via Phone...$(RESET)"
+	@adb forward tcp:4444 localabstract:live-debugger
+	@adb connect 127.0.0.1:4444
+	@echo -e "$(BOLD)$(GREEN)✓ Connected! Watch is mapped to 127.0.0.1:4444$(RESET)"
+	@echo -e "  Run 'adb devices' to confirm it appears as: 127.0.0.1:4444 device"
+
+disconnect-watch-bt:
+	@echo -e "$(BOLD)$(CYAN)🔌 Disconnecting Wear OS Bluetooth Proxy...$(RESET)"
+	@adb disconnect 127.0.0.1:4444 2>/dev/null || true
+	@adb forward --remove tcp:4444 2>/dev/null || true
+	@echo -e "$(BOLD)$(GREEN)✓ Bluetooth proxy disconnected.$(RESET)"
 
 install-mock:
 	@echo -e "$(BOLD)$(GREEN)🧪 Installing Sensor Mock Emitter to connected device/emulator...$(RESET)"
