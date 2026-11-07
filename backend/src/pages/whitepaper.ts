@@ -93,11 +93,11 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
           <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
             Given instantaneous heart rate readings $HR_i$ in beats per minute (BPM):
           </p>
-          <div style="background:var(--surface-raised);padding:14px 18px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:15px;color:var(--text-primary);margin-bottom:12px;overflow-x:auto;">
-            RR_i = (60000.0 / HR_i)  [in milliseconds]
+          <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
+            $$RR_i = \frac{60000.0}{HR_i} \quad \text{[ms]}$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
-            Valid beats must strictly satisfy physiological limits: 300 ms ≤ RR_i ≤ 1500 ms (40 to 200 BPM) and consecutive change |RR_i - RR_{i-1}| ≤ 300 ms. Ectopic beats and motion noise are rejected prior to metric computation.
+            Valid beats must strictly satisfy physiological limits: $300\text{ ms} \le RR_i \le 1500\text{ ms}$ (40 to 200 BPM) and consecutive change $|RR_i - RR_{i-1}| \le 300\text{ ms}$. Ectopic beats and motion noise are rejected prior to metric computation.
           </p>
         </div>
 
@@ -106,10 +106,10 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             Formula 2.2 — Root Mean Square of Successive Differences (RMSSD)
           </h4>
           <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
-            For a sliding buffer of $N$ valid beat intervals ($15 ≤ N ≤ 30$):
+            For a sliding buffer of $N$ valid beat intervals ($15 \le N \le 30$):
           </p>
-          <div style="background:var(--surface-raised);padding:14px 18px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:15px;color:var(--text-primary);margin-bottom:12px;overflow-x:auto;">
-            RMSSD = sqrt( (1 / (N - 1)) * Σ_{i=1}^{N-1} (RR_{i+1} - RR_i)^2 )
+          <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
+            $$RMSSD = \sqrt{\frac{1}{N - 1} \sum_{i=1}^{N-1} (RR_{i+1} - RR_i)^2}$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
             RMSSD directly reflects parasympathetic (vagal) cardiac modulation, capturing immediate autonomic shifts within seconds.
@@ -123,12 +123,11 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
           <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
             Features are standardized against the individual's calibrated baseline ($\mu_{HR}, \sigma_{HR}, \mu_{RMSSD}, \sigma_{RMSSD}$):
           </p>
-          <div style="background:var(--surface-raised);padding:14px 18px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:14.5px;color:var(--text-primary);margin-bottom:12px;line-height:1.6;overflow-x:auto;">
-            hrZ = (w.hrMean - μ_{HR}) / max(σ_{HR}, 1.0)<br/>
-            hrvZ = (μ_{RMSSD} - w.rmssd) / max(σ_{RMSSD}, 1.0)  // Inverted: drops increase score
+          <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
+            $$hrZ = \frac{w.hrMean - \mu_{HR}}{\max(\sigma_{HR}, 1.0)}, \quad hrvZ = \frac{\mu_{RMSSD} - w.rmssd}{\max(\sigma_{RMSSD}, 1.0)}$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
-            Notice the inversion of $hrvZ$: when HRV collapses below baseline, $hrvZ$ turns strongly positive, signaling sympathetic stress even if motor movement is zero.
+            Notice the mathematical inversion of $hrvZ$: when HRV collapses below baseline, $hrvZ$ turns strongly positive, signaling sympathetic stress even when motor movement is zero.
           </p>
         </div>
 
@@ -136,14 +135,14 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
           <h4 style="font-size:15px;color:var(--text-primary);margin-bottom:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
             Formula 2.4 — Continuous Logistic Fusion &amp; Sigmoid Stress Probability
           </h4>
-          <div style="background:var(--surface-raised);padding:14px 18px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:14.5px;color:var(--text-primary);margin-bottom:12px;line-height:1.6;overflow-x:auto;">
-            Score = (0.35 * hrZ) + (0.35 * hrvZ) + (0.15 * Repetitiveness) + (0.15 * HR_{slope})<br/>
-            Stress_Percent = (1.0 / (1.0 + exp(-1.2 * (Score - 1.0)))) * 100%
+          <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
+            $$Score = 0.35 \cdot hrZ + 0.35 \cdot hrvZ + 0.15 \cdot Repetitiveness + 0.15 \cdot HR_{slope}$$
+            $$\text{Stress \%} = \frac{1}{1 + e^{-1.2(Score - 1.0)}} \times 100\%$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
-            • Tier 0 (Calm): Score &lt; 1.5 (&lt; 50% Stress)<br/>
-            • Tier 1 (Rising): 1.5 ≤ Score ≤ 2.5 (50% to 74% Stress)<br/>
-            • Tier 2 (Sensory Overload): Score &gt; 2.5 (≥ 75% Stress)
+            • <strong>Tier 0 (Calm):</strong> $Score &lt; 1.5$ (&lt; 50% Stress)<br/>
+            • <strong>Tier 1 (Rising):</strong> $1.5 \le Score \le 2.5$ (50% to 74% Stress)<br/>
+            • <strong>Tier 2 (Sensory Overload):</strong> $Score &gt; 2.5$ (&ge; 75% Stress)
           </p>
         </div>
       </section>
@@ -176,6 +175,21 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             <div style="font-weight:700;color:var(--text-primary);margin-bottom:6px;">4. Zero-Spill In-Memory Rollup</div>
             <p style="font-size:13.5px;margin:0;">Watch metrics are cached purely in RAM with hourly compact summaries, preventing flash write endurance degradation and NAND power draw.</p>
           </div>
+        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface);border:1px solid var(--border-strong);overflow-x:auto;">
+          <h4 style="font-size:14px;color:var(--text-primary);margin-bottom:16px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
+            Figure 3.1 — Adaptive Sensor Duty-Cycling State Machine
+          </h4>
+          <pre class="mermaid" style="display:flex;justify-content:center;background:transparent;border:none;margin:0;">
+flowchart LR
+  subgraph Calm["Tier 0: Calm Baseline"]
+    A["PPG Active Sampling (30s)"] -->|"Update Rolling EMA Profile"| B["PPG Sleep (90s, 0mA)"]
+    B -->|"90s Timer Expired"| A
+  end
+  B -->|"Motion Spike (Accel > 0.5G)"| C["Instant PPG Wake (0s Delay)"]
+  A -->|"Stress Elevated (Tier 1/2)"| D["Continuous PPG Telemetry"]
+  C --> D
+  D -->|"Recovery to Tier 0 (< 50%)"| A
+          </pre>
         </div>
       </section>
 
@@ -191,25 +205,30 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
           The <strong>BioCue Guardian Protocol</strong> is governed by a mathematically provable, deterministic finite state machine (FSM):
         </p>
 
-        <div style="background:var(--surface-raised);padding:20px;border-radius:var(--radius-md);border:1px solid var(--border-strong);margin:20px 0;font-family:var(--font-mono);font-size:13.5px;line-height:1.65;color:var(--text-primary);">
-          [Event Start: Tier 1/2 Spontaneous Spike or Manual Tap]<br/>
-          &nbsp;&nbsp;│<br/>
-          &nbsp;&nbsp;├─▶ T = 0 to 3 min: Phase 1 — Silent Presence (Validation, Zero Demands)<br/>
-          &nbsp;&nbsp;│<br/>
-          &nbsp;&nbsp;├─▶ T = 3 to 7 min: Phase 2 — Somatic Co-Regulation (Haptic Breathing Orb)<br/>
-          &nbsp;&nbsp;│<br/>
-          &nbsp;&nbsp;├─▶ T = 7 to 12 min: Phase 3 — Safety Check ("Are you physically safe?")<br/>
-          &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ User taps "I'm safe · Need time" ──▶ Continues quiet soothing<br/>
-          &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ User does NOT interact<br/>
-          &nbsp;&nbsp;│<br/>
-          &nbsp;&nbsp;├─▶ T = 12 to 15 min: Prolonged Distress &amp; Vitals Check (HR &gt; Baseline + 20)<br/>
-          &nbsp;&nbsp;│<br/>
-          &nbsp;&nbsp;├─▶ T = 15 min: Audible/Tactile Grace Alarm (30s countdown to cancel)<br/>
-          &nbsp;&nbsp;│<br/>
-          &nbsp;&nbsp;└─▶ T = 15m30s: CRISIS BROADCAST DISPATCHED TO CIRCLE<br/>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Single GPS fix attached<br/>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• High-priority push to authorized circle<br/>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Direct 988 Crisis Lifeline shortcut surfaced
+        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface);border:1px solid var(--border-strong);overflow-x:auto;">
+          <h4 style="font-size:14px;color:var(--text-primary);margin-bottom:16px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
+            Figure 4.1 — Deterministic Crisis Guardian Finite State Machine (FSM)
+          </h4>
+          <pre class="mermaid" style="display:flex;justify-content:center;background:transparent;border:none;margin:0;">
+stateDiagram-v2
+  [*] --> Phase1: Tier 1/2 Spike or Manual Tap
+  state "Phase 1: Silent Presence (0 to 3m)" as Phase1
+  state "Phase 2: Somatic Co-Regulation (3 to 7m)" as Phase2
+  state "Phase 3: Safety Check (7 to 12m)" as Phase3
+  state "Phase 4: Prolonged Distress (12 to 15m)" as Phase4
+  state "30s Audible/Tactile Grace Alarm (15m)" as Grace
+  state "Crisis Broadcast Dispatched" as Crisis
+  state "Resolved / Calm Grounded" as Resolved
+
+  Phase1 --> Phase2: T = 3m (Validation & Zero Demands)
+  Phase2 --> Phase3: T = 7m (Haptic Breathing Pacer)
+  Phase3 --> Resolved: Wearer confirms safe
+  Phase3 --> Phase4: Unresponsive & T = 12m
+  Phase4 --> Grace: HR > Baseline + 20 & T = 15m
+  Grace --> Resolved: Cancelled by Wearer
+  Grace --> Crisis: Countdown Expired (T = 15m30s)
+  Crisis --> [*]: Circle Alerted with Single GPS Fix
+          </pre>
         </div>
       </section>
 
@@ -221,6 +240,31 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
         <p>
           While crisis escalation remains 100% deterministic, cognitive reframing, bedtime sensory co-regulation, and longitudinal pattern mining require deep linguistic synthesis.
         </p>
+
+        <div class="softcard" style="padding:24px;margin:24px 0;background:var(--surface);border:1px solid var(--border-strong);overflow-x:auto;">
+          <h4 style="font-size:14px;color:var(--text-primary);margin-bottom:16px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;">
+            Figure 5.1 — 4-Tier Hybrid Intelligence &amp; On-Chip Hardware Boundary
+          </h4>
+          <pre class="mermaid" style="display:flex;justify-content:center;background:transparent;border:none;margin:0;">
+flowchart TD
+  subgraph Watch["Smartwatch (Wear OS) — Strict Zero-LLM Boundary"]
+    Sensors["PPG Optics & 3-Axis Accel"] --> Windows["5s Window Feature Extraction"]
+    Windows --> Scoring["On-Device Scoring (Formula 2.4)"]
+    Scoring --> WatchUI["Zero-Anxiety Sensory UI"]
+  end
+
+  Scoring -->|"Tier 1/2 Escalation"| Guardian["Deterministic Crisis Guardian (FSM)"]
+  Scoring -.->|"BLE Batch Sync"| Phone["Mobile Companion App"]
+
+  subgraph Companion["Phone Hardware Governor & NPU Matrix"]
+    Phone --> Gov{"Hardware Resource Governor"}
+    Gov -->|"Battery > 20% & Thermal Normal"| SLM["On-Chip SLM (Gemma 2B INT4)"]
+    Gov -->|"Low Battery (< 20%) or Severe Heat"| Fallback["Zero-Power Regex/Semantic NLP"]
+    SLM --> Insights["Cognitive Reframing & Pattern Synthesis"]
+    Fallback --> Insights
+  end
+          </pre>
+        </div>
 
         <h3 style="font-size:18px;color:var(--text-primary);margin-top:20px;margin-bottom:10px;">5.1 The Watch Boundary: Strict Zero-LLM Invariant</h3>
         <p>
@@ -324,6 +368,37 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
     description: "Technical treatise on autonomic-motor decoupling, continuous logistic fusion scoring, deterministic crisis guardian, and on-chip Gemma 2B SLM co-regulation.",
     content,
     locale,
-    activeTab: "whitepaper"
+    activeTab: "whitepaper",
+    extraHead: `
+      <!-- KaTeX Math Styling -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous"/>
+    `,
+    scripts: `
+      <!-- KaTeX Math Rendering -->
+      <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+      <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="
+        if (typeof renderMathInElement === 'function') {
+          renderMathInElement(document.body, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\\\(', right: '\\\\)', display: false},
+              {left: '\\\\[', right: '\\\\]', display: true}
+            ],
+            throwOnError: false
+          });
+        }
+      "></script>
+
+      <!-- Mermaid Architecture & State Diagram Engine -->
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: document.documentElement.getAttribute('data-theme') === 'high-contrast' ? 'dark' : 'neutral',
+          fontFamily: 'Atkinson Hyperlegible, -apple-system, BlinkMacSystemFont, sans-serif'
+        });
+      </script>
+    `
   });
 }

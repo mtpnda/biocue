@@ -448,6 +448,10 @@ export const GLOBAL_STYLES = `
     }
   }
 
+  /* Locale Switcher Responsive Labels */
+  .locale-label-full { display: inline; }
+  .locale-label-short { display: none; }
+
   /* Responsive Queries */
   @media (max-width: 860px) {
     .desktop-nav {
@@ -461,6 +465,19 @@ export const GLOBAL_STYLES = `
     }
     .header-wrap {
       height: 64px;
+      padding: 0 16px;
+      gap: 10px;
+    }
+    .mobile-drawer {
+      top: 64px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .locale-label-full { display: none; }
+    .locale-label-short { display: inline; }
+    .wrap {
+      padding: 0 16px;
     }
   }
 `;
