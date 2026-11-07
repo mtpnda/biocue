@@ -120,7 +120,15 @@ Build signed & notarized macOS release for external distribution (DMG + GitHub)
 [bundle exec] fastlane mac uninstall
 ```
 
-Uninstall BioCue from local Mac: resets TCC permissions and removes app
+Completely uninstall app and reset privacy permissions (TCC)
+
+### mac install
+
+```sh
+[bundle exec] fastlane mac install
+```
+
+Build and install macOS app directly to /Applications with optional telemetry injection
 
 ### mac release_appstore
 
@@ -142,6 +150,14 @@ Build and submit macOS Host to Mac App Store
 ```
 
 Build iOS client IPA locally into build/ios_internal/
+
+### ios install
+
+```sh
+[bundle exec] fastlane ios install
+```
+
+Build and install iOS client directly onto connected physical iPad
 
 ### ios internal
 
