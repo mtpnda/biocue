@@ -69,7 +69,10 @@ struct WearerRoot: View {
                     ProfileView(userName: profile.displayName, roleLabel: "Wearer", onClose: { showProfile = false },
                                 manageConnections: nil, onSignOut: {
                                     service.stop(); circle.stop(); link.shutdown(); onSignOut()
-                                })
+                                }) {
+                        WearerCaregiversCard(circle: circle)
+                        WearerPairingCodeCard(circle: circle)
+                    }
                 }
         } else {
             Text(holder.error ?? "Something went wrong.").padding().calmBackground()

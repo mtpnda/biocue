@@ -2,23 +2,40 @@ import SwiftUI
 
 /// Role-agnostic profile sheet. It receives plain values and closures; the role only decides which
 /// optional rows the HOST passes in.
-struct ProfileView: View {
+struct ProfileView<Content: View>: View {
     let userName: String
     let roleLabel: String
     let onClose: () -> Void
-    let manageConnections: (() -> Void)?
+    var manageConnections: (() -> Void)? = nil
     let onSignOut: () -> Void
+    @ViewBuilder var content: () -> Content
+
+    init(
+        userName: String,
+        roleLabel: String,
+        onClose: @escaping () -> Void,
+        manageConnections: (() -> Void)? = nil,
+        onSignOut: @escaping () -> Void,
+        @ViewBuilder content: @escaping () -> Content = { EmptyView() }
+    ) {
+        self.userName = userName
+        self.roleLabel = roleLabel
+        self.onClose = onClose
+        self.manageConnections = manageConnections
+        self.onSignOut = onSignOut
+        self.content = content
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
                 CircleIconButton(systemName: "chevron.left", label: "Back", action: onClose)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Profile")
+                    Text("Settings")
                         .font(AppFont.headlineSmall)
                         .foregroundStyle(Palette.inkPrimary)
                         .accessibilityAddTraits(.isHeader)
-                    Text("Your account")
+                    Text("Account & preferences")
                         .font(AppFont.bodySmall)
                         .foregroundStyle(Palette.inkSecondary)
                 }
@@ -40,9 +57,11 @@ struct ProfileView: View {
                     .padding(.top, 8)
                     .accessibilityElement(children: .combine)
 
+                    content()
+
                     if let manageConnections = manageConnections {
                         VStack(alignment: .leading, spacing: 6) {
-                            SectionHeader(text: "Settings")
+                            SectionHeader(text: "Connections")
                             SoftCard(padding: 0) {
                                 SettingsRow(
                                     emoji: "🔗",

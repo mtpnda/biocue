@@ -23,7 +23,7 @@ WEARER_SYMBOLS = ["WearerCloud", "WearerService", "WearerRoot", "WearerHomeView"
                   "AlertNotifying"]
 
 # Files in Shared/ that legitimately DECLARE or IMPLEMENT the role-split interfaces.
-SHARED_EXEMPT = {"CloudModels.swift", "FirebaseCloud.swift"}
+SHARED_EXEMPT = {"CloudModels.swift", "FirebaseCloud.swift", "DenoCloud.swift"}
 
 def code_lines(path):
     for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):

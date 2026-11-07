@@ -148,7 +148,7 @@ class WearerDashboardViewModel(
                         _latestHrv.value = latestData.rmssd.toInt()
                         _lastReadingTimestamp.value = latestData.timestamp
                         val ageMs = System.currentTimeMillis() - latestData.timestamp
-                        _connectionStatus.value = if (ageMs > 30000) ConnectionStatus.DISCONNECTED else ConnectionStatus.CONNECTED
+                        _connectionStatus.value = if (ageMs > 150000) ConnectionStatus.DISCONNECTED else ConnectionStatus.CONNECTED
                     } else {
                         _connectionStatus.value = ConnectionStatus.SEARCHING
                     }
@@ -183,29 +183,23 @@ class WearerDashboardViewModel(
                     }
 
                     val resolvedEvents = db.eventDao().getEventsBetween(uid, start, end).filter { it.isResolved }
-                    val clusteredEvents = com.mtpnda.biocue.core.domain.EventClusterer.cluster(resolvedEvents)
-
-                    _journal.value = clusteredEvents.map { cluster ->
-                        val timeStr = SimpleDateFormat("h:mm a", Locale.US).format(Date(cluster.startTime))
-                        val uniqueLabels = cluster.events.map { it.label }.filter { it != "NONE" }.distinct()
-                        val labelText = if (uniqueLabels.isEmpty()) "Unknown" else uniqueLabels.joinToString(" + ")
-                        val hasAuto = cluster.events.any { it.triggerType == "AUTO" }
-                        val hasManual = cluster.events.any { it.triggerType == "MANUAL" }
-                        val activityStr = when {
-                            hasAuto && hasManual -> "Auto-detected + Manual Input"
-                            hasAuto -> "Auto-detected"
-                            else -> "Manual"
+                    // Flatten each event so every recorded moment is its own distinct, clean entry (no " + " combining)
+                    _journal.value = resolvedEvents.flatMap { event ->
+                        val timeStr = SimpleDateFormat("h:mm a", Locale.US).format(Date(event.startTime))
+                        val rawLabel = event.label
+                        val parts = rawLabel.split(" + ").map { it.trim() }.filter { it.isNotEmpty() && it != "NONE" }
+                        val displayLabels = if (parts.isEmpty()) listOf(if (rawLabel == "NONE" || rawLabel.isEmpty()) "Unlabeled Moment" else rawLabel) else parts
+                        val activityStr = if (event.triggerType == "AUTO") "Auto-detected" else "Manual"
+                        displayLabels.map { label ->
+                            JournalEntry(
+                                time = timeStr,
+                                place = "Logged Location",
+                                activity = activityStr,
+                                labelIcon = com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(label),
+                                labelText = label,
+                                colorHex = com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(label)
+                            )
                         }
-                        val icon = com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(labelText)
-                        val color = com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(labelText)
-                        JournalEntry(
-                            time = timeStr,
-                            place = "Logged Location",
-                            activity = activityStr,
-                            labelIcon = icon,
-                            labelText = labelText,
-                            colorHex = color
-                        )
                     }
 
                     // Sync up to Firebase
@@ -234,10 +228,12 @@ class WearerDashboardViewModel(
         _tier.value = tier
         if (tier == 2 && sosCooldown.tryAcquire(System.currentTimeMillis())) requestSosLocation()
 
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         _activityLabel.value = when {
             entity.isExercising -> "🏃 Exercising"
             entity.repetitiveness > 0.5 -> "🔄 Pacing / Stimming"
             entity.accMag > 0.2 -> "🚶 Active"
+            (hour >= 21 || hour < 6) && entity.accMag < 0.08 -> "🛏️ Resting in Bed"
             else -> "🪑 Sitting Still"
         }
     }

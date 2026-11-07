@@ -165,6 +165,8 @@ class MainActivity : ComponentActivity() {
         if (intent?.action == "com.mtpnda.biocue.ACTION_LOG_EMOTION" || 
             intent?.getStringExtra("launch_state") == "CAROUSEL") {
             launchState = WatchState.CAROUSEL
+        } else if (intent?.getStringExtra("launch_state") == "SETUP_PHONE") {
+            launchState = WatchState.SETUP_PHONE
         }
 
         if (hasAllPermissions() && !isTracking) {
@@ -182,7 +184,11 @@ class MainActivity : ComponentActivity() {
             val bleLinkState by BleLinkServer.get(this@MainActivity).state.collectAsState()
             val senderPhoneReachable by sender.isPhoneReachable.collectAsState()
             val servicePhoneReachable by (sensorService?.isPhoneReachable ?: _isPhoneReachable).collectAsState()
-            val phoneReachable = senderPhoneReachable || servicePhoneReachable || isEmulator()
+            val phoneReachable = if (phoneTargetState == PhoneTarget.IPHONE) {
+                bleLinkState is BleLinkServer.LinkState.Established
+            } else {
+                senderPhoneReachable || servicePhoneReachable || isEmulator()
+            }
 
             val testModeEnabled by (sensorService?.isTestModeActive ?: kotlinx.coroutines.flow.MutableStateFlow(false)).collectAsState()
             val currentEventId = remember { mutableStateOf<String?>(null) }
@@ -424,29 +430,29 @@ fun WearApp(
                         if (phoneTarget == "IPHONE") {
                             Text(
                                 iphoneLinkStatus.ifEmpty { "On your iPhone: open BioCue, then Connect watch." },
-                                fontSize = 11.sp, color = Color.LightGray, textAlign = TextAlign.Center,
+                                fontSize = 11.sp, color = Color.White, textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
                             CompactButton(
                                 onClick = onStartIphonePairing,
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5))
-                            ) { Text("Pair iPhone") }
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5), contentColor = Color.White)
+                            ) { Text("Pair iPhone", color = Color.White, fontWeight = FontWeight.SemiBold) }
                             CompactButton(
                                 onClick = { onSelectPhoneTarget("ANDROID") },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E2E))
-                            ) { Text("Use Android phone", fontSize = 11.sp) }
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E2E3A), contentColor = Color.White)
+                            ) { Text("Use Android phone", fontSize = 11.sp, color = Color.White) }
                         } else {
-                            Text("Open BioCue on your phone to connect.", fontSize = 11.sp, color = Color.LightGray, textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 4.dp))
+                            Text("Open BioCue on your phone to connect.", fontSize = 11.sp, color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 4.dp))
                             CompactButton(
                                 onClick = { onSelectPhoneTarget("IPHONE") },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E2E))
-                            ) { Text("I use an iPhone", fontSize = 11.sp) }
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5), contentColor = Color.White)
+                            ) { Text("I use an iPhone", fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.SemiBold) }
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         CompactButton(
                             onClick = { watchState = WatchState.ANCHOR },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E2E3A))
-                        ) { Text("Back to Watch", fontSize = 11.sp) }
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E2E3A), contentColor = Color.White)
+                        ) { Text("Back to Watch", fontSize = 11.sp, color = Color.White) }
                     }
                 }
                 WatchState.ANCHOR, WatchState.GLOWING -> {
@@ -463,22 +469,25 @@ fun WearApp(
                             modifier = Modifier
                                 .padding(bottom = 8.dp)
                                 .clickable {
-                                    if (!isPhoneReachable) {
-                                        watchState = WatchState.SETUP_PHONE
-                                    }
+                                    watchState = WatchState.SETUP_PHONE
                                 }
                         ) {
+                            val dotColor = if (isPhoneReachable) Color(0xFF34D399) else Color(0xFFF59E0B)
+                            val statusText = when {
+                                phoneTarget == "IPHONE" -> if (isPhoneReachable) "iPhone Connected" else "iPhone Disconnected"
+                                else -> if (isPhoneReachable) "Android Connected" else "Android Disconnected"
+                            }
                             Box(
                                 modifier = Modifier
                                     .size(7.dp)
                                     .clip(CircleShape)
-                                    .background(if (isPhoneReachable) Color(0xFF34D399) else Color(0xFFF59E0B))
+                                    .background(dotColor)
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
-                                text = if (isPhoneReachable) "Phone Connected" else "Phone Disconnected",
+                                text = statusText,
                                 fontSize = 10.sp,
-                                color = if (isPhoneReachable) Color(0xFF34D399) else Color(0xFFF59E0B),
+                                color = dotColor,
                                 fontWeight = FontWeight.Medium
                             )
                         }

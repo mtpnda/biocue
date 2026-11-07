@@ -32,6 +32,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -294,21 +297,17 @@ fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeDate: (
                         modifier = Modifier.size(22.dp)
                     )
                 }
-                if (journalOffset < 0) {
-                    CircleIconButton(
-                        onClick = { onChangeDate(journalOffset + 1) },
-                        contentDescription = "Next day"
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = PrimaryCharcoal,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                } else {
-                    // Reserve the space so the header doesn't shift on "Today".
-                    Spacer(Modifier.size(48.dp))
+                CircleIconButton(
+                    onClick = { onChangeDate(journalOffset + 1) },
+                    enabled = journalOffset < 0,
+                    contentDescription = "Next day"
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = if (journalOffset < 0) PrimaryCharcoal else InkSecondary.copy(alpha = 0.35f),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
             }
         }
@@ -504,6 +503,47 @@ fun PatternReviewCard(reviews: List<ReviewEvent>, userName: String, onResolve: (
                         LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_ROUTINE), EventTypes.CONTEXT_ROUTINE, parseHexColor(EventTypes.getColorHexForLabel(EventTypes.CONTEXT_ROUTINE))) { onResolve(rev.eventId, EventTypes.CONTEXT_ROUTINE) }
                         LabelBtn(EventTypes.getIconForLabel(EventTypes.CONTEXT_UNKNOWN), EventTypes.CONTEXT_UNKNOWN, NeutralGrayChip) { onResolve(rev.eventId, EventTypes.CONTEXT_UNKNOWN) }
                     }
+                }
+
+                // Free-Text Labeling & Context Input (Spec 19)
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "OR WRITE IN YOUR OWN WORDS",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = InkSecondary,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
+                var customText by remember(rev.eventId) { mutableStateOf("") }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = customText,
+                        onValueChange = { customText = it },
+                        modifier = Modifier.weight(1f),
+                        placeholder = {
+                            Text(
+                                if (isUnlabeled) "What were you feeling or experiencing?" else "Add notes, triggers, or what helped...",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(AppRadius.Sm),
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    PillButton(
+                        text = "Save",
+                        onClick = {
+                            val trimmed = customText.trim()
+                            if (trimmed.isNotEmpty()) {
+                                onResolve(rev.eventId, trimmed)
+                                customText = ""
+                            }
+                        },
+                        enabled = customText.trim().isNotEmpty()
+                    )
                 }
             }
         }

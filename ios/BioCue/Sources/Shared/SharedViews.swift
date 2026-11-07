@@ -74,40 +74,77 @@ struct JournalCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                SectionHeader(text: "Journal · \(dayLabel)")
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center) {
+                Text("JOURNAL · \(dayLabel.uppercased())")
+                    .font(AppFont.labelSmall).tracking(0.5)
+                    .foregroundStyle(Palette.inkSecondary)
+                    .padding(.leading, 4)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
-                CircleIconButton(systemName: "chevron.left", label: "Previous day") { onChangeDay(offset - 1) }
-                if offset < 0 {
-                    CircleIconButton(systemName: "chevron.right", label: "Next day") { onChangeDay(offset + 1) }
-                } else {
-                    Color.clear.frame(width: Metrics.minTouch, height: Metrics.minTouch)  // keep the header from shifting
+                HStack(spacing: 8) {
+                    CircleIconButton(systemName: "chevron.left", label: "Previous day") { onChangeDay(offset - 1) }
+                    CircleIconButton(
+                        systemName: "chevron.right",
+                        label: "Next day",
+                        disabled: offset >= 0
+                    ) {
+                        onChangeDay(offset + 1)
+                    }
                 }
             }
             SoftCard(padding: 16) {
                 if entries.isEmpty {
-                    Text("No events on this day. All calm ✨").font(AppFont.bodyMedium)
-                        .foregroundStyle(Palette.inkSecondary).padding(.vertical, 10)
+                    HStack(spacing: 14) {
+                        ZStack {
+                            Circle()
+                                .fill(StatePalette.calm.soft)
+                                .frame(width: 40, height: 40)
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(StatePalette.calm.ink)
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("All calm on this day")
+                                .font(AppFont.titleMedium)
+                                .foregroundStyle(Palette.inkPrimary)
+                            Text("No stress spikes detected or logged.")
+                                .font(AppFont.bodySmall)
+                                .foregroundStyle(Palette.inkSecondary)
+                        }
+                        Spacer()
+                    }
+                    .padding(.vertical, 4)
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                             let tint = Color.fromHexString(entry.colorHex)
-                            HStack(alignment: .top, spacing: 12) {
-                                EmojiAvatar(emoji: entry.labelIcon, fill: tint.opacity(0.30), border: tint.opacity(0.6))
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(entry.labelText).font(AppFont.labelMedium).foregroundStyle(Palette.inkPrimary)
-                                        .padding(.horizontal, 10).padding(.vertical, 4)
-                                        .background(tint.opacity(0.28), in: Capsule())
-                                        .overlay(Capsule().stroke(tint.opacity(0.6), lineWidth: 1))
-                                    Text(entry.activity).font(AppFont.bodyMedium).foregroundStyle(Palette.inkSecondary)
+                            HStack(alignment: .top, spacing: 14) {
+                                EmojiAvatar(emoji: entry.labelIcon, size: 40, fill: tint.opacity(0.18), border: tint.opacity(0.40))
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(entry.labelText)
+                                        .font(AppFont.titleMedium)
+                                        .foregroundStyle(Palette.inkPrimary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    HStack(spacing: 6) {
+                                        Text(entry.activity)
+                                            .font(AppFont.bodySmall)
+                                            .foregroundStyle(Palette.inkSecondary)
+                                        Text("·")
+                                            .font(AppFont.bodySmall)
+                                            .foregroundStyle(Palette.inkMuted)
+                                        Text(entry.time)
+                                            .font(AppFont.bodySmall)
+                                            .foregroundStyle(Palette.inkMuted)
+                                    }
                                 }
-                                Spacer(minLength: 8)
-                                Text(entry.time).font(AppFont.bodySmall).foregroundStyle(Palette.inkMuted)
+                                Spacer(minLength: 0)
                             }
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 10)
                             .accessibilityElement(children: .combine)
-                            if index < entries.count - 1 { Divider().overlay(Palette.line) }
+                            if index < entries.count - 1 {
+                                Divider().overlay(Palette.line).padding(.leading, 54)
+                            }
                         }
                     }
                 }
@@ -145,6 +182,8 @@ private struct ReviewContent: View {
     let review: ReviewEvent
     let userName: String
     let onResolve: (String, String) -> Void
+
+    @State private var customText = ""
 
     private var isUnlabeled: Bool { review.currentLabel == EventTypes.labelNone }
 
@@ -191,6 +230,39 @@ private struct ReviewContent: View {
                     choice(EventTypes.contextUnknown, neutral: true)
                 }
             }
+
+            // Free-Text Labeling & Context Input (Spec 19)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("OR WRITE IN YOUR OWN WORDS")
+                    .font(AppFont.labelSmall)
+                    .foregroundStyle(Palette.inkSecondary)
+
+                HStack(spacing: 8) {
+                    TextField(isUnlabeled ? "What were you feeling or experiencing?" : "Add notes, triggers, or what helped...", text: $customText)
+                        .font(AppFont.bodyMedium)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Palette.surface2, in: RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous).stroke(Palette.line, lineWidth: 1))
+
+                    Button(action: {
+                        let trimmed = customText.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !trimmed.isEmpty else { return }
+                        onResolve(review.eventId, trimmed)
+                        customText = ""
+                    }) {
+                        Text("Save")
+                            .font(AppFont.labelMedium)
+                            .foregroundStyle(customText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Palette.inkMuted : Palette.onCharcoal)
+                            .padding(.horizontal, 16)
+                            .frame(minHeight: Metrics.buttonHeight)
+                            .background(customText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Palette.surface2 : Palette.charcoal, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(customText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .padding(.top, 4)
         }
     }
 

@@ -205,6 +205,7 @@ fun CircleIconButton(
     onClick: () -> Unit,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     size: Dp = 40.dp,
     containerColor: Color = Surface2,
     content: @Composable () -> Unit
@@ -216,16 +217,19 @@ fun CircleIconButton(
             .semantics { this.contentDescription = contentDescription }
             .clickable(
                 role = Role.Button,
+                enabled = enabled,
                 onClick = onClick
             ),
         contentAlignment = Alignment.Center
     ) {
+        val effectiveContainer = if (enabled) containerColor else containerColor.copy(alpha = 0.5f)
+        val effectiveBorder = if (enabled) LineBorder else LineBorder.copy(alpha = 0.4f)
         Box(
             modifier = Modifier
                 .size(size)
                 .clip(CircleShape)
-                .background(containerColor)
-                .border(1.dp, LineBorder, CircleShape),
+                .background(effectiveContainer)
+                .border(1.dp, effectiveBorder, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             content()

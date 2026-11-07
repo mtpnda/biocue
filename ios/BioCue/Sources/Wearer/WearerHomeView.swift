@@ -30,14 +30,17 @@ struct WearerHomeView: View {
                     StatusMeterCard(userName: "You", tier: service.tier, activity: service.activityLabel)
                 }
 
+                // BioCue Buddy: On-device empathetic grounding & crisis guardian (Spec 19)
+                if service.companionGuidance != nil || service.tier >= 1 {
+                    BioCueBuddyCard(service: service)
+                }
+
                 if !service.reviews.isEmpty {
                     ReviewCard(reviews: service.reviews, userName: "You") { id, label in
                         Task { await service.resolveReview(eventId: id, newLabelOrContext: label) }
                     }
                 }
 
-                caregivers
-                pairingCode
                 privacy
 
                 JournalCard(entries: service.journal, offset: service.journalOffset) { delta in
@@ -57,106 +60,61 @@ struct WearerHomeView: View {
     // MARK: sections
 
     @ViewBuilder private var connectionPill: some View {
-        switch service.connection {
-        case .connected: StatusPill(text: "Watch connected", palette: .calm)
-        case .searching: StatusPill(text: "Searching for watch…", palette: .rising, textColor: Palette.inkPrimary)
-        case .disconnected: StatusPill(text: "Watch disconnected", palette: .neutral)
+        switch service.linkState {
+        case .connected:
+            StatusPill(text: "Watch connected", palette: .calm)
+        case .connecting, .handshaking:
+            StatusPill(text: "Connecting watch…", palette: .rising, textColor: Palette.inkPrimary)
+        case .scanning:
+            StatusPill(text: "Searching for watch…", palette: .rising, textColor: Palette.inkPrimary)
+        default:
+            StatusPill(text: "Watch disconnected", palette: .neutral)
         }
     }
 
-    private var caregivers: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SectionHeader(text: "Connected caregivers · \(circle.connected.count) of \(WearerCircleViewModel.maxCaregivers)")
-            SoftCard {
-                if circle.connected.isEmpty && circle.pending.isEmpty {
-                    Text("No caregivers connected yet.").font(AppFont.bodyMedium).foregroundStyle(Palette.inkSecondary)
-                }
-                ForEach(circle.pending) { p in
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack(spacing: 12) {
-                            EmojiAvatar(emoji: "🤝", size: 44, fill: StatePalette.info.soft, border: StatePalette.info.chip)
-                            VStack(alignment: .leading) {
-                                Text(p.caregiverName)
-                                    .font(AppFont.titleMedium)
-                                    .foregroundStyle(Palette.inkPrimary)
-                                Text("Wants to join your circle")
-                                    .font(AppFont.bodySmall)
-                                    .foregroundStyle(Palette.inkSecondary)
-                            }
-                        }
-                        HStack(spacing: 10) {
-                            OutlinedPillButton(title: "Deny", border: StatePalette.alert.chip, ink: StatePalette.alert.ink) { Task { await circle.deny(p) } }
-                            PillButton(title: "Approve", disabled: !circle.canAddCaregiver) { Task { await circle.approve(p) } }
-                        }
-                    }
-                    .padding(.vertical, 6)
-                    Divider().overlay(Palette.line)
-                }
-                ForEach(Array(circle.connected.enumerated()), id: \.element.id) { index, c in
-                    HStack(spacing: 12) {
-                        EmojiAvatar(emoji: "👤", size: 44)
-                        VStack(alignment: .leading) {
-                            Text(c.caregiverName)
-                                .font(AppFont.titleMedium)
-                                .foregroundStyle(Palette.inkPrimary)
-                            Text("Connected · reads stress events")
-                                .font(AppFont.bodySmall)
-                                .foregroundStyle(Palette.inkSecondary)
-                        }
-                        Spacer()
-                        Button("Remove") { Task { await circle.remove(c) } }
-                            .font(AppFont.labelLarge)
-                            .foregroundStyle(StatePalette.alert.ink)
-                            .frame(minHeight: Metrics.minTouch)
-                    }
-                    if index < circle.connected.count - 1 { Divider().overlay(Palette.line) }
-                }
-                if let message = circle.errorMessage {
-                    InlineNotice(text: message).padding(.top, 8)
-                }
-            }
-        }
-    }
-
-    private var pairingCode: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SectionHeader(text: "Add a caregiver")
-            SoftCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Pairing code")
-                        .font(AppFont.titleMedium)
-                        .foregroundStyle(Palette.inkPrimary)
-                    Text("Single-use · expires in 10 minutes. Share it out loud or in person.")
-                        .font(AppFont.bodyMedium).foregroundStyle(Palette.inkSecondary)
-                    PairingCodeView(code: circle.pairingCode)
-                    Text(circle.pairingCode.isEmpty ? "No active code"
-                         : String(format: "Expires in %d:%02d", circle.secondsRemaining / 60, circle.secondsRemaining % 60))
-                        .font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary).frame(maxWidth: .infinity)
-                    PillButton(title: circle.canAddCaregiver ? "Generate pairing code" : "Maximum caregivers reached",
-                               loading: circle.isWorking, disabled: !circle.canAddCaregiver) {
-                        Task { await circle.generateCode() }
-                    }
-                }
-            }
-        }
-    }
+    @State private var privacyExpanded = false
 
     private var privacy: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SectionHeader(text: "What leaves this phone")
-            SoftCard {
-                privacyRow("📤", "Stress events", "Start, end, activity and your label — synced to your circle", .info)
-                Divider().overlay(Palette.line)
-                privacyRow("🔒", "Heart data & movement", "Stays on this phone, always", .neutral)
-                Divider().overlay(Palette.line)
-                privacyRow("📍", "Location", "Stays on this phone; only used to show where an SOS happened", .rising)
+        SoftCard(container: Palette.surface2, padding: 14) {
+            VStack(alignment: .leading, spacing: 10) {
+                Button(action: { withAnimation(.easeInOut(duration: 0.2)) { privacyExpanded.toggle() } }) {
+                    HStack {
+                        Image(systemName: "lock.shield")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Palette.inkSecondary)
+                        Text("PRIVACY & DATA GUARANTEE")
+                            .font(AppFont.labelSmall)
+                            .tracking(0.5)
+                            .foregroundStyle(Palette.inkSecondary)
+                        Spacer()
+                        Text(privacyExpanded ? "Hide" : "Review")
+                            .font(AppFont.labelSmall)
+                            .foregroundStyle(Palette.inkMuted)
+                        Image(systemName: privacyExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Palette.inkMuted)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                if privacyExpanded {
+                    Divider().overlay(Palette.line)
+                    VStack(alignment: .leading, spacing: 10) {
+                        privacyRow("📤", "Stress events", "Start, end, and your label — shared only with approved circle", .info)
+                        Divider().overlay(Palette.line)
+                        privacyRow("🔒", "Heart data & movement", "Stays strictly on this phone and watch, always", .neutral)
+                        Divider().overlay(Palette.line)
+                        privacyRow("📍", "Emergency location", "Sent once, only if an emergency SOS is triggered", .rising)
+                    }
+                }
             }
         }
     }
 
     private func privacyRow(_ emoji: String, _ title: String, _ subtitle: String, _ tone: StatePalette) -> some View {
         HStack(spacing: 12) {
-            EmojiAvatar(emoji: emoji, size: 44, fill: tone.soft, border: tone.chip)
+            EmojiAvatar(emoji: emoji, size: 36, fill: tone.soft, border: tone.chip)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(AppFont.titleMedium)
@@ -164,38 +122,95 @@ struct WearerHomeView: View {
                 Text(subtitle)
                     .font(AppFont.bodySmall)
                     .foregroundStyle(Palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            Spacer(minLength: 0)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
     }
 
     #if DEBUG
+    @State private var devToolsExpanded = false
+
     private var developerTools: some View {
-        SoftCard(container: Palette.surface2) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("DEVELOPER TOOLS").font(AppFont.labelSmall).foregroundStyle(Palette.inkSecondary)
-                Text("Sensor mock (no watch needed)").font(AppFont.bodySmall).foregroundStyle(Palette.inkSecondary)
-                HStack(spacing: 8) {
-                    chip("Off") { service.setMockIntensity(.off) }
-                    chip("Low") { service.setMockIntensity(.low) }
-                    chip("Medium") { service.setMockIntensity(.medium) }
-                    chip("High") { service.setMockIntensity(.high) }
+        SoftCard(container: Palette.surface2, padding: 14) {
+            VStack(alignment: .leading, spacing: 12) {
+                Button(action: { withAnimation(.easeInOut(duration: 0.2)) { devToolsExpanded.toggle() } }) {
+                    HStack {
+                        Image(systemName: "wrench.and.screwdriver")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Palette.inkSecondary)
+                        Text("DEVELOPER TOOLS")
+                            .font(AppFont.labelSmall)
+                            .tracking(0.5)
+                            .foregroundStyle(Palette.inkSecondary)
+                        Spacer()
+                        Image(systemName: devToolsExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Palette.inkMuted)
+                    }
+                    .contentShape(Rectangle())
                 }
-                HStack(spacing: 8) {
-                    chip("Overwhelm") { Task { await service.simulateManualEvent(label: EventTypes.labelOverwhelmed) } }
-                    chip("Excited") { Task { await service.simulateManualEvent(label: EventTypes.labelExcited) } }
+                .buttonStyle(.plain)
+
+                if devToolsExpanded {
+                    Divider().overlay(Palette.line)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Sensor mock intensity")
+                            .font(AppFont.bodySmall)
+                            .foregroundStyle(Palette.inkSecondary)
+
+                        HStack(spacing: 6) {
+                            mockIntensityButton(title: "Off", intensity: .off)
+                            mockIntensityButton(title: "Low", intensity: .low)
+                            mockIntensityButton(title: "Medium", intensity: .medium)
+                            mockIntensityButton(title: "High", intensity: .high)
+                        }
+
+                        Text("Simulate Spike")
+                            .font(AppFont.bodySmall)
+                            .foregroundStyle(Palette.inkSecondary)
+                            .padding(.top, 4)
+
+                        HStack(spacing: 8) {
+                            simButton("Overwhelm", icon: "⚡️") {
+                                Task { await service.simulateManualEvent(label: EventTypes.labelOverwhelmed) }
+                            }
+                            simButton("Excited", icon: "✨") {
+                                Task { await service.simulateManualEvent(label: EventTypes.labelExcited) }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    private func chip(_ title: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title).font(AppFont.labelMedium).frame(maxWidth: .infinity, minHeight: Metrics.minTouch)
-                .background(Palette.card, in: Capsule()).overlay(Capsule().stroke(Palette.line, lineWidth: 1))
+    private func mockIntensityButton(title: String, intensity: WearerService.MockIntensity) -> some View {
+        let isSelected = service.mockIntensity == intensity
+        return Button(action: { service.setMockIntensity(intensity) }) {
+            Text(title)
+                .font(AppFont.labelMedium)
+                .foregroundStyle(isSelected ? Palette.onCharcoal : Palette.inkPrimary)
+                .frame(maxWidth: .infinity, minHeight: 34)
+                .background(isSelected ? Palette.charcoal : Palette.card, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Palette.line, lineWidth: isSelected ? 0 : 1))
         }
-        .foregroundStyle(Palette.inkPrimary)
+    }
+
+    private func simButton(_ title: String, icon: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Text(icon).font(.system(size: 13))
+                Text(title).font(AppFont.labelMedium)
+            }
+            .foregroundStyle(Palette.inkPrimary)
+            .frame(maxWidth: .infinity, minHeight: 36)
+            .background(Palette.card, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Palette.line, lineWidth: 1))
+        }
     }
     #endif
 }

@@ -23,13 +23,15 @@ struct SoftCard<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        content()
-            .foregroundStyle(Palette.inkPrimary)
-            .padding(padding)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(container, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).stroke(border, lineWidth: 1))
-            .softShadow()
+        VStack(alignment: .leading, spacing: 0) {
+            content()
+        }
+        .foregroundStyle(Palette.inkPrimary)
+        .padding(padding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(container, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).stroke(border, lineWidth: 1))
+        .softShadow()
     }
 }
 
@@ -104,19 +106,21 @@ struct GhostButton: View {
 struct CircleIconButton: View {
     let systemName: String
     let label: String
+    var disabled: Bool = false
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: { if !disabled { action() } }) {
             Image(systemName: systemName)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Palette.inkPrimary)
+                .foregroundStyle(disabled ? Palette.inkMuted.opacity(0.35) : Palette.inkPrimary)
                 .frame(width: 40, height: 40)
-                .background(Palette.surface2, in: Circle())
-                .overlay(Circle().stroke(Palette.line, lineWidth: 1))
+                .background(Palette.surface2.opacity(disabled ? 0.5 : 1.0), in: Circle())
+                .overlay(Circle().stroke(Palette.line.opacity(disabled ? 0.4 : 1), lineWidth: 1))
                 .frame(width: Metrics.minTouch, height: Metrics.minTouch)
                 .contentShape(Circle())
         }
+        .disabled(disabled)
         .accessibilityLabel(label)
     }
 }
@@ -162,7 +166,7 @@ struct SectionHeader: View {
         Text(text.uppercased())
             .font(AppFont.labelSmall).tracking(0.5)
             .foregroundStyle(Palette.inkSecondary)
-            .padding(.leading, 4).padding(.top, 8)
+            .padding(.leading, 4).padding(.top, 4)
             .accessibilityAddTraits(.isHeader)
     }
 }

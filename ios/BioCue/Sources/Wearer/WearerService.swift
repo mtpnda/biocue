@@ -19,6 +19,11 @@ final class WearerService: ObservableObject {
     @Published private(set) var reviews: [ReviewEvent] = []
     @Published private(set) var journal: [JournalEntry] = []
     @Published private(set) var ongoingLabel: String?
+    @Published private(set) var ongoingEvent: StressEvent?
+    @Published private(set) var companionGuidance: CompanionGuidance?
+    @Published private(set) var guardianState: GuardianState = .idle
+    @Published private(set) var isSafeConfirmed: Bool = false
+    @Published private(set) var latestHr: Double?
     @Published private(set) var journalOffset = 0
 
     // MARK: Dependencies
@@ -38,12 +43,15 @@ final class WearerService: ObservableObject {
     private var lastWindowAt: Date?
     private var lastSosRequestAt: Date?
     private var lastAlertAt: [Int: Date] = [:]
+    private var lastWearerInteractionMs: Int64 = 0
+    private var hasDispatchedCrisis = false
+    private var lastGuardianAction: GuardianAction = .none
 
     /// Same fixed baseline as Android (no per-user calibration yet).
     private let baseline = Baseline.appDefault
     static let alertCooldown: TimeInterval = 5 * 60
     static let sosRequestCooldown: TimeInterval = 60
-    static let disconnectedAfter: TimeInterval = 30
+    static let disconnectedAfter: TimeInterval = 150
 
     /// Throws `RoleError` for a caregiver: this service cannot exist for the wrong role.
     init(userId: String, gate: RoleGate, link: WatchLinking, events: EventStore, windows: WindowStore,
@@ -59,6 +67,7 @@ final class WearerService: ObservableObject {
         self.notifier = notifier
         self.now = now
         self.calendar = calendar
+        self.lastWearerInteractionMs = Int64(now().timeIntervalSince1970 * 1000)
     }
 
     // MARK: Lifecycle
@@ -144,9 +153,11 @@ final class WearerService: ObservableObject {
 
         await windows.append(window)
         lastWindowAt = nowDate
+        latestHr = window.hrMean
         tier = decision.tier
         stressPercent = DetectionPipeline.stressPercent(decision.score)
-        activityLabel = Self.activityLabel(for: window)
+        let hour = calendar.component(.hour, from: now())
+        activityLabel = Self.activityLabel(for: window, hourOfDay: hour)
 
         if decision.tier == 2 { requestSosLocationIfDue(nowDate) }
         alertIfDue(tier: decision.tier, at: nowDate)
@@ -187,10 +198,13 @@ final class WearerService: ObservableObject {
         link.requestSosLocation()
     }
 
-    static func activityLabel(for w: SensorWindow) -> String {
+    static func activityLabel(for w: SensorWindow, hourOfDay: Int = 12) -> String {
         if w.isExercising { return "🏃 Exercising" }
         if w.repetitiveness > 0.5 { return "🔄 Pacing / Stimming" }
         if w.accMag > 0.2 { return "🚶 Active" }
+        if (hourOfDay >= 21 || hourOfDay < 6) && w.accMag < 0.08 {
+            return "🛏️ Resting in Bed"
+        }
         return "🪑 Sitting Still"
     }
 
@@ -208,22 +222,84 @@ final class WearerService: ObservableObject {
                         cues: [("🔄", e.triggerType == "AUTO" ? "Detected Spontaneous Spike" : "Manually Triggered"),
                                ("📍", sosLocation != nil ? "Location captured" : "Unknown Location")])
         }
-        ongoingLabel = await events.ongoing(userId: userId)?.label
+
+        ongoingEvent = await events.ongoing(userId: userId)
+        ongoingLabel = ongoingEvent?.label
+
+        let nowDate = now()
+        let nowMs = Int64(nowDate.timeIntervalSince1970 * 1000)
+
+        // Evaluate Guardian Protocol and Companion Guidance if there is an active event
+        if let ongoing = ongoingEvent {
+            let input = GuardianInput(
+                eventStartTime: ongoing.startTime,
+                currentTimeMs: nowMs,
+                lastWearerInteractionMs: lastWearerInteractionMs,
+                currentTier: tier,
+                hrMean: latestHr ?? baseline.hrMean,
+                hrBaseline: baseline.hrMean,
+                isSafeConfirmed: isSafeConfirmed
+            )
+            let (state, action) = GuardianEngine.evaluate(input: input)
+            guardianState = state
+            companionGuidance = CompanionEngine.synthesize(
+                durationMs: max(0, nowMs - ongoing.startTime),
+                tier: tier,
+                hr: latestHr ?? baseline.hrMean,
+                hrBaseline: baseline.hrMean,
+                activity: activityLabel,
+                guardianState: state,
+                hourOfDay: calendar.component(.hour, from: nowDate)
+            )
+
+            switch action {
+            case .promptSafetyCheck:
+                if lastGuardianAction != action {
+                    lastGuardianAction = action
+                    notifier.tier1(percent: stressPercent)
+                }
+            case .soundGraceAlarm:
+                if lastGuardianAction != action {
+                    lastGuardianAction = action
+                    notifier.tier2(percent: 100)
+                }
+            case .triggerCrisisBroadcast(let reason):
+                if !hasDispatchedCrisis {
+                    hasDispatchedCrisis = true
+                    lastGuardianAction = action
+                    var e = ongoing
+                    e.label = "CRISIS_UNRESPONSIVE - \(reason)"
+                    await events.upsert(e); sync(e)
+                    notifier.tier2(percent: 100)
+                }
+            case .none:
+                break
+            }
+        } else {
+            guardianState = .idle
+            companionGuidance = nil
+            isSafeConfirmed = false
+            hasDispatchedCrisis = false
+            lastGuardianAction = .none
+        }
 
         let (start, end) = dayBounds(offset: journalOffset)
         let resolved = await events.between(userId: userId, start: start, end: end).filter { $0.isResolved }
-        journal = EventClusterer.cluster(resolved).map { cluster in
-            var labels: [String] = []   // distinct, first-seen order (Kotlin `.distinct()`)
-            for event in cluster.events where event.label != "NONE" && !labels.contains(event.label) {
-                labels.append(event.label)
+        // Flatten each event so every recorded moment is its own distinct, clean entry (no " + " combining)
+        journal = resolved.flatMap { event -> [JournalEntry] in
+            let rawLabel = event.label
+            let parts = rawLabel.components(separatedBy: " + ").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty && $0 != "NONE" }
+            let displayLabels = parts.isEmpty ? [(rawLabel == "NONE" || rawLabel.isEmpty) ? "Unlabeled Moment" : rawLabel] : parts
+            let activity = event.triggerType == "AUTO" ? "Auto-detected" : "Manual"
+            return displayLabels.map { label in
+                JournalEntry(
+                    time: TimeFormat.clock(event.startTime),
+                    activity: activity,
+                    labelIcon: EventTypes.icon(forLabel: label),
+                    labelText: label,
+                    colorHex: EventTypes.colorHex(forLabel: label)
+                )
             }
-            let labelText = labels.isEmpty ? "Unknown" : labels.joined(separator: " + ")
-            let hasAuto = cluster.events.contains { $0.triggerType == "AUTO" }
-            let hasManual = cluster.events.contains { $0.triggerType == "MANUAL" }
-            let activity = hasAuto && hasManual ? "Auto-detected + Manual Input" : (hasAuto ? "Auto-detected" : "Manual")
-            return JournalEntry(time: TimeFormat.clock(cluster.startTime), activity: activity,
-                                labelIcon: EventTypes.icon(forLabel: labelText),
-                                labelText: labelText, colorHex: EventTypes.colorHex(forLabel: labelText))
         }
     }
 
@@ -236,6 +312,7 @@ final class WearerService: ObservableObject {
     }
 
     func resolveReview(eventId: String, newLabelOrContext: String) async {
+        lastWearerInteractionMs = Int64(now().timeIntervalSince1970 * 1000)
         guard var e = await events.event(id: eventId) else { return }
         let result = ResolveLogic.processResolution(currentLabel: e.label, newLabelOrContext: newLabelOrContext)
         e.label = result.label
@@ -245,15 +322,41 @@ final class WearerService: ObservableObject {
     }
 
     func changeJournalDate(delta: Int) {
+        lastWearerInteractionMs = Int64(now().timeIntervalSince1970 * 1000)
         let next = journalOffset + delta
         guard next <= 0 else { return }
         journalOffset = next
         Task { await refresh() }
     }
 
-    func endOngoingEvent() async {
+    func confirmSafe() {
+        lastWearerInteractionMs = Int64(now().timeIntervalSince1970 * 1000)
+        isSafeConfirmed = true
+        Task { await refresh() }
+    }
+
+    func endOngoingEvent(note: String? = nil) async {
+        lastWearerInteractionMs = Int64(now().timeIntervalSince1970 * 1000)
         guard var e = await events.ongoing(userId: userId) else { return }
         e.endTime = Int64(now().timeIntervalSince1970 * 1000)
+        if let note = note, !note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            e.label = note.trimmingCharacters(in: .whitespacesAndNewlines)
+            e.isResolved = true
+        }
+        await events.upsert(e); sync(e)
+        await refresh()
+    }
+
+    func addOngoingNote(_ note: String) async {
+        lastWearerInteractionMs = Int64(now().timeIntervalSince1970 * 1000)
+        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard var e = await events.ongoing(userId: userId) else { return }
+        if e.label == EventTypes.labelNone || e.label.isEmpty {
+            e.label = trimmed
+        } else {
+            e.label = "\(e.label) - \(trimmed)"
+        }
         await events.upsert(e); sync(e)
         await refresh()
     }
@@ -271,9 +374,11 @@ final class WearerService: ObservableObject {
 
     #if DEBUG
     enum MockIntensity { case off, low, medium, high }
+    @Published var mockIntensity: MockIntensity = .off
 
     /// Feeds synthetic windows through the REAL pipeline, like the Android "Continuous Sensor Mock".
     func setMockIntensity(_ intensity: MockIntensity) {
+        mockIntensity = intensity
         mockTask?.cancel()
         guard intensity != .off else { return }
         mockTask = Task { [weak self] in

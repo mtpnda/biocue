@@ -18,6 +18,8 @@
 		2D9952EF94BB93FA1202955C /* CaregiverRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EE4DC4A83A6C5C2ED4BBEC1 /* CaregiverRoot.swift */; };
 		36C21ECCF7BEA3B7EC1F07D0 /* AtkinsonHyperlegibleNext.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EE17731FC0271A0FAC6F70CF /* AtkinsonHyperlegibleNext.ttf */; };
 		3AC04E5F00B9F4F3892CE4D4 /* Newsreader.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CEEDBDD61FB9DAB668DD2EA /* Newsreader.ttf */; };
+		46AC1BB113FD19FA06AFAB01 /* BioCueBuddyCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE900F3E819D8F9FD300B01 /* BioCueBuddyCard.swift */; };
+		46AC1BB113FD19FA06AFAAC9 /* WearerCaregiverCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE900F3E819D8F9FD300AC9 /* WearerCaregiverCards.swift */; };
 		46AC1BB113FD19FA06AFAACF /* WearerHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */; };
 		4CFB797DACCEF5689084DD2F /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F917730B82ABD491AF4F3344 /* AuthService.swift */; };
 		4E043FB39C49D51086C91267 /* TestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D8A75C8AE2BFB80910B4F0 /* TestDoubles.swift */; };
@@ -58,6 +60,8 @@
 		22814FCA3EFC8098CC5C327B /* CaregiverScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaregiverScreens.swift; sourceTree = "<group>"; };
 		2EE4DC4A83A6C5C2ED4BBEC1 /* CaregiverRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaregiverRoot.swift; sourceTree = "<group>"; };
 		36E298413812BE6E5BA19201 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		3AE900F3E819D8F9FD300B01 /* BioCueBuddyCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BioCueBuddyCard.swift; sourceTree = "<group>"; };
+		3AE900F3E819D8F9FD300AC9 /* WearerCaregiverCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerCaregiverCards.swift; sourceTree = "<group>"; };
 		3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerHomeView.swift; sourceTree = "<group>"; };
 		3B7D8B58C453154B80FD4B36 /* WearerRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerRoot.swift; sourceTree = "<group>"; };
 		4266D84FF5B299A28EE45BC6 /* WearerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearerServiceTests.swift; sourceTree = "<group>"; };
@@ -166,10 +170,12 @@
 		62E8346FE8C14C06D0BFC10A /* Wearer */ = {
 			isa = PBXGroup;
 			children = (
+				3AE900F3E819D8F9FD300B01 /* BioCueBuddyCard.swift */,
 				90567D5B3BF562CECD43C412 /* AlertNotifier.swift */,
 				471A6131B38F2976B7FDA781 /* LocalStores.swift */,
 				12C1D0AD4AE6408BC0202E0B /* WatchLinkCard.swift */,
 				B9057A3DE3F8C580E422CE23 /* WatchLinkCentral.swift */,
+				3AE900F3E819D8F9FD300AC9 /* WearerCaregiverCards.swift */,
 				3AE900F3E819D8F9FD300AC2 /* WearerHomeView.swift */,
 				3B7D8B58C453154B80FD4B36 /* WearerRoot.swift */,
 				BAB440D4926926E039251DE2 /* WearerService.swift */,
@@ -379,6 +385,8 @@
 				8ECC5AF9B28340CC4EBD60F0 /* TimeFormat.swift in Sources */,
 				AE61B6E32E600045A2C20DA0 /* WatchLinkCard.swift in Sources */,
 				05F791EC9FB0599344E7218B /* WatchLinkCentral.swift in Sources */,
+				46AC1BB113FD19FA06AFAB01 /* BioCueBuddyCard.swift in Sources */,
+				46AC1BB113FD19FA06AFAAC9 /* WearerCaregiverCards.swift in Sources */,
 				46AC1BB113FD19FA06AFAACF /* WearerHomeView.swift in Sources */,
 				86C8759EE1596068B05CDBB8 /* WearerRoot.swift in Sources */,
 				7147A4E48BEB4050D656CC0F /* WearerService.swift in Sources */,
