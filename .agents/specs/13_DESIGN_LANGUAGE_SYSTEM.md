@@ -194,9 +194,43 @@ The following 18 components form the complete, closed BioCue design library. Dev
     - Trailing: Chevron icon (`chevron.right`, `inkSecondary`).
     - Min Height: 64pt, full width.
 
+19. **`BioCueBuddyCard` (Empathetic Co-Regulation)**:
+    - Container: `StatePalette.info.soft` or `Palette.card`, border `Palette.line`.
+    - Avatar: Botanical or soft avatar (44pt).
+    - Empathetic Copy: Atkinson Regular (14.5pt), `Palette.inkPrimary`.
+    - Action Strip: Somatic breathing pacer trigger + free-text reflection shortcut button.
+
+20. **`BreathingPacerCard` (Decoupled Non-Overflowing Pacer)**:
+    - Pulsing Orb: Dynamic animated scale ($0.85 \leftrightarrow 1.25$) in `StatePalette.calm.soft` with `StatePalette.calm.chip` outline.
+    - Guidance Text Anchoring: Stably positioned in a separate, fixed-height container **below** the visual orb. Never superimposed inside the expanding orb.
+    - Guarantee: Zero text clipping, zero container overflow across all viewport widths.
+
+21. **`JournalCard` (Decomposed Event List)**:
+    - Date Header: Section title with previous/next chevron buttons.
+    - Label Decomposition: Splits composite labels into an emotion title (`Overwhelmed`, `Excited`) and context badges.
+    - Context Badge Token: `RoundedCornerShape(6.dp)` / `cornerRadius: 6`, `Palette.surface2` fill, 1pt `Palette.line` border. Strictly prohibits 50% radius capsules on multi-line text to prevent oval distortion.
+
+22. **`FreeTextCheckInSheet` (Sensory Overload Reflection)**:
+    - Preset State Chips: Quick-tap buttons for rapid labeling during reduced executive function.
+    - Open-Ended Field: Multi-line text field (`CalmTextField`) with placeholder encouraging open expression of sensory environment (lighting, noise, internal sensation).
+
 ---
 
-## 5. Visual Regression & Quality Checklist
+## 5. Mindful Contours Brand & Icon Motif
+
+The canonical visual brand of BioCue is the **Mindful Contours** emblem:
+
+1. **Backdrop:** Deep matte charcoal squircle / canvas (`#1C1C1E`).
+2. **Concentric Contours:** Three nested, organic topographic curves rendered with smooth variable weight ($1.5\text{pt} - 2.5\text{pt}$):
+   - Outer contour: Warm Oat (`#F2F0EA`, 45% opacity).
+   - Middle contour: Subtle Sage (`#D1D5DB`, 75% opacity).
+   - Inner contour: Focused contour framing the center core (`#F2F0EA`, 95% opacity).
+3. **Mindfulness Anchor Bead:** A single, perfectly centered circular bead ($10\text{pt}$ diameter) filled with Sage Green (`#4E7252`) and a soft ambient glow, symbolizing grounded autonomic awareness.
+4. **Usage:** Enforced across all app launcher icons (Wear OS, Android Mobile, iOS), web favicon (`/favicon.svg`), website headers, and Google Play Store store graphics.
+
+---
+
+## 6. Visual Regression & Quality Checklist
 
 Before committing or releasing any UI code, verify against the following checklist:
 

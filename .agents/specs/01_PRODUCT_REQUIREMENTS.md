@@ -25,12 +25,16 @@ BioCue is a multi-device Android application (Phone + Wear OS) designed to predi
 2. **Extreme Privacy:** All physiological data (HR, HRV, accelerometer) is stored on-device in the wearer's local Room database. Only derived data (stress events, activity labels, stress level) is synced to Firestore for caregiver visibility. Raw sensor windows never leave the wearer's phone.
 3. **Consent & Battery:** Continuous background GPS tracking is explicitly forbidden. GPS is only fetched via an on-demand "SOS Ping" during a severe meltdown.
 4. **Wearer Owns Data:** The wearer has full control over who can see their data. Caregivers can be added and removed at any time. Removal is immediate and irreversible — the caregiver loses all access and local data is wiped.
+5. **Intelligent Co-Regulation & Crisis Guardian:** When sensory overload begins, the app acts as an on-device empathetic buddy ("BioCue Buddy"). It supports somatic breathing and free-text reflections. If high stress persists unacknowledged for >15 minutes, the safety guardian protocol triggers a priority broadcast to paired caregivers to protect against silent crisis or incapacitation.
+6. **Sovereign, Open & Free:** BioCue is 100% free and open-source forever. No paywalls, subscription tiers, or corporate health telemetry. Mathematical formulations and architecture are publicly published in the open Technical Whitepaper.
 
 ## Success Metrics
 - Useful early warning for ≥50% of episodes within 90 days.
 - Watch battery life ≥16 hours (full waking day).
 - Caregiver receives stress alerts within 30 seconds of a Tier 2 meltdown.
-- Pairing flow completes in <60 seconds.
+- Pairing flow completes in <60 seconds via temporary 6-digit PIN in Settings.
+- 15-minute emergency escalation for unacknowledged, unresponsive crises.
+- 100% bilingual parity across US English and Bahasa Indonesia with zero pricing or currency copy.
 
 ---
 
