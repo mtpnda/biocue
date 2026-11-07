@@ -1,17 +1,15 @@
 import { Dictionary, Locale } from "./types.ts";
 import { enDictionary } from "./dictionaries/en.ts";
-import { enIdDictionary } from "./dictionaries/en-id.ts";
 import { idIdDictionary } from "./dictionaries/id-id.ts";
 
 export * from "./types.ts";
 
 export const DICTIONARIES: Record<Locale, Dictionary> = {
   "en": enDictionary,
-  "en-id": enIdDictionary,
-  "id-id": idIdDictionary,
+  "id": idIdDictionary,
 };
 
-export const SUPPORTED_LOCALES: Locale[] = ["en", "en-id", "id-id"];
+export const SUPPORTED_LOCALES: Locale[] = ["en", "id"];
 
 export function resolveLocale(urlStr: string, headers?: Headers): Locale {
   try {
@@ -19,38 +17,33 @@ export function resolveLocale(urlStr: string, headers?: Headers): Locale {
     const path = url.pathname.toLowerCase();
 
     // 1. Direct path prefix
-    if (path === "/en" || path.startsWith("/en/")) {
+    if (path === "/en" || path === "/en-us" || path.startsWith("/en/") || path.startsWith("/en-us/")) {
       return "en";
     }
-    if (path === "/en-id" || path.startsWith("/en-id/")) {
-      return "en-id";
-    }
-    if (path === "/id" || path === "/id-id" || path.startsWith("/id-id/") || path.startsWith("/id/")) {
-      return "id-id";
+    if (path === "/id" || path === "/id-id" || path.startsWith("/id/") || path.startsWith("/id-id/")) {
+      return "id";
     }
 
     // 2. Cookie check
     if (headers) {
       const cookieHeader = headers.get("cookie") || "";
       const match = cookieHeader.match(/biocue_locale=([a-zA-Z-]+)/);
-      if (match && SUPPORTED_LOCALES.includes(match[1] as Locale)) {
-        return match[1] as Locale;
+      if (match) {
+        const val = match[1].toLowerCase();
+        if (val === "id" || val === "id-id") return "id";
+        if (val === "en" || val === "en-us" || val === "en-id") return "en";
       }
 
       // 3. Country / CDN header check
       const country = (headers.get("cf-ipcountry") || headers.get("x-country-code") || "").toUpperCase();
       if (country === "ID") {
-        const acceptLang = (headers.get("accept-language") || "").toLowerCase();
-        if (acceptLang.includes("id")) {
-          return "id-id";
-        }
-        return "en-id";
+        return "id";
       }
 
       // 4. Accept-Language header
       const acceptLang = (headers.get("accept-language") || "").toLowerCase();
-      if (acceptLang.startsWith("id")) {
-        return "id-id";
+      if (acceptLang.startsWith("id") || acceptLang.includes(",id") || acceptLang.includes("id-")) {
+        return "id";
       }
     }
 
@@ -66,9 +59,8 @@ export function getDictionary(locale: Locale): Dictionary {
 
 export function renderLocaleSwitcher(currentLocale: Locale): string {
   const options = [
-    { code: "en", label: "🌐 English (Global)", href: "/en" },
-    { code: "en-id", label: "🇮🇩 English (Indonesia)", href: "/en-id" },
-    { code: "id-id", label: "🇮🇩 Bahasa Indonesia", href: "/id-id" },
+    { code: "en", label: "🇺🇸 English (US)", shortLabel: "🇺🇸 EN", href: "/en" },
+    { code: "id", label: "🇮🇩 Bahasa Indonesia", shortLabel: "🇮🇩 ID", href: "/id" },
   ];
 
   const current = options.find((o) => o.code === currentLocale) || options[0];
@@ -78,7 +70,7 @@ export function renderLocaleSwitcher(currentLocale: Locale): string {
       <button 
         type="button" 
         class="locale-btn"
-        aria-label="Change language or region"
+        aria-label="Change language: English (US) or Bahasa Indonesia"
         aria-expanded="false"
         onclick="
           const m = this.nextElementSibling;
@@ -102,7 +94,7 @@ export function renderLocaleSwitcher(currentLocale: Locale): string {
         "
       >
         <span class="locale-label-full">${current.label}</span>
-        <span class="locale-label-short">${current.code === 'en' ? '🌐 EN' : '🇮🇩 ID'}</span>
+        <span class="locale-label-short">${current.shortLabel}</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
 
@@ -118,7 +110,7 @@ export function renderLocaleSwitcher(currentLocale: Locale): string {
           border-radius:var(--radius-md);
           box-shadow:var(--shadow-raised);
           padding:6px;
-          min-width:210px;
+          min-width:190px;
           z-index:200;
         "
       >

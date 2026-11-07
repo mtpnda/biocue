@@ -442,7 +442,7 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
             <h3 style="margin:0;font-size:20px;">${dict.howItWorks.step1Title}</h3>
             <p style="margin:0;font-size:14.5px;">${dict.howItWorks.step1Desc}</p>
             <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-              ${renderIcon("shield", 16)} Low-energy Wear OS Health Services API
+              ${renderIcon("shield", 16)} ${dict.howItWorks.step1Badge}
             </div>
           </div>
 
@@ -451,7 +451,7 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
             <h3 style="margin:0;font-size:20px;">${dict.howItWorks.step2Title}</h3>
             <p style="margin:0;font-size:14.5px;">${dict.howItWorks.step2Desc}</p>
             <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-              ${renderIcon("privacy-lock", 16)} Local SQLite/Room DB Machine Learning
+              ${renderIcon("privacy-lock", 16)} ${dict.howItWorks.step2Badge}
             </div>
           </div>
 
@@ -460,7 +460,7 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
             <h3 style="margin:0;font-size:20px;">${dict.howItWorks.step3Title}</h3>
             <p style="margin:0;font-size:14.5px;">${dict.howItWorks.step3Desc}</p>
             <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-              ${renderIcon("pairing-link", 16)} Encrypted 2-in-1 Caregiver Circle Relay
+              ${renderIcon("pairing-link", 16)} ${dict.howItWorks.step3Badge}
             </div>
           </div>
         </div>
@@ -479,53 +479,26 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:24px;">
-          <div class="softcard">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--state-calm-soft);color:var(--state-calm-ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-              ${renderIcon("calm", 24)}
-            </div>
-            <h3 style="font-size:19px;margin-bottom:8px;">Zero-Anxiety Anchor UI</h3>
-            <p style="font-size:14.5px;margin:0;">No erratic lines, alarming pulse counters, or red warning sirens. Subtle botanical states and organic breathing pacers maintain cognitive ease.</p>
-          </div>
-
-          <div class="softcard">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--state-info-soft);color:var(--state-info-ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-              ${renderIcon("brain", 24)}
-            </div>
-            <h3 style="font-size:19px;margin-bottom:8px;">On-Device Fusion Scoring</h3>
-            <p style="font-size:14.5px;margin:0;">Combines Heart Rate Variability (HRV RMSSD), heart rate acceleration, and 3-axis motion to accurately separate exercise from sensory overwhelm.</p>
-          </div>
-
-          <div class="softcard">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--state-neutral-soft);color:var(--state-neutral-ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-              ${renderIcon("caregiver", 24)}
-            </div>
-            <h3 style="font-size:19px;margin-bottom:8px;">Sovereign Caregiver Circle</h3>
-            <p style="font-size:14.5px;margin:0;">Connect up to 2 approved caregivers via temporary 6-digit PIN. One-tap removal instantly revokes database access and wipes caregiver device caches.</p>
-          </div>
-
-          <div class="softcard">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--state-alert-soft);color:var(--state-alert-ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-              ${renderIcon("sos-location", 24)}
-            </div>
-            <h3 style="font-size:19px;margin-bottom:8px;">Consent-First Emergency GPS</h3>
-            <p style="font-size:14.5px;margin:0;">Zero continuous background tracking. A single GPS location fix is acquired solely when the wearer explicitly triggers an SOS emergency beacon.</p>
-          </div>
-
-          <div class="softcard">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--surface-raised);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:16px;border:1px solid var(--border-strong);">
-              ${renderIcon("privacy-lock", 24)}
-            </div>
-            <h3 style="font-size:19px;margin-bottom:8px;">100% Private Local Storage</h3>
-            <p style="font-size:14.5px;margin:0;">Raw biometrics remain locked in the local Room database on your phone. Only lightweight categorized stress event labels are synced to paired caregivers.</p>
-          </div>
-
-          <div class="softcard">
-            <div style="width:44px;height:44px;border-radius:12px;background:var(--state-rising-soft);color:var(--state-rising-ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-              ${renderIcon("excited", 24)}
-            </div>
-            <h3 style="font-size:19px;margin-bottom:8px;">Full 16+ Hour Battery Life</h3>
-            <p style="font-size:14.5px;margin:0;">Designed to run all day on a single charge. Intelligently throttles PPG sensor windows and avoids high-power background loops.</p>
-          </div>
+          ${dict.features.cards.map((c) => {
+            const cardStyles: Record<string, { bg: string; color: string; border?: string }> = {
+              "calm": { bg: "var(--state-calm-soft)", color: "var(--state-calm-ink)" },
+              "brain": { bg: "var(--state-info-soft)", color: "var(--state-info-ink)" },
+              "caregiver": { bg: "var(--state-neutral-soft)", color: "var(--state-neutral-ink)" },
+              "sos-location": { bg: "var(--state-alert-soft)", color: "var(--state-alert-ink)" },
+              "privacy-lock": { bg: "var(--surface-raised)", color: "var(--text-primary)", border: "border:1px solid var(--border-strong);" },
+              "excited": { bg: "var(--state-rising-soft)", color: "var(--state-rising-ink)" },
+            };
+            const s = cardStyles[c.icon] || { bg: "var(--surface-raised)", color: "var(--text-primary)", border: "" };
+            return `
+              <div class="softcard">
+                <div style="width:44px;height:44px;border-radius:12px;background:${s.bg};color:${s.color};${s.border ?? ''}display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+                  ${renderIcon(c.icon, 24)}
+                </div>
+                <h3 style="font-size:19px;margin-bottom:8px;">${c.title}</h3>
+                <p style="font-size:14.5px;margin:0;">${c.desc}</p>
+              </div>
+            `;
+          }).join("")}
         </div>
       </div>
     </section>
@@ -534,58 +507,30 @@ export function renderHomePage(requestUrl: string, headers?: Headers): string {
     <section style="padding:var(--space-section) 0;">
       <div class="wrap">
         <div style="text-align:center;max-width:720px;margin:0 auto 24px;">
-          <span class="status" style="margin-bottom:14px;">Why BioCue Stands Apart</span>
-          <h2>Traditional Monitors vs. BioCue Sovereign Care</h2>
-          <p>Most commercial wearables are built for athletic optimization or intrusive surveillance. BioCue is built for sensory autonomy.</p>
+          <span class="status" style="margin-bottom:14px;">${dict.comparison.badge}</span>
+          <h2>${dict.comparison.title}</h2>
+          <p>${dict.comparison.sub}</p>
         </div>
 
         <div style="overflow-x:auto;">
           <table class="comp-table">
             <thead>
               <tr>
-                <th>Capability</th>
-                <th class="comp-highlight" style="color:var(--state-calm-ink);">BioCue Platform</th>
-                <th>Consumer Fitness Trackers</th>
-                <th>Invasive Surveillance Apps</th>
+                <th>${dict.comparison.colCapability}</th>
+                <th class="comp-highlight" style="color:var(--state-calm-ink);">${dict.comparison.colBiocue}</th>
+                <th>${dict.comparison.colFitness}</th>
+                <th>${dict.comparison.colSurveillance}</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><strong>Meltdown Prediction</strong></td>
-                <td class="comp-highlight">5–15 min autonomic early warning</td>
-                <td>None (post-hoc athletic logs)</td>
-                <td>None (location-only alerts)</td>
-              </tr>
-              <tr>
-                <td><strong>Smartwatch Display</strong></td>
-                <td class="comp-highlight">Zero-Anxiety Anchor (no panic numbers)</td>
-                <td>Flashing BPM &amp; noisy charts</td>
-                <td>Not applicable (phone only)</td>
-              </tr>
-              <tr>
-                <td><strong>Biometric Privacy</strong></td>
-                <td class="comp-highlight">100% on-device local Room DB</td>
-                <td>Uploaded to corporate health clouds</td>
-                <td>Cloud-tracked indefinitely</td>
-              </tr>
-              <tr>
-                <td><strong>GPS Surveillance</strong></td>
-                <td class="comp-highlight">Strictly forbidden (On-demand SOS only)</td>
-                <td>Continuous route tracking</td>
-                <td>24/7 background geofencing</td>
-              </tr>
-              <tr>
-                <td><strong>Caregiver Sovereignty</strong></td>
-                <td class="comp-highlight">Wearer controls pairing; instant wipe</td>
-                <td>No caregiver circles</td>
-                <td>Unilateral surveillance; no wearer say</td>
-              </tr>
-              <tr>
-                <td><strong>Software &amp; Access</strong></td>
-                <td class="comp-highlight">100% Free &amp; Open Source</td>
-                <td>Proprietary hardware lock-in</td>
-                <td>Commercial paywall restrictions</td>
-              </tr>
+              ${dict.comparison.rows.map((row) => `
+                <tr>
+                  <td><strong>${row.capability}</strong></td>
+                  <td class="comp-highlight">${row.biocue}</td>
+                  <td>${row.fitness}</td>
+                  <td>${row.surveillance}</td>
+                </tr>
+              `).join("")}
             </tbody>
           </table>
         </div>

@@ -105,3 +105,30 @@ Deno.test("POST /api/support handles ticket submission", async () => {
   assertEquals(json.success, true);
   assertEquals(json.ticketId.startsWith("ticket_"), true);
 });
+
+Deno.test("GET /id renders Home page in Bahasa Indonesia with full section localization", async () => {
+  const res = await app.request("/id");
+  assertEquals(res.status, 200);
+  const html = await res.text();
+  assertEquals(html.includes("<!DOCTYPE html>"), true);
+  assertEquals(html.includes("Perlindungan Sensory Overload"), true);
+  assertEquals(html.includes("Tampilan Bebas Cemas (Zero-Anxiety)"), true);
+  assertEquals(html.includes("Smartwatch Olahraga Konvensional vs. BioCue Berbasis Kedaulatan"), true);
+  assertEquals(html.includes("Kapabilitas"), true);
+  assertEquals(html.includes("API Health Services Wear OS hemat energi"), true);
+  assertEquals(html.includes("Unduh Rilis"), true);
+  assertEquals(html.includes("lang=\"id\""), true);
+  // Ensure NO pricing, currency, or payment terms are present
+  assertEquals(html.includes("$"), false);
+});
+
+Deno.test("GET /id-id redirects to /id and /en-us redirects to /en", async () => {
+  const resId = await app.request("/id-id");
+  assertEquals(resId.status, 302);
+  assertEquals(resId.headers.get("location"), "/id");
+
+  const resEn = await app.request("/en-us");
+  assertEquals(resEn.status, 302);
+  assertEquals(resEn.headers.get("location"), "/en");
+});
+

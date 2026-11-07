@@ -2,8 +2,8 @@ import { Dictionary } from "../types.ts";
 
 export const enDictionary: Dictionary = {
   locale: "en",
-  localeName: "English (Global)",
-  flag: "🌐",
+  localeName: "English (US)",
+  flag: "🇺🇸",
 
   meta: {
     title: "BioCue — Sensory Overload Prediction & Bio-Signal Cueing",
@@ -13,6 +13,7 @@ export const enDictionary: Dictionary = {
   nav: {
     features: "Features",
     howItWorks: "How It Works",
+    whitepaper: "Whitepaper",
     simulator: "Sensory Simulator",
     faq: "FAQ",
     support: "Help & Support",
@@ -56,16 +57,99 @@ export const enDictionary: Dictionary = {
     sub: "From quiet background sensor capture to gentle early intervention, BioCue bridges physiological changes with actionable self-regulation.",
     step1Title: "1. Ambient Sensor Fusion",
     step1Desc: "Your Wear OS smartwatch continuously samples photoplethysmography (PPG) pulse intervals and 3-axis accelerometer data, measuring Heart Rate Variability (HRV RMSSD) and physical motion without draining battery.",
+    step1Badge: "Low-energy Wear OS Health Services API",
     step2Title: "2. On-Device Prediction",
     step2Desc: "Our on-device Fusion ML algorithm calculates autonomic tone locally in your phone's Room database. It differentiates between healthy exercise and internal sensory stress—zero raw vitals ever leave your device.",
+    step2Badge: "Local SQLite/Room DB Machine Learning",
     step3Title: "3. Gentle Cue & Support",
     step3Desc: "Before stress peaks into an involuntary crisis, the watch emits a soft, rhythmic haptic pulse. If distress escalates, the wearer can activate guided breathing or send a one-tap SOS beacon to up to 2 approved caregivers.",
+    step3Badge: "Encrypted 2-in-1 Caregiver Circle Relay",
   },
 
   features: {
     badge: "Crafted for Autistic & Sensory-Sensitive Individuals",
     title: "Thoughtful Engineering for Sensory Well-Being",
     sub: "Every interaction, animation, and color token adheres to our neurodivergent-affirming Design Language System.",
+    cards: [
+      {
+        icon: "calm",
+        title: "Zero-Anxiety Anchor UI",
+        desc: "No erratic lines, alarming pulse counters, or red warning sirens. Subtle botanical states and organic breathing pacers maintain cognitive ease."
+      },
+      {
+        icon: "brain",
+        title: "On-Device Fusion Scoring",
+        desc: "Combines Heart Rate Variability (HRV RMSSD), heart rate acceleration, and 3-axis motion to accurately separate exercise from sensory overwhelm."
+      },
+      {
+        icon: "caregiver",
+        title: "Sovereign Caregiver Circle",
+        desc: "Connect up to 2 approved caregivers via temporary 6-digit PIN. One-tap removal instantly revokes database access and wipes caregiver device caches."
+      },
+      {
+        icon: "sos-location",
+        title: "Consent-First Emergency GPS",
+        desc: "Zero continuous background tracking. A single GPS location fix is acquired solely when the wearer explicitly triggers an SOS emergency beacon."
+      },
+      {
+        icon: "privacy-lock",
+        title: "100% Private Local Storage",
+        desc: "Raw biometrics remain locked in the local Room database on your phone. Only lightweight categorized stress event labels are synced to paired caregivers."
+      },
+      {
+        icon: "excited",
+        title: "Full 16+ Hour Battery Life",
+        desc: "Designed to run all day on a single charge. Intelligently throttles PPG sensor windows and avoids high-power background loops."
+      }
+    ]
+  },
+
+  comparison: {
+    badge: "Why BioCue Stands Apart",
+    title: "Traditional Monitors vs. BioCue Sovereign Care",
+    sub: "Most commercial wearables are built for athletic optimization or intrusive surveillance. BioCue is built for sensory autonomy.",
+    colCapability: "Capability",
+    colBiocue: "BioCue Platform",
+    colFitness: "Consumer Fitness Trackers",
+    colSurveillance: "Invasive Surveillance Apps",
+    rows: [
+      {
+        capability: "Meltdown Prediction",
+        biocue: "5–15 min autonomic early warning",
+        fitness: "None (post-hoc athletic logs)",
+        surveillance: "None (location-only alerts)"
+      },
+      {
+        capability: "Smartwatch Display",
+        biocue: "Zero-Anxiety Anchor (no panic numbers)",
+        fitness: "Flashing BPM & noisy charts",
+        surveillance: "Not applicable (phone only)"
+      },
+      {
+        capability: "Biometric Privacy",
+        biocue: "100% on-device local Room DB",
+        fitness: "Uploaded to corporate health clouds",
+        surveillance: "Cloud-tracked indefinitely"
+      },
+      {
+        capability: "GPS Surveillance",
+        biocue: "Strictly forbidden (On-demand SOS only)",
+        fitness: "Continuous route tracking",
+        surveillance: "24/7 background geofencing"
+      },
+      {
+        capability: "Caregiver Sovereignty",
+        biocue: "Wearer controls pairing; instant wipe",
+        fitness: "No caregiver circles",
+        surveillance: "Unilateral surveillance; no wearer say"
+      },
+      {
+        capability: "Software & Access",
+        biocue: "100% Free & Open Source",
+        fitness: "Proprietary hardware lock-in",
+        surveillance: "Commercial paywall restrictions"
+      }
+    ]
   },
 
   faq: {
@@ -113,5 +197,29 @@ export const enDictionary: Dictionary = {
     githubTitle: "Open-Source Repository",
     githubSub: "Explore the full source code, inspect security rules, or build your own custom release.",
     githubCta: "View on GitHub ↗",
+  },
+
+  footer: {
+    desc: "BioCue is an open-source assistive bio-signal cueing platform combining Wear OS 3+ smartwatch physiological sensing with an Android Native companion app and encrypted Caregiver Circles.",
+    badge: "100% Free & Sovereign On-Device Biometrics",
+    colProduct: "Product",
+    colTrust: "Trust & Legal",
+    colSupport: "Support & Open Source",
+    linkFeatures: "Features",
+    linkHowItWorks: "How It Works",
+    linkWhitepaper: "Technical Whitepaper",
+    linkSimulator: "Sensory Simulator",
+    linkFaq: "FAQ",
+    linkDownload: "Download Release",
+    linkPrivacy: "Privacy Policy",
+    linkTerms: "Terms of Service",
+    linkDataDeletion: "Data Deletion Rights",
+    linkCaregiverPolicy: "Caregiver Removal Policy",
+    linkHelpCenter: "Help Center & Support",
+    linkGithub: "GitHub Repository ↗",
+    linkReleases: "Releases & Changelogs ↗",
+    copyright: "© 2026 BioCue. 100% Free & Open Source. Designed with neurodiversity and sovereignty at core.",
+    disclaimer: "Non-diagnostic wellness & assistive cueing tool",
+    edgeStatus: "Edge Deno KV Active",
   },
 };

@@ -24,7 +24,7 @@ app.route("/api/pairings", pairingsRouter);
 app.route("/api/events", eventsRouter);
 
 // Web Pages & Health Check (Multi-Country Localized)
-// First-time visit to / automatically routes to Indonesian site if in ID, or Global site if outside ID.
+// First-time visit to / automatically routes to Indonesian site (/id) if in ID, or US English site (/en) if outside ID.
 app.get("/", (c) => {
   const targetLocale = resolveLocale(c.req.url, c.req.raw.headers);
   return c.redirect(`/${targetLocale}`);
@@ -32,12 +32,14 @@ app.get("/", (c) => {
 
 app.get("/en", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
 app.get("/en/", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
-app.get("/en-id", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
-app.get("/en-id/", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
-app.get("/id-id", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
-app.get("/id-id/", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
-app.get("/id", (c) => c.redirect("/id-id"));
-app.get("/id/", (c) => c.redirect("/id-id"));
+app.get("/en-us", (c) => c.redirect("/en"));
+app.get("/en-us/", (c) => c.redirect("/en"));
+app.get("/en-id", (c) => c.redirect("/en"));
+app.get("/en-id/", (c) => c.redirect("/en"));
+app.get("/id", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
+app.get("/id/", (c) => c.html(renderHomePage(c.req.url, c.req.raw.headers)));
+app.get("/id-id", (c) => c.redirect("/id"));
+app.get("/id-id/", (c) => c.redirect("/id"));
 
 // Section anchor redirects
 app.get("/features", (c) => {
@@ -61,8 +63,9 @@ app.get("/faq", (c) => {
 app.get("/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
 app.get("/whitepaper/", (c) => c.redirect("/whitepaper"));
 app.get("/en/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
-app.get("/en-id/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
-app.get("/id-id/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
+app.get("/id/whitepaper", (c) => c.html(renderWhitepaperPage(c.req.url, c.req.raw.headers)));
+app.get("/en-id/whitepaper", (c) => c.redirect("/en/whitepaper"));
+app.get("/id-id/whitepaper", (c) => c.redirect("/id/whitepaper"));
 
 app.get("/privacy", (c) => c.html(renderPrivacyPage(c.req.url, c.req.raw.headers)));
 app.get("/privacy-policy", (c) => c.redirect("/privacy"));
@@ -75,8 +78,9 @@ app.get("/support/", (c) => c.redirect("/support"));
 app.get("/help", (c) => c.redirect("/support"));
 app.get("/contact", (c) => c.redirect("/support"));
 app.get("/en/support", (c) => c.html(renderSupportPage(c.req.url, c.req.raw.headers)));
-app.get("/en-id/support", (c) => c.html(renderSupportPage(c.req.url, c.req.raw.headers)));
-app.get("/id-id/support", (c) => c.html(renderSupportPage(c.req.url, c.req.raw.headers)));
+app.get("/id/support", (c) => c.html(renderSupportPage(c.req.url, c.req.raw.headers)));
+app.get("/en-id/support", (c) => c.redirect("/en/support"));
+app.get("/id-id/support", (c) => c.redirect("/id/support"));
 
 // Portal & Sign In
 app.get("/signin", (c) => c.html(renderSignInPage(c.req.url, c.req.raw.headers)));
