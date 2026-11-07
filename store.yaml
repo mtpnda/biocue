@@ -21,9 +21,9 @@ links:
   support_email: "support@matapandastudio.com"
 
 release:
-  version_name: "0.1.0"
-  version_code: 1
-  changelog: "v0.1.12: Direct Open Settings navigation for Wear OS sensor and location permissions with auto-resume on return."
+  version_name: "0.1.13"
+  version_code: 61
+  changelog: "v0.1.13: Refined minimal cerebral balance icon, reduced battery footprint on Wear OS, and streamlined companion sync."
 
 full_description: |
   BioCue is an ambient wellness and habit-cueing companion designed to seamlessly bridge the gap between smartwatch vitals and caregiver support. Built with neuro-inclusive design principles, BioCue provides a zero-anxiety tracking experience for the wearer while delivering rich, real-time wellness insights to a trusted caregiver or family circle.

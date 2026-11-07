@@ -16,5 +16,6 @@ else
 end
 
 # Project overrides
+ENV["PROJECT_ROOT"] ||= File.expand_path("..", __dir__)
 ENV["APP_NAME"]     ||= "BioCue"
 ENV["PACKAGE_NAME"] ||= "com.mtpnda.biocue"

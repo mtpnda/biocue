@@ -1,1 +1,1 @@
-v0.1.12: Direct Open Settings navigation for Wear OS sensor and location permissions with auto-resume on return.
+v0.1.13: Refined minimal cerebral balance icon, reduced battery footprint on Wear OS, and streamlined companion sync.
