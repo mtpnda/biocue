@@ -1,6 +1,6 @@
 # BioCue — Agentic Operating & Architecture Guide
 > **Repository:** `BioCue` (Wear OS + Android Companion for Habit & Bio-Signal Cueing)  
-> **Central Agent Plugin:** [/Users/valdiearsanur/.gemini/config/plugins/central-agents/](file:///Users/valdiearsanur/.gemini/config/plugins/central-agents/) (12 Specialized Agents, Centralized Verified Skills)  
+> **Central Agent Plugin:** [/Users/valdiearsanur/.gemini/config/plugins/central-agents/](file:///Users/valdiearsanur/.gemini/config/plugins/central-agents/) (13 Specialized Agents, Centralized Verified Skills)  
 > **Release Standard:** [custom-release-manager](file:///Users/valdiearsanur/.gemini/config/plugins/central-agents/skills/custom-release-manager/SKILL.md)
 
 ---
@@ -25,6 +25,9 @@
 | Developer Intent / Task in BioCue | Target Agent | Primary Central Skills Paired | Target Subsystem / File Scope |
 | :--- | :--- | :--- | :--- |
 | **Android / Wear OS UI, Jetpack Compose, Sensors, Health Services** | `@mobile-dev` | `android-architecture`, `android-ui-engineering`, `android-background-work`, `mobile-automation` | `mobile/`, `wear/`, `core-detection/` |
+| **Visual UI/UX Design, Design System, Micro-Interactions** | `@designer` | `emil-design-eng`, `apple-design`, `frontend-design`, `review-animations` | `mobile/src/main/java/.../ui/theme/` |
+| **Branding, Logo Design, Cinematic Video Production, Promo Motion** | `@producer` | `cinetic`, `showtime`, `logo-design`, `replica-brand`, `webhost-tailscale-share` | `brand/`, `listings/`, `videos/` |
+| **Store Listing Copy, Pain Mining, Launch Copy & Growth** | `@marketing` | `replica-entrepreneur`, `replica-launch`, `technical-writing`, `unslop` | `mobile/src/main/play/`, `wear/src/main/play/` |
 | **Automated Testing, Robolectric, Compose Test Rules, Quality Gates** | `@qa-engineer` | `test-driven-development`, `tdd`, `android-device-testing`, `code-review-and-quality` | `mobile/src/test/`, `wear/src/test/`, `tests/` |
 | **Play Store Publishing, Fastlane, GPP, Keystore Signing, Webhost Ingestion** | `@release-manager` | `custom-release-manager`, `reusable-fastlane`, `shipping-and-launch` | `Makefile`, `fastlane/`, `play-account.json`, `mobile/src/main/play/`, `wear/src/main/play/` |
 | **Firebase / Cloud Sync, Firestore Rules, Data Modeling** | `@backend-dev` | `api-and-interface-design`, `security-and-hardening`, `clean-code-principles` | `firestore.rules`, `firebase.json`, `functions/` |
