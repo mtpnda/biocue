@@ -56,13 +56,9 @@ BioCue adheres to the standardized `custom-release-manager` protocol:
    - `release-notes/en-US/default.txt`: Release changelog for current build.
 
 3. **Authentication, Centralized Secrets & Signing**:
-   - **Zero Secrets in Repository:** Real private keys, service account JSON files, and keystores are **never** stored inside the project folder.
-   - **Global Secrets Storage (`~/.secrets/`):**
-     - `~/.secrets/android/biocue-release-key.jks`: BioCue production upload key.
-     - `~/.secrets/android/play-account.json`: Google Play Console publishing credentials.
-     - `~/.secrets/android/biocue/google-services.json`: Firebase client config.
-   - **Multi-Machine Linking:** Run `make setup-secrets` on any cloned machine to symlink global credentials into place. Gradle also directly checks `~/.secrets/android/` automatically.
-   - `local.properties`: Contains SDK path and local keystore properties (strictly gitignored).
+   - Governed centrally by `@release-manager` using the [custom-release-manager](file:///Users/valdiearsanur/.gemini/config/plugins/central-agents/skills/custom-release-manager/SKILL.md) standard.
+   - **Zero Secrets in Repository:** Keystores (`*.jks`), service account credentials (`play-account.json`), and Firebase configs are strictly stored globally in `~/.secrets/`, never in source control.
+   - **Multi-Machine Parity:** Run `make setup-secrets` on any cloned machine to symlink global credentials into place.
 
 ---
 
