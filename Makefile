@@ -25,7 +25,7 @@ YELLOW:= \033[33m
 RED   := \033[31m
 RESET := \033[0m
 
-.PHONY: help doctor setup-secrets connect-watch-bt disconnect-watch-bt clean build-all build-mac build-ios build-android build-mobile build-wear build-mock \
+.PHONY: help doctor setup-secrets connect-watch pair-watch disconnect-watch clean build-all build-mac build-ios build-android build-mobile build-wear build-mock \
         release-local release-mac-local release-ios-local release-android-local release-wear-local sync-webhost \
         release-github release-mac-github release-android-github \
         release-appstore release-mac-appstore release-ios-appstore release-testflight \
@@ -72,8 +72,9 @@ help:
 	@echo -e "  $(GREEN)make build-mock$(RESET)             Build Sensor Mock Emitter dev APK"
 	@echo -e "  $(GREEN)make install-android$(RESET)        Install Companion APK directly to connected Android phone/tablet/emulator"
 	@echo -e "  $(GREEN)make install-wear$(RESET)           Install Wear OS APK directly to connected smartwatch/emulator"
-	@echo -e "  $(GREEN)make connect-watch-bt$(RESET)       Forward & connect to Wear OS watch via Phone Bluetooth proxy (127.0.0.1:4444)"
-	@echo -e "  $(GREEN)make disconnect-watch-bt$(RESET)    Disconnect watch Bluetooth proxy"
+	@echo -e "  $(GREEN)make connect-watch$(RESET)         Autonomously discover & connect to physical watch over Wi-Fi"
+	@echo -e "  $(GREEN)make pair-watch IP=.. PORT=.. CODE=..$(RESET) One-time Wi-Fi pairing with physical watch"
+	@echo -e "  $(GREEN)make disconnect-watch$(RESET)      Disconnect wireless watch connections"
 	@echo -e "  $(GREEN)make install-mock$(RESET)           Install Sensor Mock Emitter dev APK to connected device/emulator"
 	@echo -e "  $(GREEN)make mock-web$(RESET)               Start Web GUI Console on http://localhost:8080"
 	@echo -e "  $(GREEN)make mock-cli ARGS=\"...\"$(RESET)       Run Mock CLI command (e.g. ARGS=\"--scenario overwhelmed\")"
@@ -257,18 +258,20 @@ install-wear:
 	@echo -e "$(BOLD)$(GREEN)⌚ Installing BioCue Wear OS APK to connected watch/emulator via Fastlane...$(RESET)"
 	$(FASTLANE) android install_wear $(if $(DEVICE),device:"$(DEVICE)",)$(if $(BUILD),build:true,)
 
-connect-watch-bt:
-	@echo -e "$(BOLD)$(CYAN)⌚ Setting up Wear OS Bluetooth Proxy via Phone...$(RESET)"
-	@adb forward tcp:4444 localabstract:live-debugger
-	@adb connect 127.0.0.1:4444
-	@echo -e "$(BOLD)$(GREEN)✓ Connected! Watch is mapped to 127.0.0.1:4444$(RESET)"
-	@echo -e "  Run 'adb devices' to confirm it appears as: 127.0.0.1:4444 device"
+connect-watch:
+	@python3 tools/watch_auto_connect.py $(if $(IP),--ip $(IP),) $(if $(PORT),--port $(PORT),)
 
-disconnect-watch-bt:
-	@echo -e "$(BOLD)$(CYAN)🔌 Disconnecting Wear OS Bluetooth Proxy...$(RESET)"
-	@adb disconnect 127.0.0.1:4444 2>/dev/null || true
-	@adb forward --remove tcp:4444 2>/dev/null || true
-	@echo -e "$(BOLD)$(GREEN)✓ Bluetooth proxy disconnected.$(RESET)"
+pair-watch:
+	@if [ -z "$(IP)" ] || [ -z "$(PORT)" ] || [ -z "$(CODE)" ]; then \
+		echo -e "$(RED)Error: Missing arguments.$(RESET)"; \
+		echo "Usage: make pair-watch IP=<watch_ip> PORT=<pairing_port> CODE=<6_digit_code>"; \
+		exit 1; \
+	fi
+	@python3 tools/watch_auto_connect.py --ip $(IP) --pair $(PORT) $(CODE)
+
+disconnect-watch:
+	@echo -e "$(BOLD)$(CYAN)🔌 Disconnecting wireless watch connections...$(RESET)"
+	@adb disconnect
 
 install-mock:
 	@echo -e "$(BOLD)$(GREEN)🧪 Installing Sensor Mock Emitter to connected device/emulator...$(RESET)"

@@ -64,19 +64,27 @@ To grant all required runtime permissions (`BODY_SENSORS`, `ACTIVITY_RECOGNITION
 make mock-cli ARGS="--grant-permissions"
 ```
 
-### 3.3. Physical Watch Connection via Bluetooth Proxy (Zero Hassle)
+### 3.3. Autonomous Physical Watch Wi-Fi Connection (Minimum Intervention)
 
-To avoid dynamic Wi-Fi IP and port changes, you can route debugging through your connected Android phone over Bluetooth on a **permanent, fixed port (`127.0.0.1:4444`)**:
+For modern Wear OS watches (such as Samsung Galaxy Watch 4 Classic), Bluetooth debugging is deprecated by Samsung/Google. BioCue includes an autonomous discovery and connection tool ([`tools/watch_auto_connect.py`](file:///tools/watch_auto_connect.py)) that eliminates manual port renewal and IP typing:
 
-1. **On your Watch:**
-   - Go to **Settings** &rarr; **Developer Options** &rarr; Turn on **ADB Debugging** & **Debug over Bluetooth**.
-2. **On your Phone:**
-   - In the companion app (Pixel Watch or Galaxy Wearable) &rarr; **Settings** &rarr; Developer Options &rarr; Turn on **Debugging over Bluetooth**.
-3. **On your Mac (with phone connected via USB or wireless):**
-   ```bash
-   make connect-watch-bt
-   ```
-   Your watch will immediately appear in `adb devices` as `127.0.0.1:4444 device`. When done, run `make disconnect-watch-bt`.
+#### 1. One-Time Pairing (Watch Lifetime)
+With watch on same Wi-Fi as Mac, go to **Settings** &rarr; **Developer options** &rarr; **Wireless debugging** &rarr; **Pair new device**:
+```bash
+make pair-watch IP=<watch_ip> PORT=<pairing_port> CODE=<6_digit_code>
+```
+*(This saves your watch IP and permanently pairs your Mac's `~/.android/adbkey`)*
+
+#### 2. Daily Automatic Connection (1 Command)
+```bash
+make connect-watch
+```
+**What this does automatically:**
+1. Verifies if the watch is already connected.
+2. Auto-discovers the watch's dynamic port over local Wi-Fi via mDNS (`adb mdns services`).
+3. If mDNS is filtered by your router, it uses your cached IP and performs a parallel socket probe across Android's active port range in under 1.5 seconds.
+4. Connects via `adb connect` and automatically promotes to fixed port 5555 (`adb tcpip 5555`) for instant future connects.
+5. To disconnect when finished: `make disconnect-watch`.
 
 ---
 
