@@ -20,6 +20,9 @@
 | [**`15_MOCK_SENSOR_EMITTER.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/15_MOCK_SENSOR_EMITTER.md) | **Mock Sensor Emitter System:** Web console, CLI tools, ADB broadcast contracts, scenarios, and test tooling | Authoritative |
 | [**`16_DENO_AUTH_AND_DATA_PLANE.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/16_DENO_AUTH_AND_DATA_PLANE.md) | **Deno Edge Auth & Data Plane:** Replaces Firebase with Deno KV, HS256 JWT, Caregiver Circles, and SSE live streams | Authoritative |
 | [**`17_SOVEREIGN_AUTH_AND_OFFLINE_OAUTH_ENGINEERING.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/17_SOVEREIGN_AUTH_AND_OFFLINE_OAUTH_ENGINEERING.md) | **Sovereign OAuth & Offline State Machine:** Pure Swift PKCE, reversed scheme, offline fallback FSM, and Deno token minting | Authoritative |
+| [**`18_BATTERY_OPTIMIZED_HRV_PROFILING_AND_SYNC.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/18_BATTERY_OPTIMIZED_HRV_PROFILING_AND_SYNC.md) | **Battery-Optimized HRV & Stress Level Profiling & Local Sync:** 4-pillar battery strategy, adaptive duty-cycling, hardware offbody, RMSSD baseline | Authoritative |
+| [**`19_INTELLIGENT_COMPANION_AND_CRISIS_GUARDIAN.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/19_INTELLIGENT_COMPANION_AND_CRISIS_GUARDIAN.md) | **Intelligent Companion & Crisis Guardian Engine (BioCue Buddy):** 4-phase empathetic co-regulation, somatic pacer, free-text semantics, 15m safety guardian | Authoritative |
+| [**`20_HYBRID_INTELLIGENCE_AND_ON_CHIP_SLM_ARCHITECTURE.md`**](file:///Users/valdiearsanur/Workspace/biocue/.agents/specs/20_HYBRID_INTELLIGENCE_AND_ON_CHIP_SLM_ARCHITECTURE.md) | **Hybrid Intelligence & On-Chip SLM Architecture:** Autonomic-motor decoupling mathematical formulation, deterministic safety air-gap, and Gemma 2B / CoreML on-chip SLM execution | Authoritative |
 
 ---
 
