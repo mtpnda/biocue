@@ -94,10 +94,10 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             Given instantaneous heart rate readings $HR_i$ in beats per minute (BPM):
           </p>
           <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
-            $$RR_i = \frac{60000.0}{HR_i} \quad \text{[ms]}$$
+            $$RR_i = \\frac{60000.0}{HR_i} \\quad \\text{[ms]}$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
-            Valid beats must strictly satisfy physiological limits: $300\text{ ms} \le RR_i \le 1500\text{ ms}$ (40 to 200 BPM) and consecutive change $|RR_i - RR_{i-1}| \le 300\text{ ms}$. Ectopic beats and motion noise are rejected prior to metric computation.
+            Valid beats must strictly satisfy physiological limits: $300\\text{ ms} \\le RR_i \\le 1500\\text{ ms}$ (40 to 200 BPM) and consecutive change $|RR_i - RR_{i-1}| \\le 300\\text{ ms}$. Ectopic beats and motion noise are rejected prior to metric computation.
           </p>
         </div>
 
@@ -106,10 +106,10 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             Formula 2.2 — Root Mean Square of Successive Differences (RMSSD)
           </h4>
           <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
-            For a sliding buffer of $N$ valid beat intervals ($15 \le N \le 30$):
+            For a sliding buffer of $N$ valid beat intervals ($15 \\le N \\le 30$):
           </p>
           <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
-            $$RMSSD = \sqrt{\frac{1}{N - 1} \sum_{i=1}^{N-1} (RR_{i+1} - RR_i)^2}$$
+            $$RMSSD = \\sqrt{\\frac{1}{N - 1} \\sum_{i=1}^{N-1} (RR_{i+1} - RR_i)^2}$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
             RMSSD directly reflects parasympathetic (vagal) cardiac modulation, capturing immediate autonomic shifts within seconds.
@@ -121,10 +121,10 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             Formula 2.3 — Standardized Z-Score Autonomic Decoupling
           </h4>
           <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
-            Features are standardized against the individual's calibrated baseline ($\mu_{HR}, \sigma_{HR}, \mu_{RMSSD}, \sigma_{RMSSD}$):
+            Features are standardized against the individual's calibrated baseline ($\\mu_{HR}, \\sigma_{HR}, \\mu_{RMSSD}, \\sigma_{RMSSD}$):
           </p>
           <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
-            $$hrZ = \frac{w.hrMean - \mu_{HR}}{\max(\sigma_{HR}, 1.0)}, \quad hrvZ = \frac{\mu_{RMSSD} - w.rmssd}{\max(\sigma_{RMSSD}, 1.0)}$$
+            $$hrZ = \\frac{w.hrMean - \\mu_{HR}}{\\max(\\sigma_{HR}, 1.0)}, \\quad hrvZ = \\frac{\\mu_{RMSSD} - w.rmssd}{\\max(\\sigma_{RMSSD}, 1.0)}$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
             Notice the mathematical inversion of $hrvZ$: when HRV collapses below baseline, $hrvZ$ turns strongly positive, signaling sympathetic stress even when motor movement is zero.
@@ -136,12 +136,12 @@ export function renderWhitepaperPage(requestUrl?: string, headers?: Headers): st
             Formula 2.4 — Continuous Logistic Fusion &amp; Sigmoid Stress Probability
           </h4>
           <div style="background:var(--surface-raised);padding:16px 20px;border-radius:var(--radius-sm);color:var(--text-primary);margin-bottom:12px;overflow-x:auto;text-align:center;">
-            $$Score = 0.35 \cdot hrZ + 0.35 \cdot hrvZ + 0.15 \cdot Repetitiveness + 0.15 \cdot HR_{slope}$$
-            $$\text{Stress \%} = \frac{1}{1 + e^{-1.2(Score - 1.0)}} \times 100\%$$
+            $$Score = 0.35 \\cdot hrZ + 0.35 \\cdot hrvZ + 0.15 \\cdot Repetitiveness + 0.15 \\cdot HR_{slope}$$
+            $$\\text{Stress \\%} = \\frac{1}{1 + e^{-1.2(Score - 1.0)}} \\times 100\\%$$
           </div>
           <p style="font-size:13.5px;color:var(--text-muted);">
             • <strong>Tier 0 (Calm):</strong> $Score &lt; 1.5$ (&lt; 50% Stress)<br/>
-            • <strong>Tier 1 (Rising):</strong> $1.5 \le Score \le 2.5$ (50% to 74% Stress)<br/>
+            • <strong>Tier 1 (Rising):</strong> $1.5 \\le Score \\le 2.5$ (50% to 74% Stress)<br/>
             • <strong>Tier 2 (Sensory Overload):</strong> $Score &gt; 2.5$ (&ge; 75% Stress)
           </p>
         </div>

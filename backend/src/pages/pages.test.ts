@@ -43,6 +43,9 @@ Deno.test("GET /whitepaper renders Technical Whitepaper with mathematical formul
   assertEquals(html.includes("Formula 2.4"), true);
   assertEquals(html.includes("Gemma 2B"), true);
   assertEquals(html.includes("HardwareResourceGovernor"), true);
+  // Ensure LaTeX formulas are properly escaped without FormFeed (\x0c) artifacts
+  assertEquals(html.includes("\x0c"), false);
+  assertEquals(html.includes("RMSSD = \\sqrt{\\frac{1}{N - 1} \\sum_{i=1}^{N-1} (RR_{i+1} - RR_i)^2}"), true);
 });
 
 Deno.test("GET /privacy renders Privacy Policy with sovereign clauses", async () => {
