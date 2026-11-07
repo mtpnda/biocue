@@ -32,6 +32,7 @@ dependencies {
     testImplementation(libs.androidx.junit)
     testImplementation("androidx.test:core:1.5.0")
     testImplementation(libs.mockk)
+    testImplementation("org.json:json:20231013")
     testImplementation(libs.robolectric)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

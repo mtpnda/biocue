@@ -16,28 +16,46 @@ object EventTypes {
     val DEFAULT_CONTEXTS = listOf(CONTEXT_LOUD_NOISES, CONTEXT_CROWDED, CONTEXT_DEMAND, CONTEXT_ROUTINE, CONTEXT_UNKNOWN)
     
     fun getIconForLabel(label: String): String {
+        if (label.contains(LABEL_OVERWHELMED)) return "🌩️"
+        if (label.contains(LABEL_EXCITED)) return "✨"
+        if (label.contains(LABEL_ACTIVE)) return "🏃"
+        if (label.contains(CONTEXT_LOUD_NOISES)) return "🔊"
+        if (label.contains(CONTEXT_CROWDED)) return "👥"
+        if (label.contains(CONTEXT_DEMAND)) return "📋"
+        if (label.contains(CONTEXT_ROUTINE)) return "🔄"
+        if (label == LABEL_NONE || label == CONTEXT_UNKNOWN || label == "Unknown" || label.isEmpty() || label == "overwhelmed") {
+            return "🤷"
+        }
+
+        val lower = label.lowercase()
         return when {
-            label.contains(LABEL_OVERWHELMED) -> "🌩️"
-            label.contains(LABEL_EXCITED) -> "✨"
-            label.contains(LABEL_ACTIVE) -> "🏃"
-            label.contains(CONTEXT_LOUD_NOISES) -> "🔊"
-            label.contains(CONTEXT_CROWDED) -> "👥"
-            label.contains(CONTEXT_DEMAND) -> "📋"
-            label.contains(CONTEXT_ROUTINE) -> "🔄"
-            else -> "🤷"
+            lower.contains("hurt") || lower.contains("pain") || lower.contains("harm") || lower.contains("cut") || lower.contains("bleed") -> "🩹"
+            lower.contains("sad") || lower.contains("cry") || lower.contains("lonely") || lower.contains("alone") || lower.contains("hopeless") -> "🌧️"
+            lower.contains("loud") || lower.contains("noise") || lower.contains("sound") -> "🔊"
+            lower.contains("crowd") || lower.contains("people") || lower.contains("party") -> "👥"
+            else -> "💭"
         }
     }
     
     fun getColorHexForLabel(label: String): String {
+        if (label.contains(LABEL_OVERWHELMED)) return "#a5b4fc"
+        if (label.contains(LABEL_EXCITED)) return "#fcd34d"
+        if (label.contains(LABEL_ACTIVE)) return "#cbd5e1"
+        if (label.contains(CONTEXT_LOUD_NOISES)) return "#fca5a5"
+        if (label.contains(CONTEXT_CROWDED)) return "#fdba74"
+        if (label.contains(CONTEXT_DEMAND)) return "#6ee7b7"
+        if (label.contains(CONTEXT_ROUTINE)) return "#93c5fd"
+        if (label == LABEL_NONE || label == CONTEXT_UNKNOWN || label == "Unknown" || label.isEmpty() || label == "overwhelmed") {
+            return "#94a3b8"
+        }
+
+        val lower = label.lowercase()
         return when {
-            label.contains(LABEL_OVERWHELMED) -> "#a5b4fc"
-            label.contains(LABEL_EXCITED) -> "#fcd34d"
-            label.contains(LABEL_ACTIVE) -> "#cbd5e1"
-            label.contains(CONTEXT_LOUD_NOISES) -> "#fca5a5"
-            label.contains(CONTEXT_CROWDED) -> "#fdba74"
-            label.contains(CONTEXT_DEMAND) -> "#6ee7b7"
-            label.contains(CONTEXT_ROUTINE) -> "#93c5fd"
-            else -> "#94a3b8"
+            lower.contains("hurt") || lower.contains("pain") || lower.contains("harm") || lower.contains("cut") || lower.contains("bleed") -> "#f87171"
+            lower.contains("sad") || lower.contains("cry") || lower.contains("lonely") || lower.contains("alone") || lower.contains("hopeless") -> "#93c5fd"
+            lower.contains("loud") || lower.contains("noise") || lower.contains("sound") -> "#fca5a5"
+            lower.contains("crowd") || lower.contains("people") || lower.contains("party") -> "#fdba74"
+            else -> "#c084fc"
         }
     }
 }

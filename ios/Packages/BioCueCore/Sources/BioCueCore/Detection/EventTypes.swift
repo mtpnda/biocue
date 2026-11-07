@@ -25,7 +25,25 @@ public enum EventTypes {
         if label.contains(contextCrowded) { return "👥" }
         if label.contains(contextDemand) { return "📋" }
         if label.contains(contextRoutine) { return "🔄" }
-        return "🤷"
+        if label == labelNone || label == contextUnknown || label == "Unknown" || label.isEmpty || label == "overwhelmed" {
+            return "🤷"
+        }
+
+        // Semantic free-text keywords (Spec 19)
+        let lower = label.lowercased()
+        if lower.contains("hurt") || lower.contains("pain") || lower.contains("harm") || lower.contains("cut") || lower.contains("bleed") {
+            return "🩹"
+        }
+        if lower.contains("sad") || lower.contains("cry") || lower.contains("lonely") || lower.contains("alone") || lower.contains("hopeless") {
+            return "🌧️"
+        }
+        if lower.contains("loud") || lower.contains("noise") || lower.contains("sound") {
+            return "🔊"
+        }
+        if lower.contains("crowd") || lower.contains("people") || lower.contains("party") {
+            return "👥"
+        }
+        return "💭"
     }
 
     public static func colorHex(forLabel label: String) -> String {
@@ -36,6 +54,24 @@ public enum EventTypes {
         if label.contains(contextCrowded) { return "#fdba74" }
         if label.contains(contextDemand) { return "#6ee7b7" }
         if label.contains(contextRoutine) { return "#93c5fd" }
-        return "#94a3b8"
+        if label == labelNone || label == contextUnknown || label == "Unknown" || label.isEmpty || label == "overwhelmed" {
+            return "#94a3b8"
+        }
+
+        // Semantic free-text keywords (Spec 19)
+        let lower = label.lowercased()
+        if lower.contains("hurt") || lower.contains("pain") || lower.contains("harm") || lower.contains("cut") || lower.contains("bleed") {
+            return "#f87171"
+        }
+        if lower.contains("sad") || lower.contains("cry") || lower.contains("lonely") || lower.contains("alone") || lower.contains("hopeless") {
+            return "#93c5fd"
+        }
+        if lower.contains("loud") || lower.contains("noise") || lower.contains("sound") {
+            return "#fca5a5"
+        }
+        if lower.contains("crowd") || lower.contains("people") || lower.contains("party") {
+            return "#fdba74"
+        }
+        return "#c084fc"
     }
 }
