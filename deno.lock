@@ -2,6 +2,7 @@
   "version": "5",
   "specifiers": {
     "npm:@hono/zod-openapi@0.14": "0.14.9_hono@4.13.16_zod@3.25.76",
+    "npm:hono@*": "4.13.16",
     "npm:hono@^4.4.0": "4.13.16",
     "npm:zod@^3.23.8": "3.25.76"
   },

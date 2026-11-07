@@ -35,11 +35,21 @@ export function renderLayout(opts: PageOptions): string {
   <title>${title}</title>
   <meta name="description" content="${desc}"/>
 
+  <!-- Favicon & Official App Icons (Mindful Contours) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/icon.png"/>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+  <link rel="shortcut icon" href="/favicon.ico"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.png"/>
+
   <!-- OpenGraph / Social Meta -->
   <meta property="og:title" content="${title}"/>
   <meta property="og:description" content="${desc}"/>
   <meta property="og:type" content="website"/>
+  <meta property="og:image" content="https://biocue.matapandastudio.deno.net/icon.png"/>
+  <meta property="og:image:width" content="512"/>
+  <meta property="og:image:height" content="512"/>
   <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:image" content="https://biocue.matapandastudio.deno.net/icon.png"/>
 
   <!-- Google Fonts Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>

@@ -132,3 +132,29 @@ Deno.test("GET /id-id redirects to /id and /en-us redirects to /en", async () =>
   assertEquals(resEn.headers.get("location"), "/en");
 });
 
+Deno.test("Static Asset Endpoints serve official Mindful Contours icon & favicon", async () => {
+  const iconPngRes = await app.request("/icon.png");
+  assertEquals(iconPngRes.status, 200);
+  assertEquals(iconPngRes.headers.get("Content-Type"), "image/png");
+  const iconBytes = await iconPngRes.arrayBuffer();
+  assertEquals(iconBytes.byteLength > 10000, true);
+
+  const faviconRes = await app.request("/favicon.ico");
+  assertEquals(faviconRes.status, 200);
+  assertEquals(faviconRes.headers.get("Content-Type"), "image/png");
+
+  const iconSvgRes = await app.request("/icon.svg");
+  assertEquals(iconSvgRes.status, 200);
+  assertEquals(iconSvgRes.headers.get("Content-Type"), "image/svg+xml");
+  const svgText = await iconSvgRes.text();
+  assertEquals(svgText.includes("<svg"), true);
+  assertEquals(svgText.includes("#1E1F20"), true);
+  assertEquals(svgText.includes("#86EFAC"), true);
+
+  // Check that HTML links to new icon
+  const homeRes = await app.request("/en");
+  const html = await homeRes.text();
+  assertEquals(html.includes('<link rel="icon" type="image/png" sizes="32x32" href="/icon.png"/>'), true);
+  assertEquals(html.includes('<img src="/icon.png"'), true);
+});
+

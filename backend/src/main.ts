@@ -86,6 +86,45 @@ app.get("/id-id/support", (c) => c.redirect("/id/support"));
 app.get("/signin", (c) => c.html(renderSignInPage(c.req.url, c.req.raw.headers)));
 app.get("/login", (c) => c.redirect("/signin"));
 
+// Static Assets: Official Brand Icon & Favicon (Mindful Contours)
+let iconPngBytes: Uint8Array | null = null;
+let iconSvgText = "";
+
+try {
+  iconPngBytes = await Deno.readFile(new URL("./assets/icon.png", import.meta.url));
+} catch (e) {
+  console.warn("Could not read ./assets/icon.png:", e);
+}
+
+try {
+  iconSvgText = await Deno.readTextFile(new URL("./assets/icon.svg", import.meta.url));
+} catch (e) {
+  console.warn("Could not read ./assets/icon.svg:", e);
+}
+
+const serveIconPng = (c: any) => {
+  if (!iconPngBytes) return c.text("Icon not found", 404);
+  return c.body(iconPngBytes, 200, {
+    "Content-Type": "image/png",
+    "Cache-Control": "public, max-age=86400, immutable",
+  });
+};
+
+const serveIconSvg = (c: any) => {
+  if (!iconSvgText) return c.text("SVG not found", 404);
+  return c.body(iconSvgText, 200, {
+    "Content-Type": "image/svg+xml",
+    "Cache-Control": "public, max-age=86400, immutable",
+  });
+};
+
+app.get("/icon.png", serveIconPng);
+app.get("/favicon.ico", serveIconPng);
+app.get("/apple-touch-icon.png", serveIconPng);
+app.get("/apple-touch-icon-precomposed.png", serveIconPng);
+app.get("/icon.svg", serveIconSvg);
+app.get("/logo.svg", serveIconSvg);
+
 // Downloads
 app.get("/download", (c) => c.redirect("/#download"));
 app.get("/download/android", (c) => c.redirect("https://github.com/mtpnda/biocue/releases/latest"));
