@@ -40,9 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 import com.mtpnda.biocue.ConnectionStatus
 import com.mtpnda.biocue.JournalEntry
 import com.mtpnda.biocue.ReviewEvent
@@ -270,8 +272,55 @@ fun SosAlertCard(userName: String) {
     }
 }
 
+/**
+ * Parse and format raw event labels cleanly for display.
+ * E.g. "OVERWHELMED - Crowded Space" -> Pair("Overwhelmed", "Crowded Space")
+ * "EXCITED" -> Pair("Excited", null)
+ */
+private fun formatJournalLabel(raw: String): Pair<String, String?> {
+    val trimmed = raw.trim()
+    if (trimmed.isEmpty() || trimmed == "NONE") return Pair("Unlabeled Moment", null)
+    if (!trimmed.contains(" - ")) {
+        val title = when (trimmed.uppercase(Locale.US)) {
+            "OVERWHELMED" -> "Overwhelmed"
+            "EXCITED" -> "Excited"
+            "ACTIVE" -> "Active"
+            else -> trimmed.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
+        }
+        return Pair(title, null)
+    }
+    val parts = trimmed.split(" - ", limit = 2)
+    val emotionRaw = parts[0].trim()
+    val contextRaw = parts.getOrNull(1)?.trim()
+    val emotion = when (emotionRaw.uppercase(Locale.US)) {
+        "OVERWHELMED" -> "Overwhelmed"
+        "EXCITED" -> "Excited"
+        "ACTIVE" -> "Active"
+        else -> emotionRaw.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
+    }
+    return Pair(emotion, contextRaw)
+}
+
 @Composable
 fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeDate: (Int) -> Unit) {
+    // Defensively decompose any legacy or combined entries separated by " + "
+    val effectiveEntries = remember(journal) {
+        journal.flatMap { entry ->
+            val parts = entry.labelText.split(" + ").map { it.trim() }.filter { it.isNotEmpty() && it != "NONE" }
+            if (parts.size <= 1) {
+                listOf(entry)
+            } else {
+                parts.map { part ->
+                    entry.copy(
+                        labelText = part,
+                        labelIcon = com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(part),
+                        colorHex = com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(part)
+                    )
+                }
+            }
+        }
+    }
+
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -316,7 +365,7 @@ fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeDate: (
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            if (journal.isEmpty()) {
+            if (effectiveEntries.isEmpty()) {
                 Text(
                     text = "No events on this day. All calm ✨",
                     style = MaterialTheme.typography.bodyMedium,
@@ -324,8 +373,10 @@ fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeDate: (
                     modifier = Modifier.padding(vertical = 14.dp)
                 )
             } else {
-                journal.forEachIndexed { index, entry ->
+                effectiveEntries.forEachIndexed { index, entry ->
                     val tint = parseHexColor(entry.colorHex)
+                    val (title, contextCue) = formatJournalLabel(entry.labelText)
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -334,39 +385,55 @@ fun JournalCard(journal: List<JournalEntry>, journalOffset: Int, onChangeDate: (
                     ) {
                         EmojiAvatar(
                             emoji = entry.labelIcon,
-                            containerColor = tint.copy(alpha = 0.30f),
-                            borderColor = tint.copy(alpha = 0.6f),
+                            containerColor = tint.copy(alpha = 0.22f),
+                            borderColor = tint.copy(alpha = 0.50f),
                             modifier = Modifier.padding(end = 12.dp)
                         )
                         Column(modifier = Modifier.weight(1f)) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(PillShape)
-                                    .background(tint.copy(alpha = 0.28f))
-                                    .border(1.dp, tint.copy(alpha = 0.6f), PillShape)
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    entry.labelText,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = InkPrimary
+                                    text = title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = InkPrimary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = entry.time,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = InkMuted
                                 )
                             }
+
+                            if (!contextCue.isNullOrBlank()) {
+                                Spacer(Modifier.height(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Surface2)
+                                        .border(1.dp, LineBorder, RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = contextCue,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = InkPrimary
+                                    )
+                                }
+                            }
+
+                            Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "${entry.activity} · ${if (entry.labelText == "Excited") "Manual check-in" else "Auto-detected"}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = InkSecondary,
-                                modifier = Modifier.padding(top = 6.dp)
+                                text = entry.activity,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = InkSecondary
                             )
                         }
-                        Text(
-                            entry.time,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = InkMuted,
-                            modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-                        )
                     }
-                    if (index < journal.size - 1) {
+                    if (index < effectiveEntries.size - 1) {
                         HorizontalDivider(color = LineBorder)
                     }
                 }

@@ -2,6 +2,7 @@ package com.mtpnda.biocue.ui.screens.wearer
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -738,34 +739,43 @@ private fun CheckInChip(text: String, modifier: Modifier = Modifier, onClick: ()
 @Composable
 private fun BreathingPacerCard() {
     var isBreathingActive by remember { mutableStateOf(false) }
-    var phaseText by remember { mutableStateOf("Breathe in… (4s)") }
-    var targetScale by remember { mutableFloatStateOf(0.6f) }
+    var phaseTitle by remember { mutableStateOf("Breathe in slowly") }
+    var phaseSubtitle by remember { mutableStateOf("Feel your lungs expand · 4s") }
+    var targetScale by remember { mutableFloatStateOf(0.80f) }
 
     LaunchedEffect(isBreathingActive) {
         if (!isBreathingActive) return@LaunchedEffect
         while (isBreathingActive) {
-            phaseText = "Breathe in… (4s)"
-            targetScale = 1.0f
+            // 1. Inhale 4s
+            phaseTitle = "Breathe in slowly"
+            phaseSubtitle = "Feel your lungs expand · 4s"
+            targetScale = 1.15f
             delay(4000)
             if (!isBreathingActive) break
 
-            phaseText = "Hold… (4s)"
+            // 2. Hold 4s
+            phaseTitle = "Hold gently"
+            phaseSubtitle = "Soften your jaw & shoulders · 4s"
             delay(4000)
             if (!isBreathingActive) break
 
-            phaseText = "Breathe out… (4s)"
-            targetScale = 0.5f
+            // 3. Exhale 4s
+            phaseTitle = "Slow exhale"
+            phaseSubtitle = "Gently release all tension · 4s"
+            targetScale = 0.75f
             delay(4000)
             if (!isBreathingActive) break
 
-            phaseText = "Rest… (4s)"
+            // 4. Rest 4s
+            phaseTitle = "Rest peacefully"
+            phaseSubtitle = "Stay present in your body · 4s"
             delay(4000)
         }
     }
 
     val animatedScale by animateFloatAsState(
-        targetValue = if (isBreathingActive) targetScale else 0.6f,
-        animationSpec = tween(durationMillis = 4000, easing = LinearEasing),
+        targetValue = if (isBreathingActive) targetScale else 0.80f,
+        animationSpec = tween(durationMillis = 3800, easing = FastOutSlowInEasing),
         label = "pacerScale"
     )
 
@@ -778,7 +788,7 @@ private fun BreathingPacerCard() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("🫧", fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp))
                 Column {
-                    Text("4-4-4 Calm Breathing Pacer", style = MaterialTheme.typography.titleMedium)
+                    Text("4-4-4-4 Calm Breathing Pacer", style = MaterialTheme.typography.titleMedium)
                     Text("Guided visual breath to ground your nervous system", style = MaterialTheme.typography.bodySmall, color = InkSecondary)
                 }
             }
@@ -786,27 +796,60 @@ private fun BreathingPacerCard() {
 
         if (isBreathingActive) {
             Spacer(modifier = Modifier.height(18.dp))
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(AppRadius.Md))
+                    .background(Surface2)
+                    .border(1.dp, LineBorder, RoundedCornerShape(AppRadius.Md))
+                    .padding(vertical = 20.dp, horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Expanding / Contracting Serene Breathing Orb
                 Box(
-                    modifier = Modifier
-                        .size((110 * animatedScale).dp)
-                        .clip(CircleShape)
-                        .background(CalmPalette.soft)
-                        .border(2.dp, CalmPalette.chip, CircleShape),
+                    modifier = Modifier.size(130.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = phaseText,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = CalmPalette.ink,
-                        fontWeight = FontWeight.Bold
+                    // Outer subtle breathing halo
+                    Box(
+                        modifier = Modifier
+                            .size((130 * animatedScale).dp)
+                            .clip(CircleShape)
+                            .background(CalmPalette.soft.copy(alpha = 0.40f))
                     )
+                    // Inner calming core
+                    Box(
+                        modifier = Modifier
+                            .size((95 * animatedScale).dp)
+                            .clip(CircleShape)
+                            .background(CalmPalette.soft)
+                            .border(2.dp, CalmPalette.chip, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "🫧",
+                            fontSize = (26 * animatedScale).sp
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Guidance Text & Pacing Cues — Stable, legibly placed outside the orb without overflow
+                Text(
+                    text = phaseTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = InkPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = phaseSubtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = InkSecondary,
+                    textAlign = TextAlign.Center
+                )
             }
         }
 

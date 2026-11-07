@@ -206,11 +206,18 @@ final class CaregiverViewModel: ObservableObject {
         let end = start + 86_400_000
         journal = events.filter { $0.isResolved && $0.startTime >= start && $0.startTime < end }
             .sorted { $0.startTime > $1.startTime }
-            .map { e in
-                JournalEntry(time: TimeFormat.clock(e.startTime),
-                             activity: e.triggerType == "MANUAL" ? "Manual Event" : "Detected Event",
-                             labelIcon: EventTypes.icon(forLabel: e.label), labelText: e.label,
-                             colorHex: EventTypes.colorHex(forLabel: e.label))
+            .flatMap { e -> [JournalEntry] in
+                let rawLabel = e.label
+                let parts = rawLabel.components(separatedBy: " + ").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty && $0 != "NONE" }
+                let displayLabels = parts.isEmpty ? [(rawLabel == "NONE" || rawLabel.isEmpty) ? "Unlabeled Moment" : rawLabel] : parts
+                let activity = e.triggerType == "MANUAL" ? "Manual" : "Auto-detected"
+                return displayLabels.map { label in
+                    JournalEntry(time: TimeFormat.clock(e.startTime),
+                                 activity: activity,
+                                 labelIcon: EventTypes.icon(forLabel: label),
+                                 labelText: label,
+                                 colorHex: EventTypes.colorHex(forLabel: label))
+                }
             }
     }
 }

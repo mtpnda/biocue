@@ -73,6 +73,49 @@ struct JournalCard: View {
         }
     }
 
+    private var effectiveEntries: [JournalEntry] {
+        entries.flatMap { entry -> [JournalEntry] in
+            let parts = entry.labelText.components(separatedBy: " + ").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty && $0 != "NONE" }
+            if parts.count <= 1 { return [entry] }
+            return parts.map { part in
+                JournalEntry(
+                    id: UUID().uuidString,
+                    time: entry.time,
+                    activity: entry.activity,
+                    labelIcon: EventTypes.icon(forLabel: part),
+                    labelText: part,
+                    colorHex: EventTypes.colorHex(forLabel: part)
+                )
+            }
+        }
+    }
+
+    private func parseLabel(_ raw: String) -> (title: String, cue: String?) {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty || trimmed == "NONE" { return ("Unlabeled Moment", nil) }
+        if !trimmed.contains(" - ") {
+            let title: String
+            switch trimmed.uppercased() {
+            case "OVERWHELMED": title = "Overwhelmed"
+            case "EXCITED": title = "Excited"
+            case "ACTIVE": title = "Active"
+            default: title = trimmed.prefix(1).capitalized + trimmed.dropFirst()
+            }
+            return (title, nil)
+        }
+        let pieces = trimmed.components(separatedBy: " - ")
+        let emotion = pieces[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        let cue = pieces.count > 1 ? pieces[1].trimmingCharacters(in: .whitespacesAndNewlines) : nil
+        let formattedEmotion: String
+        switch emotion.uppercased() {
+        case "OVERWHELMED": formattedEmotion = "Overwhelmed"
+        case "EXCITED": formattedEmotion = "Excited"
+        case "ACTIVE": formattedEmotion = "Active"
+        default: formattedEmotion = emotion.prefix(1).capitalized + emotion.dropFirst()
+        }
+        return (formattedEmotion, cue)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center) {
@@ -94,7 +137,7 @@ struct JournalCard: View {
                 }
             }
             SoftCard(padding: 16) {
-                if entries.isEmpty {
+                if effectiveEntries.isEmpty {
                     HStack(spacing: 14) {
                         ZStack {
                             Circle()
@@ -117,32 +160,39 @@ struct JournalCard: View {
                     .padding(.vertical, 4)
                 } else {
                     VStack(spacing: 0) {
-                        ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                        ForEach(Array(effectiveEntries.enumerated()), id: \.element.id) { index, entry in
                             let tint = Color.fromHexString(entry.colorHex)
+                            let (title, cue) = parseLabel(entry.labelText)
                             HStack(alignment: .top, spacing: 14) {
                                 EmojiAvatar(emoji: entry.labelIcon, size: 40, fill: tint.opacity(0.18), border: tint.opacity(0.40))
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(entry.labelText)
-                                        .font(AppFont.titleMedium)
-                                        .foregroundStyle(Palette.inkPrimary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    HStack(spacing: 6) {
-                                        Text(entry.activity)
-                                            .font(AppFont.bodySmall)
-                                            .foregroundStyle(Palette.inkSecondary)
-                                        Text("·")
-                                            .font(AppFont.bodySmall)
-                                            .foregroundStyle(Palette.inkMuted)
+                                    HStack {
+                                        Text(title)
+                                            .font(AppFont.titleMedium)
+                                            .foregroundStyle(Palette.inkPrimary)
+                                        Spacer()
                                         Text(entry.time)
                                             .font(AppFont.bodySmall)
                                             .foregroundStyle(Palette.inkMuted)
                                     }
+                                    if let cue = cue, !cue.isEmpty {
+                                        Text(cue)
+                                            .font(AppFont.labelSmall)
+                                            .foregroundStyle(Palette.inkPrimary)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 2)
+                                            .background(Palette.surface2, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Palette.line, lineWidth: 1))
+                                    }
+                                    Text(entry.activity)
+                                        .font(AppFont.bodySmall)
+                                        .foregroundStyle(Palette.inkSecondary)
                                 }
                                 Spacer(minLength: 0)
                             }
                             .padding(.vertical, 10)
                             .accessibilityElement(children: .combine)
-                            if index < entries.count - 1 {
+                            if index < effectiveEntries.count - 1 {
                                 Divider().overlay(Palette.line).padding(.leading, 54)
                             }
                         }

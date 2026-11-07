@@ -104,16 +104,24 @@ class CaregiverDashboardViewModel(application: Application) : AndroidViewModel(a
                 val start = cal.timeInMillis
 
                 val dayEvents = entityList.filter { it.isResolved && it.startTime >= start && it.startTime <= end }.sortedByDescending { it.startTime }
-                _journal.value = dayEvents.map { event ->
+                _journal.value = dayEvents.flatMap { event ->
                     val timeStr = SimpleDateFormat("h:mm a", Locale.US).format(Date(event.startTime))
-                    val activityStr = if (event.triggerType == "MANUAL") "Manual Event" else "Detected Event"
-                    val labelText = event.label
-                    
-                    val icon = com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(labelText)
-                    val color = com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(labelText)
-                    JournalEntry(
-                        time = timeStr, place = "Synced Location", activity = activityStr, labelIcon = icon, labelText = labelText, colorHex = color
-                    )
+                    val rawLabel = event.label
+                    val parts = rawLabel.split(" + ").map { it.trim() }.filter { it.isNotEmpty() && it != "NONE" }
+                    val displayLabels = if (parts.isEmpty()) listOf(if (rawLabel == "NONE" || rawLabel.isEmpty()) "Unlabeled Moment" else rawLabel) else parts
+                    val activityStr = if (event.triggerType == "MANUAL") "Manual" else "Auto-detected"
+                    displayLabels.map { label ->
+                        val icon = com.mtpnda.biocue.core.domain.model.EventTypes.getIconForLabel(label)
+                        val color = com.mtpnda.biocue.core.domain.model.EventTypes.getColorHexForLabel(label)
+                        JournalEntry(
+                            time = timeStr,
+                            place = "Synced Location",
+                            activity = activityStr,
+                            labelIcon = icon,
+                            labelText = label,
+                            colorHex = color
+                        )
+                    }
                 }
             }
         }
